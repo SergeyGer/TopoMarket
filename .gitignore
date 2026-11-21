@@ -1,0 +1,26 @@
+# Private research inputs and local runtime state (must stay untracked)
+private_data/
+.adp-inputs/
+.adp/
+
+# Local data directories, caches and virtual environments
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.streamlit/
+.coverage
+htmlcov/
+dist/
+build/
+*.egg-info/
+*.sqlite
+*.sqlite3
+*.parquet
+
+# Environment files and secrets
+.env
+.env.*
