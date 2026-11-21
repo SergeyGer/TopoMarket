@@ -30,6 +30,11 @@ from .manifest import (
     _atomic_write_text,
     write_manifest,
 )
+from .normalized import build_demo_normalized_tables
+from .schemas import NORMALIZED_FILE_NAMES, NORMALIZED_TABLE_NAMES, SCHEMA_CONTRACTS
+
+#: Friendly alias used by the demo package and by schema-alignment callers.
+DEMO_FILE_NAMES = NORMALIZED_FILE_NAMES
 
 #: Human-readable generator name recorded in the manifest.
 GENERATOR_NAME = "topomarket.synthetic"
@@ -44,12 +49,15 @@ DEFAULT_PRICE_DAYS = 30
 #: Fixed start date so price rows are stable across runs.
 PRICE_START_DATE = date(2024, 1, 1)
 
-#: Generated CSV files in their deterministic write order.
+#: Generated CSV files in their deterministic write order.  The first four are
+#: the original scaffold fixtures; the final three are the normalised analysis
+#: tables shared with the private import pipeline.
 SYNTHETIC_FILE_NAMES: tuple[str, ...] = (
     "markets.csv",
     "participants.csv",
     "edges.csv",
     "prices.csv",
+    *NORMALIZED_FILE_NAMES,
 )
 
 MARKET_COLUMNS: tuple[str, ...] = (
@@ -250,12 +258,24 @@ def build_dataset(
 
     numeric_seed = normalise_seed(seed)
     market_rows, participant_rows = _market_rows(numeric_seed)
-    return {
+    dataset: dict[str, tuple[tuple[str, ...], list[tuple[Any, ...]]]] = {
         "markets.csv": (MARKET_COLUMNS, market_rows),
         "participants.csv": (PARTICIPANT_COLUMNS, participant_rows),
         "edges.csv": (EDGE_COLUMNS, _edge_rows(numeric_seed, market_rows)),
         "prices.csv": (PRICE_COLUMNS, _price_rows(numeric_seed, market_rows)),
     }
+    normalized = build_demo_normalized_tables(
+        numeric_seed,
+        start_date=PRICE_START_DATE,
+        days=DEFAULT_PRICE_DAYS,
+    )
+    for table_name in NORMALIZED_TABLE_NAMES:
+        table = normalized[table_name]
+        dataset[f"{table_name}.csv"] = (
+            tuple(table.columns),
+            [tuple(row.get(column) for column in table.columns) for row in table],
+        )
+    return dataset
 
 
 def _file_entry(path: str, digest: str, size: int, rows: int) -> dict[str, Any]:
@@ -336,12 +356,24 @@ class SyntheticGenerator:
             row_counts[filename] = len(rows)
 
         total_rows = sum(row_counts.values())
+        table_schemas = {
+            table_name: {
+                "file": f"{table_name}.csv",
+                "columns": list(SCHEMA_CONTRACTS[table_name].columns),
+                "types": dict(SCHEMA_CONTRACTS[table_name].types),
+                "units": dict(SCHEMA_CONTRACTS[table_name].units),
+                "row_count": row_counts.get(f"{table_name}.csv", 0),
+            }
+            for table_name in NORMALIZED_TABLE_NAMES
+        }
         metadata = {
             "generator": GENERATOR_NAME,
             "generator_version": __version__,
             "seed": self.seed,
             "synthetic": True,
             "row_counts": dict(row_counts),
+            "tables": list(NORMALIZED_TABLE_NAMES),
+            "schemas": table_schemas,
         }
         payload: dict[str, Any] = {
             "schema_version": MANIFEST_SCHEMA_VERSION,
@@ -369,6 +401,9 @@ class SyntheticGenerator:
             "rows": dict(row_counts),
             "row_count": total_rows,
             "total_rows": total_rows,
+            "tables": list(NORMALIZED_TABLE_NAMES),
+            "normalized_tables": list(NORMALIZED_TABLE_NAMES),
+            "schemas": table_schemas,
             "metadata": metadata,
         }
 
@@ -405,9 +440,12 @@ __all__ = [
     "DEFAULT_MARKET_COUNT",
     "DEFAULT_PRICE_DAYS",
     "DEFAULT_SEED",
+    "DEMO_FILE_NAMES",
     "EDGE_COLUMNS",
     "GENERATOR_NAME",
     "MARKET_COLUMNS",
+    "NORMALIZED_FILE_NAMES",
+    "NORMALIZED_TABLE_NAMES",
     "PARTICIPANT_COLUMNS",
     "PRICE_COLUMNS",
     "PRICE_START_DATE",
@@ -416,6 +454,7 @@ __all__ = [
     "SyntheticDataGenerator",
     "SyntheticGenerator",
     "build_dataset",
+    "build_demo_normalized_tables",
     "generate",
     "generate_synthetic",
     "generate_synthetic_data",

@@ -19,8 +19,10 @@ from typing import Any
 from . import (
     adapter,
     adapters,
+    analysis_tables,
     cboe,
     cli,
+    datasets,
     directory,
     fred,
     french,
@@ -29,6 +31,8 @@ from . import (
     manifest,
     normalization,
     normalize,
+    normalized,
+    normalized_tables,
     ofr,
     openintro,
     parser_report,
@@ -39,9 +43,12 @@ from . import (
     raw_registry,
     registry,
     reports,
+    schema,
+    schemas,
     source_adapters,
     sources,
     synthetic,
+    tables,
 )
 from .adapters import *  # noqa: F401,F403 - seed-file adapter API
 from .adapters import __all__ as _ADAPTERS_ALL
@@ -111,6 +118,10 @@ from .manifest import (
     write_manifest,
     write_snapshot,
 )
+from .normalized import *  # noqa: F401,F403 - normalised table API
+from .normalized import __all__ as _NORMALIZED_ALL
+from .schemas import *  # noqa: F401,F403 - schema contracts
+from .schemas import __all__ as _SCHEMAS_ALL
 from .synthetic import (
     DEFAULT_SEED,
     GENERATOR_NAME,
@@ -238,14 +249,18 @@ __all__ += [name for name in _ADAPTERS_ALL if name not in __all__]
 __all__ += [
     "adapter",
     "adapters",
+    "analysis_tables",
     "cboe",
     "cli",
+    "datasets",
     "fred",
     "french",
     "hash_registry",
     "importers",
     "normalization",
     "normalize",
+    "normalized",
+    "normalized_tables",
     "ofr",
     "openintro",
     "parser_report",
@@ -256,6 +271,11 @@ __all__ += [
     "raw_registry",
     "registry",
     "reports",
+    "schema",
+    "schemas",
     "source_adapters",
     "sources",
+    "tables",
 ]
+__all__ += [name for name in _NORMALIZED_ALL if name not in __all__]
+__all__ += [name for name in _SCHEMAS_ALL if name not in __all__]

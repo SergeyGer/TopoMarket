@@ -44,3 +44,11 @@ __all__ = [
     "normalize_value",
     "parse_date",
 ]
+
+# The A2 normalised analysis tables are exposed here as well so callers that
+# already import ``topomarket.data.normalize`` can discover the table builders
+# without changing their import path.
+from .normalized import *  # noqa: E402,F401,F403
+from .normalized import __all__ as _NORMALIZED_ALL  # noqa: E402
+
+__all__ += [name for name in _NORMALIZED_ALL if name not in __all__]

@@ -465,6 +465,7 @@ class ImportResult:
     """The tables, reports and registry produced by an import run."""
 
     tables: dict[str, NormalizedDataset] = field(default_factory=dict)
+    normalized_tables: dict[str, NormalizedDataset] = field(default_factory=dict)
     reports: dict[str, ParserReport] = field(default_factory=dict)
     registry: RawHashRegistry = field(default_factory=RawHashRegistry)
     sources: list[ParsedSource] = field(default_factory=list)
@@ -490,6 +491,21 @@ class ImportResult:
     @property
     def normalized(self) -> dict[str, NormalizedDataset]:
         return self.tables
+
+    @property
+    def derived_tables(self) -> dict[str, NormalizedDataset]:
+        return self.normalized_tables
+
+    @property
+    def analysis_tables(self) -> dict[str, NormalizedDataset]:
+        return self.normalized_tables
+
+    @property
+    def normalized_row_counts(self) -> dict[str, int]:
+        return {
+            table_name: dataset.row_count
+            for table_name, dataset in self.normalized_tables.items()
+        }
 
     @property
     def raw_hashes(self) -> RawHashRegistry:
@@ -520,13 +536,18 @@ class ImportResult:
         return self.registry.hashes
 
     def get(self, source_id: str, default: Any = None) -> NormalizedDataset | Any:
-        return self.tables.get(source_id, default)
+        if source_id in self.tables:
+            return self.tables[source_id]
+        return self.normalized_tables.get(source_id, default)
 
     def __getitem__(self, key: str) -> Any:
         aliases = {
             "tables": self.tables,
             "datasets": self.tables,
             "normalized": self.tables,
+            "normalized_tables": self.normalized_tables,
+            "derived_tables": self.normalized_tables,
+            "analysis_tables": self.normalized_tables,
             "reports": self.reports,
             "parser_reports": self.reports,
             "registry": self.registry,
@@ -538,6 +559,7 @@ class ImportResult:
             "output_dir": self.output_dir,
             "written": self.written,
             "row_counts": self.row_counts,
+            "normalized_row_counts": self.normalized_row_counts,
             "registry_entries": self.registry_entries,
             "report_count": self.report_count,
             "file_hashes": self.file_hashes,
@@ -546,10 +568,14 @@ class ImportResult:
             return aliases[key]
         if key in self.tables:
             return self.tables[key]
+        if key in self.normalized_tables:
+            return self.normalized_tables[key]
         raise KeyError(key)
 
     def __contains__(self, key: object) -> bool:
-        return isinstance(key, str) and (key in self.tables or key in self.reports)
+        return isinstance(key, str) and (
+            key in self.tables or key in self.reports or key in self.normalized_tables
+        )
 
     def __iter__(self):
         return iter(self.tables)
@@ -557,6 +583,8 @@ class ImportResult:
     def as_dict(self) -> dict[str, Any]:
         return {
             "source_ids": list(self.source_ids),
+            "normalized_tables": list(self.normalized_tables),
+            "normalized_row_counts": self.normalized_row_counts,
             "reports": {source_id: dict(report) for source_id, report in self.reports.items()},
             "registry": self.registry.to_dict(),
             "warnings": list(self.warnings),
@@ -593,6 +621,17 @@ class ImportResult:
             dataset.to_csv(mirror)
             table_paths[source_id] = str(primary)
             written_paths.extend((primary, mirror))
+
+        # The derived analysis tables share their schema with the synthetic
+        # demo generator.  They are written alongside the source tables so
+        # private and demo consumers can use the same downstream contract.
+        from ..normalized import build_normalized_tables_from_sources, write_normalized_tables
+
+        if not self.normalized_tables:
+            self.normalized_tables = build_normalized_tables_from_sources(self.tables)
+        normalized_written = write_normalized_tables(self.normalized_tables, root)
+        normalized_table_paths = dict(normalized_written)
+        written_paths.extend(normalized_written.written_paths)
 
         registry_destination = (
             Path(registry_path) if registry_path is not None else root / RAW_HASHES_FILENAME
@@ -640,6 +679,20 @@ class ImportResult:
         written: dict[str, Any] = {
             "output_dir": str(root),
             "tables": table_paths,
+            "normalized_tables": normalized_table_paths,
+            "derived_tables": normalized_table_paths,
+            "normalized_row_counts": {
+                name: dataset.row_count
+                for name, dataset in self.normalized_tables.items()
+            },
+            "schemas": {
+                name: {
+                    "columns": list(dataset.columns),
+                    "types": dict(dataset.schema),
+                    "units": dict(dataset.units),
+                }
+                for name, dataset in self.normalized_tables.items()
+            },
             "normalized_dir": str(tables_directory),
             "registry": str(registry_destination),
             "reports": str(report_destination),
@@ -656,10 +709,16 @@ class ImportResult:
             manifest_payload = {
                 "schema_version": 1,
                 "source_ids": list(self.source_ids),
+                "normalized_tables": list(self.normalized_tables),
+                "normalized_row_counts": {
+                    name: dataset.row_count
+                    for name, dataset in self.normalized_tables.items()
+                },
                 "file_count": len(self.registry.entries),
                 "row_counts": {
                     source_id: dataset.row_count for source_id, dataset in self.tables.items()
                 },
+                "schemas": written["schemas"],
                 "missing_sources": list(self.missing_sources),
                 "warnings": list(self.warnings),
                 "errors": dict(self.errors),
@@ -834,6 +893,12 @@ def import_sources(
 
     result.tables = SourceAliasDict(_canonical_order(result.tables))
     result.reports = SourceAliasDict(_canonical_order(result.reports))
+
+    from ..normalized import build_normalized_tables_from_sources
+
+    result.normalized_tables = SourceAliasDict(
+        build_normalized_tables_from_sources(result.tables)
+    )
 
     required = [canonical_source_id(item) for item in require] if require is not None else []
     for source_id in required:
