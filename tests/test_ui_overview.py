@@ -29,13 +29,9 @@ def test_badge_and_data_source_label() -> None:
 def test_latest_data_date_prefers_an_explicit_manifest_field(tmp_path: Path) -> None:
     _write_csv(tmp_path / "markets.csv", "date,value", "2023-01-01,1")
 
+    assert overview.latest_data_date(tmp_path, {"latest_date": "2025-03-04"}) == "2025-03-04"
     assert (
-        overview.latest_data_date(tmp_path, {"latest_date": "2025-03-04"})
-        == "2025-03-04"
-    )
-    assert (
-        overview.latest_data_date(tmp_path, {"metadata": {"as_of": "2024-12-31"}})
-        == "2024-12-31"
+        overview.latest_data_date(tmp_path, {"metadata": {"as_of": "2024-12-31"}}) == "2024-12-31"
     )
 
 

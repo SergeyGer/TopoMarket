@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security policy
+    url: https://github.com/SergeyGer/TopoMarket/blob/main/SECURITY.md
+    about: How to report a vulnerability and what the repository never contains.
+  - name: Data notices
+    url: https://github.com/SergeyGer/TopoMarket/blob/main/NOTICE.md
+    about: Provider terms and attribution before publishing genuine market data.

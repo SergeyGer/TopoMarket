@@ -151,9 +151,9 @@ def test_snapshot_listing_and_latest(tmp_path: Path) -> None:
     assert latest_snapshot(data_dir) == newer
     assert latest_snapshot(data_dir).snapshot_id == newer.snapshot_id
     assert list_snapshot_ids(data_dir) == [older.snapshot_id, newer.snapshot_id]
-    assert json.loads((newer.path / "manifest.json").read_text(encoding="utf-8"))[
-        "metadata"
-    ] == {"version": 2}
+    assert json.loads((newer.path / "manifest.json").read_text(encoding="utf-8"))["metadata"] == {
+        "version": 2
+    }
 
 
 def test_list_snapshots_supports_json_snapshot_files(tmp_path: Path) -> None:
@@ -186,12 +186,8 @@ def test_data_directory_manifest_is_not_a_snapshot(tmp_path: Path) -> None:
 
 def test_snapshots_with_identical_content_share_an_id(tmp_path: Path) -> None:
     data_dir = tmp_path / "data"
-    first = write_snapshot(
-        data_dir, _manifest(created_at="2024-01-01T00:00:00Z")
-    )
-    second = write_snapshot(
-        data_dir, _manifest(created_at="2030-01-01T00:00:00Z")
-    )
+    first = write_snapshot(data_dir, _manifest(created_at="2024-01-01T00:00:00Z"))
+    second = write_snapshot(data_dir, _manifest(created_at="2030-01-01T00:00:00Z"))
 
     assert first.snapshot_id == second.snapshot_id
     assert first.path == second.path

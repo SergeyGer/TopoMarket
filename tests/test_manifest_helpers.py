@@ -288,6 +288,7 @@ def test_write_snapshot_accepts_a_directory_keyword(tmp_path: Path) -> None:
 
     assert written.path.is_relative_to(tmp_path / "actual" / "snapshots")
     assert (written.path / MANIFEST_FILENAME).is_file()
-    assert json.loads((written.path / MANIFEST_FILENAME).read_text(encoding="utf-8"))[
-        "snapshot_id"
-    ] == written.snapshot_id
+    assert (
+        json.loads((written.path / MANIFEST_FILENAME).read_text(encoding="utf-8"))["snapshot_id"]
+        == written.snapshot_id
+    )

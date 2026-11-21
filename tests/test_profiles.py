@@ -144,9 +144,7 @@ def test_private_profile_generic_environment_override(
     assert profile.data_dir == target
 
 
-def test_demo_profile_environment_override(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-) -> None:
+def test_demo_profile_environment_override(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     target = tmp_path / "demo-data"
     monkeypatch.setenv(ENV_DEMO_DATA_DIR, str(target))
 

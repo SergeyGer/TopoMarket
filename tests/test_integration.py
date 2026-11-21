@@ -38,9 +38,7 @@ def _manifest(**overrides: object) -> dict[str, object]:
     return payload
 
 
-def test_synthetic_cli_pipeline_reaches_the_overview(
-    tmp_path: Path, capsys
-) -> None:
+def test_synthetic_cli_pipeline_reaches_the_overview(tmp_path: Path, capsys) -> None:
     data_dir = tmp_path / "synthetic"
 
     assert main(["synthetic", "--out", str(data_dir), "--seed", "123"]) == 0
@@ -114,9 +112,7 @@ def test_python_m_topomarket_entry_point() -> None:
     environment = dict(os.environ)
     source_path = str(REPO_ROOT / "src")
     existing = environment.get("PYTHONPATH")
-    environment["PYTHONPATH"] = (
-        source_path + os.pathsep + existing if existing else source_path
-    )
+    environment["PYTHONPATH"] = source_path + os.pathsep + existing if existing else source_path
 
     version = subprocess.run(
         [sys.executable, "-m", "topomarket", "--version"],

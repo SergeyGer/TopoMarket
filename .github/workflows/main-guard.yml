@@ -1,0 +1,80 @@
+name: main-guard
+
+# Compensating control: every change to `main` must arrive through a merged pull request
+# with green CI. Branch protection is enabled for this public repository, and this workflow
+# provides an independent audit signal if protection is ever disabled or bypassed.
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  guard:
+    name: direct-push guard
+    runs-on: ubuntu-latest
+    steps:
+      - name: Detect direct or force push to main
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const forced = Boolean(context.payload.forced);
+            const head = context.payload.head_commit;
+            if (!head || !head.id) {
+              core.setFailed('main-guard: cannot determine the head commit of the push');
+              return;
+            }
+            const sha = head.id;
+            const { owner, repo } = context.repo;
+            if (forced) {
+              core.setFailed(
+                `main-guard: FORCE PUSH detected on main (${sha}). Server-side protection is required.`,
+              );
+              return;
+            }
+
+            const isMerged = (pr) => Boolean(pr.merged_at) || pr.merged === true;
+            let merged = undefined;
+            for (let attempt = 1; attempt <= 5 && merged === undefined; attempt++) {
+              const pulls = await github.rest.repos.listPullRequestsAssociatedWithCommit({
+                owner,
+                repo,
+                commit_sha: sha,
+              });
+              merged = pulls.data.find((pr) => isMerged(pr));
+              if (merged === undefined && attempt < 5) {
+                core.info(`main-guard: no merged PR yet (attempt ${attempt}/5), retrying`);
+                await new Promise((resolve) => setTimeout(resolve, 4000));
+              }
+            }
+
+            if (merged === undefined) {
+              const match = (head.message || '').match(/\(#(\d+)\)\s*$/);
+              if (match) {
+                try {
+                  const response = await github.rest.pulls.get({
+                    owner,
+                    repo,
+                    pull_number: Number(match[1]),
+                  });
+                  const pr = response.data;
+                  if (pr.merged === true && pr.merge_commit_sha === sha) {
+                    merged = pr;
+                  }
+                } catch (error) {
+                  core.info(`main-guard: fallback PR lookup failed: ${error}`);
+                }
+              }
+            }
+
+            if (merged === undefined) {
+              core.setFailed(
+                `main-guard: DIRECT PUSH detected on main (${sha}). ` +
+                  'All changes must go through a merged pull request with green CI.',
+              );
+              return;
+            }
+            core.info(`main-guard: main updated through merged PR #${merged.number}`);

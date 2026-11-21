@@ -298,13 +298,9 @@ def load_profile(
 
     missing = [field for field in _REQUIRED_FIELDS if field not in raw]
     if missing:
-        raise ValueError(
-            f"Profile file {path} is missing required fields: {', '.join(missing)}"
-        )
+        raise ValueError(f"Profile file {path} is missing required fields: {', '.join(missing)}")
     if raw["profile"] != profile:
-        raise ValueError(
-            f"Profile file {path} declares {raw['profile']!r}, expected {profile!r}"
-        )
+        raise ValueError(f"Profile file {path} declares {raw['profile']!r}, expected {profile!r}")
     if not isinstance(raw["private_data"], bool):
         raise ValueError(f"'private_data' in {path} must be a boolean")
     if isinstance(raw["random_seed"], bool) or not isinstance(raw["random_seed"], int):

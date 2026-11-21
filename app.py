@@ -38,8 +38,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="app.py",
         description=(
-            "TopoMarket Streamlit shell. Run with "
-            "`streamlit run app.py -- --profile demo|private`."
+            "TopoMarket Streamlit shell. Run with `streamlit run app.py -- --profile demo|private`."
         ),
     )
     parser.add_argument(
@@ -144,9 +143,7 @@ def main(argv: Sequence[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    if st is not None and (
-        getattr(st, "__name__", "") == "streamlit" or _in_streamlit_runtime(st)
-    ):
+    if st is not None and (getattr(st, "__name__", "") == "streamlit" or _in_streamlit_runtime(st)):
         # Raising SystemExit inside ``streamlit run`` would abort the script
         # runner before it can finalise the page.
         main()

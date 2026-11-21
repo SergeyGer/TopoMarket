@@ -96,7 +96,9 @@ def normalise_seed(seed: Any) -> int:
 def _rng(seed: int, section: str) -> random.Random:
     """Return a section-specific RNG derived deterministically from ``seed``."""
 
-    return random.Random(f"topomarket-synthetic:{seed}:{section}")
+    return random.Random(  # nosec B311 - deterministic fixtures, not cryptography
+        f"topomarket-synthetic:{seed}:{section}"
+    )
 
 
 def _csv_text(header: Sequence[str], rows: Sequence[Sequence[Any]]) -> str:
@@ -150,15 +152,11 @@ def _participants_by_market(
     for market in market_rows:
         market_id = str(market[0])
         count = int(market[3])
-        grouped[market_id] = [
-            f"{market_id}-p{position:02d}" for position in range(1, count + 1)
-        ]
+        grouped[market_id] = [f"{market_id}-p{position:02d}" for position in range(1, count + 1)]
     return grouped
 
 
-def _topology_edges(
-    topology: str, participants: Sequence[str]
-) -> list[tuple[str, str]]:
+def _topology_edges(topology: str, participants: Sequence[str]) -> list[tuple[str, str]]:
     """Return deterministic source/target pairs for a topology."""
 
     nodes = list(participants)
@@ -196,9 +194,7 @@ def _topology_edges(
     return edges
 
 
-def _edge_rows(
-    seed: int, market_rows: Sequence[Sequence[Any]]
-) -> list[tuple[Any, ...]]:
+def _edge_rows(seed: int, market_rows: Sequence[Sequence[Any]]) -> list[tuple[Any, ...]]:
     """Build the edges rows for ``seed``."""
 
     rng = _rng(seed, "edges")
@@ -222,9 +218,7 @@ def _edge_rows(
     return rows
 
 
-def _price_rows(
-    seed: int, market_rows: Sequence[Sequence[Any]]
-) -> list[tuple[Any, ...]]:
+def _price_rows(seed: int, market_rows: Sequence[Sequence[Any]]) -> list[tuple[Any, ...]]:
     """Build the daily price rows for ``seed``."""
 
     rng = _rng(seed, "prices")
@@ -394,9 +388,7 @@ def generate_synthetic(
 ) -> dict[str, Any]:
     """Write deterministic synthetic CSVs and a manifest to ``out_dir``."""
 
-    return SyntheticGenerator(seed=seed).generate(
-        out_dir, created_at=created_at, **kwargs
-    )
+    return SyntheticGenerator(seed=seed).generate(out_dir, created_at=created_at, **kwargs)
 
 
 # Common alternative spellings for embedders and tests.

@@ -111,9 +111,7 @@ def test_manifest_tampering_is_detected(tmp_path: Path) -> None:
 def test_strict_validation_requires_provenance_fields(tmp_path: Path) -> None:
     data_dir = tmp_path / "data"
     data_dir.mkdir()
-    (data_dir / MANIFEST_FILENAME).write_text(
-        json.dumps({"profile": "demo"}), encoding="utf-8"
-    )
+    (data_dir / MANIFEST_FILENAME).write_text(json.dumps({"profile": "demo"}), encoding="utf-8")
 
     with pytest.raises(ManifestIntegrityError, match="required provenance"):
         read_manifest(data_dir, strict=True)

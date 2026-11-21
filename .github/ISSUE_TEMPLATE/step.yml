@@ -1,0 +1,31 @@
+name: Implementation step
+description: A numbered TopoMarket implementation step with acceptance checks
+title: "Step N: "
+labels: ["type: feature"]
+body:
+  - type: input
+    id: acceptance
+    attributes:
+      label: Acceptance check id (for example A2)
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: What the step delivers and which specification sections it covers.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance_criteria
+    attributes:
+      label: Acceptance criteria
+      placeholder: |
+        - [ ] ...
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence / verification plan
+      description: Tests, fixtures, commands and artefacts that prove the step.

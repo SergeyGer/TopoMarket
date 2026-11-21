@@ -1,0 +1,48 @@
+name: security
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "17 4 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  dependency-audit:
+    name: dependency audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install package and auditing tools
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev]"
+          python -m pip install pip-audit bandit detect-secrets
+      - name: Audit installed dependencies
+        run: python -m pip_audit --skip-editable
+      - name: Static security analysis (bandit)
+        run: python -m bandit -q -r src -x tests
+      - name: Secret scan (detect-secrets, tracked files)
+        run: |
+          # Scan only files tracked by git: private inputs, caches and local state are never
+          # committed and are absent from a clean checkout.
+          git ls-files -z | xargs -0 python -m detect_secrets scan > /tmp/secrets.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          data = json.loads(Path("/tmp/secrets.json").read_text())
+          results = data.get("results") or {}
+          if results:
+              print("Potential secrets detected:")
+              for filename, findings in results.items():
+                  print(f"- {filename}: {len(findings)} finding(s)")
+              raise SystemExit(1)
+          print("No potential secrets detected.")
+          PY

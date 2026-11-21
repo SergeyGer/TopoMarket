@@ -135,9 +135,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         if args.command == "info":
             return _show_info(args.profile)
         if args.command == "status":
-            return _show_status(
-                args.profile, data_dir=args.data_dir, emit_json=args.json
-            )
+            return _show_status(args.profile, data_dir=args.data_dir, emit_json=args.json)
         if args.command == "validate":
             return _validate(args.profile, data_dir=args.data_dir)
         if args.command == "synthetic":

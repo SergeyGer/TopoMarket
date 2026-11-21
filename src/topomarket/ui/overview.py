@@ -208,9 +208,7 @@ def inspect_data_directory(data_dir: Path | str) -> dict[str, Any]:
         return status
 
     status["files"] = [entry.name for entry in entries if entry.is_file()]
-    status["data_files"] = [
-        name for name in status["files"] if name != "manifest.json"
-    ]
+    status["data_files"] = [name for name in status["files"] if name != "manifest.json"]
 
     manifest_path = directory / "manifest.json"
     if manifest_path.is_file():

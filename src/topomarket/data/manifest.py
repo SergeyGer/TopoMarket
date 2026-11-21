@@ -123,9 +123,7 @@ def compute_snapshot_id(manifest: Mapping[str, Any] | Any) -> str:
         raise TypeError("snapshot_id() expects a manifest mapping")
 
     content = {
-        key: value
-        for key, value in manifest.items()
-        if key not in SNAPSHOT_ID_EXCLUDED_FIELDS
+        key: value for key, value in manifest.items() if key not in SNAPSHOT_ID_EXCLUDED_FIELDS
     }
     digest = hashlib.sha256(canonical_json(content).encode("utf-8")).hexdigest()
     return digest
@@ -495,9 +493,7 @@ def write_manifest(
     :func:`os.replace` only after it has been fully written and flushed.
     """
 
-    destination = _resolve_target(
-        data_dir, target=target, path=path, directory=directory
-    )
+    destination = _resolve_target(data_dir, target=target, path=path, directory=directory)
     location = manifest_path(destination, filename=filename)
     root = location.parent
 
@@ -553,9 +549,7 @@ def read_manifest(
     data = dict(payload)
 
     if strict:
-        validated = validate_manifest(
-            data, require_provenance=True, verify_snapshot_id=verify
-        )
+        validated = validate_manifest(data, require_provenance=True, verify_snapshot_id=verify)
         return Manifest(validated, path=location)
 
     if verify and "snapshot_id" in data:
@@ -666,9 +660,7 @@ def resolve_relative_path(
 
     resolved = candidate.resolve(strict=False)
     if resolved != base_path and not resolved.is_relative_to(base_path):
-        raise PathTraversalError(
-            f"path escapes the data directory: {relative!r} -> {resolved}"
-        )
+        raise PathTraversalError(f"path escapes the data directory: {relative!r} -> {resolved}")
 
     if must_exist and not resolved.exists():
         raise FileNotFoundError(f"path does not exist: {resolved}")
@@ -912,8 +904,7 @@ def list_snapshots(data_dir: Any = None, *, path: Path | str | None = None) -> l
                 items = None
             if items is not None:
                 snapshots = [
-                    item if isinstance(item, Snapshot) else Snapshot(item)
-                    for item in items
+                    item if isinstance(item, Snapshot) else Snapshot(item) for item in items
                 ]
                 return sorted(snapshots, key=_snapshot_sort_key)
 

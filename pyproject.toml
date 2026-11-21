@@ -7,12 +7,14 @@ name = "topomarket"
 version = "0.1.0"
 description = "Topology-aware market research toolkit with demo and private data profiles."
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 license = { text = "MIT" }
 authors = [{ name = "TopoMarket contributors" }]
 keywords = ["market", "topology", "research", "demo"]
 classifiers = [
     "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3 :: Only",
     "Topic :: Scientific/Engineering :: Information Analysis",
 ]
