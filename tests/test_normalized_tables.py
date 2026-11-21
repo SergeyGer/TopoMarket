@@ -1,12 +1,14 @@
-"""Tests for the normalised table contracts and the demo/private generators."""
+"""Public tests for the normalised table contracts and generators."""
 
 from __future__ import annotations
 
 import hashlib
+import json
 from pathlib import Path
 
 from topomarket.data.adapters import import_sources
 from topomarket.data.normalized import (
+    build_demo_normalized_tables,
     build_normalized_tables,
     read_normalized_table,
     write_normalized_tables,
@@ -88,6 +90,48 @@ def test_schema_contracts_are_complete() -> None:
     assert SCHEMAS["tda_daily"]["vix_close"] == "float"
 
 
+def test_demo_tables_match_every_schema_contract() -> None:
+    first = build_demo_normalized_tables(seed=42)
+    second = build_demo_normalized_tables(seed=42)
+
+    assert tuple(first) == NORMALIZED_TABLE_NAMES
+    for table_name in NORMALIZED_TABLE_NAMES:
+        dataset = first[table_name]
+        assert tuple(dataset.columns) == tuple(SCHEMAS[table_name])
+        assert dataset.schema == SCHEMAS[table_name]
+        assert dataset.metadata["synthetic"] is True
+        assert dataset.metadata["seed"] == 42
+        assert dataset.to_json() == second[table_name].to_json()
+        assert tuple(second[table_name].columns) == tuple(SCHEMAS[table_name])
+
+
+def test_normalized_writer_emits_the_schema_contract(tmp_path: Path) -> None:
+    tables = build_normalized_tables(
+        sp500=[{"date": "2024-01-02", "close": 100.0}],
+        industries=[{"date": "2024-01-02", "industry": "NoDur", "value_weighted_return": 1.0}],
+    )
+    output = tmp_path / "output"
+
+    written = write_normalized_tables(tables, output)
+
+    assert set(written) == set(NORMALIZED_TABLE_NAMES)
+    schema_payload = json.loads(
+        (output / "normalized" / "schemas.json").read_text(encoding="utf-8")
+    )
+    assert set(schema_payload["tables"]) == set(NORMALIZED_TABLE_NAMES)
+    for table_name in NORMALIZED_TABLE_NAMES:
+        record = schema_payload["tables"][table_name]
+        assert record["file"] == f"{table_name}.csv"
+        assert record["columns"] == list(SCHEMAS[table_name])
+        assert record["types"] == SCHEMAS[table_name]
+        primary = output / f"{table_name}.csv"
+        mirror = output / "normalized" / f"{table_name}.csv"
+        assert primary.is_file()
+        assert mirror.is_file()
+        assert primary.read_bytes() == mirror.read_bytes()
+        assert read_normalized_table(primary).columns == tuple(SCHEMAS[table_name])
+
+
 def test_synthetic_generator_includes_normalized_tables(tmp_path: Path) -> None:
     out = tmp_path / "synthetic"
     manifest = generate_synthetic(out, seed=42, created_at="2024-02-01T00:00:00Z")
@@ -118,7 +162,7 @@ def test_demo_generator_is_byte_identical_for_the_same_seed(tmp_path: Path) -> N
         assert data.endswith(b"\n")
 
 
-def test_private_import_writes_the_same_schema(tmp_path: Path) -> None:
+def test_source_import_writes_the_same_schema(tmp_path: Path) -> None:
     inputs = tmp_path / "inputs"
     _write_inputs(inputs)
     output = tmp_path / "output"

@@ -15,17 +15,26 @@ from pathlib import Path
 import pytest
 
 from topomarket.data.adapters import (
+    ADAPTER_CLASSES,
+    ADAPTERS,
+    OPTIONAL_SOURCE_IDS,
+    REQUIRED_SOURCE_IDS,
     SOURCE_IDS,
+    SOURCE_NAMES,
     CboeVixAdapter,
     FREDSP500Adapter,
     French12IndustryAdapter,
     OFRFSIAdapter,
     OpenIntroSP500Adapter,
     RawHashRegistry,
+    canonical_source_id,
+    detect_adapter,
+    get_adapter,
     import_sources,
     import_zip,
 )
 from topomarket.data.adapters.cli import main as adapter_main
+from topomarket.data.schemas import NORMALIZED_TABLE_NAMES, SCHEMAS
 
 OPENINTRO = """OpenIntro S&P 500 daily observations
 Date,Open,High,Low,Close,Adj Close,Volume
@@ -112,6 +121,61 @@ def test_directory_import_writes_registry_reports_and_tables(tmp_path: Path) -> 
     assert reports["row_counts"]["cboe_vix"] == 2
     assert (output / "normalized" / "cboe_vix.csv").is_file()
     assert (output / "import_manifest.json").is_file()
+
+
+def test_every_adapter_is_registered_and_discoverable() -> None:
+    assert len(SOURCE_IDS) == len(ADAPTER_CLASSES) == 5
+    assert tuple(ADAPTERS) == SOURCE_IDS
+    assert set(SOURCE_NAMES) == set(SOURCE_IDS)
+    assert set(REQUIRED_SOURCE_IDS) == {
+        "openintro_sp500",
+        "fred_sp500",
+        "cboe_vix",
+        "french_12_industries",
+    }
+    assert set(OPTIONAL_SOURCE_IDS) == {"ofr_fsi"}
+
+    for source_id in SOURCE_IDS:
+        adapter = get_adapter(source_id)
+        assert isinstance(adapter, ADAPTERS[source_id])
+        assert adapter.source_id == source_id
+        assert canonical_source_id(source_id) == source_id
+
+
+@pytest.mark.parametrize(
+    ("adapter_class", "filename"),
+    [
+        (OpenIntroSP500Adapter, "sp500_1950_2018.csv"),
+        (FREDSP500Adapter, "SP500_FRED.csv"),
+        (CboeVixAdapter, "VIX_History.csv"),
+        (French12IndustryAdapter, "12_Industry_Portfolios_daily_CSV.csv"),
+        (OFRFSIAdapter, "ofr_fsi.csv"),
+    ],
+)
+def test_detection_maps_each_synthetic_fixture_to_its_adapter(
+    adapter_class: type, filename: str
+) -> None:
+    adapter = detect_adapter(filename=filename, text=FIXTURES[filename])
+
+    assert adapter is not None
+    assert isinstance(adapter, adapter_class)
+    assert adapter.source_id == adapter_class.source_id
+
+
+def test_optional_ofr_source_can_be_absent(tmp_path: Path) -> None:
+    inputs = tmp_path / "inputs"
+    inputs.mkdir()
+    for filename, text in FIXTURES.items():
+        if filename != "ofr_fsi.csv":
+            (inputs / filename).write_text(text, encoding="utf-8")
+
+    result = import_sources(inputs, tmp_path / "output")
+
+    assert set(result.tables) == set(REQUIRED_SOURCE_IDS)
+    assert "ofr_fsi" not in result.tables
+    assert set(result.normalized_tables) == set(NORMALIZED_TABLE_NAMES)
+    for table_name in NORMALIZED_TABLE_NAMES:
+        assert list(result.normalized_tables[table_name].columns) == list(SCHEMAS[table_name])
 
 
 def test_import_is_deterministic_for_identical_bytes(tmp_path: Path) -> None:
