@@ -12,6 +12,7 @@ import pytest
 from topomarket import __version__
 from topomarket.cli import main
 from topomarket.data import read_manifest
+from topomarket.data.schemas import NORMALIZED_FILE_NAMES
 from topomarket.data.synthetic import (
     DEFAULT_MARKET_COUNT,
     DEFAULT_PRICE_DAYS,
@@ -127,7 +128,7 @@ def test_cli_generates_synthetic_data(tmp_path: Path, capsys: pytest.CaptureFixt
     manifest = _read_manifest(out)
     assert manifest["seed"] == 42
     assert manifest["synthetic"] is True
-    for filename in SYNTHETIC_FILE_NAMES:
+    for filename in NORMALIZED_FILE_NAMES:
         assert (out / filename).is_file()
 
     assert main(["synthetic", "--out", str(out), "--seed", "123"]) == 0

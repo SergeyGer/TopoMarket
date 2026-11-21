@@ -9,9 +9,19 @@ from collections.abc import Sequence
 from pathlib import Path
 
 from topomarket import __version__
-from topomarket.data import generate_synthetic, load_demo_markets
+from topomarket.data import (
+    SOURCE_ID_ALIASES,
+    SOURCE_IDS,
+    import_sources,
+)
+from topomarket.demo import DEMO_FILE_NAMES, demo_tables, generate_demo
 from topomarket.profiles import PROFILE_NAMES, load_profile
-from topomarket.ui.overview import inspect_data_directory
+from topomarket.report import (
+    build_data_report,
+    format_data_report,
+    has_import_artifacts,
+    validate_data_directory,
+)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -96,6 +106,104 @@ def build_parser() -> argparse.ArgumentParser:
         help="Emit the status as JSON.",
     )
 
+    import_command = subparsers.add_parser(
+        "import",
+        help="Import local seed files from a directory or zip archive.",
+        description=(
+            "Import local seed CSV files from a directory or zip archive and "
+            "write normalised tables, the raw hash registry and parser reports. "
+            "No network access is performed."
+        ),
+    )
+    source = import_command.add_mutually_exclusive_group()
+    source.add_argument(
+        "--input-dir",
+        type=Path,
+        help="Directory containing the supplied seed CSV files (searched recursively).",
+    )
+    source.add_argument(
+        "--input-zip",
+        type=Path,
+        help="Zip archive containing the supplied seed CSV files.",
+    )
+    import_command.add_argument(
+        "--input",
+        "--input-path",
+        dest="input_path",
+        type=Path,
+        help="Single input file or archive (alternative to --input-dir/--input-zip).",
+    )
+    import_command.add_argument(
+        "--output-dir",
+        "--out",
+        "--output",
+        "--data-dir",
+        dest="output_dir",
+        type=Path,
+        help=(
+            "Directory that receives the imported tables, registry and reports "
+            "(default: the profile's output directory)."
+        ),
+    )
+    import_command.add_argument(
+        "--profile",
+        choices=PROFILE_NAMES,
+        default="demo",
+        help="Profile whose output directory is used when --output-dir is omitted.",
+    )
+    import_command.add_argument(
+        "--registry",
+        type=Path,
+        help="Override the raw hash registry path.",
+    )
+    import_command.add_argument(
+        "--reports",
+        type=Path,
+        help="Override the parser reports path.",
+    )
+    import_command.add_argument(
+        "--require",
+        action="append",
+        default=[],
+        choices=(*SOURCE_IDS, *sorted(SOURCE_ID_ALIASES)),
+        help="Require a source id or provider alias to be present (repeatable).",
+    )
+    import_command.add_argument(
+        "--strict",
+        action="store_true",
+        help="Treat unrecognised or unparseable files as errors.",
+    )
+    import_command.add_argument(
+        "--json",
+        action="store_true",
+        help="Emit a machine-readable import summary.",
+    )
+
+    report = subparsers.add_parser(
+        "report",
+        help="Show per-source rows, date ranges, warnings and the active snapshot id.",
+        description=(
+            "Show per-source row counts, observation ranges, warnings and the "
+            "active snapshot id for a local data directory or profile."
+        ),
+    )
+    report.add_argument(
+        "--profile",
+        choices=PROFILE_NAMES,
+        default="demo",
+        help="Profile whose data directory is inspected (default: demo).",
+    )
+    report.add_argument(
+        "--data-dir",
+        type=Path,
+        help="Local data directory to report on instead of the profile default.",
+    )
+    report.add_argument(
+        "--json",
+        action="store_true",
+        help="Emit the report as JSON.",
+    )
+
     synthetic = subparsers.add_parser(
         "synthetic",
         help="Generate deterministic synthetic CSV data and a manifest.",
@@ -136,6 +244,21 @@ def main(argv: Sequence[str] | None = None) -> int:
             return _show_info(args.profile)
         if args.command == "status":
             return _show_status(args.profile, data_dir=args.data_dir, emit_json=args.json)
+        if args.command == "report":
+            return _show_report(args.profile, data_dir=args.data_dir, emit_json=args.json)
+        if args.command == "import":
+            return _import_seed_data(
+                input_dir=args.input_dir,
+                input_zip=args.input_zip,
+                input_path=args.input_path,
+                output_dir=args.output_dir,
+                profile_name=args.profile,
+                registry_path=args.registry,
+                reports_path=args.reports,
+                require=args.require,
+                strict=args.strict,
+                emit_json=args.json,
+            )
         if args.command == "validate":
             return _validate(args.profile, data_dir=args.data_dir)
         if args.command == "synthetic":
@@ -150,19 +273,26 @@ def main(argv: Sequence[str] | None = None) -> int:
 
 def _run_demo(emit_json: bool = False) -> int:
     profile = load_profile("demo")
-    markets = load_demo_markets()
+    tables = demo_tables()
+    row_counts = {
+        str(name): int(getattr(dataset, "row_count", len(dataset)))
+        for name, dataset in tables.items()
+    }
     summary = {
         "profile": profile.profile,
         "data_source": profile.data_source,
-        "market_count": len(markets),
-        "markets": [market.get("id", "unknown") for market in markets],
+        "synthetic": True,
+        "table_count": len(row_counts),
+        "tables": sorted(row_counts),
+        "row_counts": row_counts,
+        "total_rows": sum(row_counts.values()),
     }
     if emit_json:
         print(json.dumps(summary, indent=2, sort_keys=True))
     else:
         print(f"TopoMarket demo ({profile.data_source} data)")
-        print(f"Markets: {', '.join(summary['markets'])}")
-        print(f"Total markets: {summary['market_count']}")
+        print(f"Tables: {', '.join(sorted(row_counts))}")
+        print(f"Total rows: {summary['total_rows']}")
     return 0
 
 
@@ -181,45 +311,140 @@ def _show_status(
     """Print the data status for ``profile_name`` or an explicit directory."""
 
     profile = load_profile(profile_name, data_dir=data_dir)
-    status = inspect_data_directory(profile.data_dir)
-    payload = {
-        "profile": profile.profile,
-        "data_source": profile.data_source,
-        "data_dir": str(profile.data_dir),
-        "data_available": status["data_available"],
-        "manifest_present": status["manifest_present"],
-        "manifest_valid": status["manifest_valid"],
-        "manifest_error": status["manifest_error"],
-        "snapshot_count": status["snapshot_count"],
-        "latest_data_date": status["latest_data_date"],
-    }
+    report = build_data_report(
+        profile.data_dir,
+        profile=profile.profile,
+        data_source=profile.data_source,
+    )
     if emit_json:
+        print(json.dumps(report, indent=2, sort_keys=True))
+        return 0
+
+    print(format_data_report(report))
+    return 0
+
+
+def _show_report(
+    profile_name: str,
+    *,
+    data_dir: Path | None = None,
+    emit_json: bool = False,
+) -> int:
+    """Print per-source rows, ranges, warnings and the active snapshot id."""
+
+    if data_dir is not None:
+        profile = load_profile(profile_name, data_dir=data_dir)
+        target = profile.data_dir
+    else:
+        profile = load_profile(profile_name)
+        # ``import`` defaults to the profile output directory, so report on it
+        # when it actually contains imported data and otherwise keep the
+        # profile's configured data directory.
+        target = (
+            profile.output_dir if has_import_artifacts(profile.output_dir) else profile.data_dir
+        )
+
+    report = build_data_report(
+        target,
+        profile=profile.profile,
+        data_source=profile.data_source,
+    )
+    if emit_json:
+        print(json.dumps(report, indent=2, sort_keys=True))
+        return 0
+
+    print(format_data_report(report))
+    return 0
+
+
+def _import_seed_data(
+    *,
+    input_dir: Path | None,
+    input_zip: Path | None,
+    input_path: Path | None,
+    output_dir: Path | None,
+    profile_name: str,
+    registry_path: Path | None,
+    reports_path: Path | None,
+    require: Sequence[str],
+    strict: bool,
+    emit_json: bool,
+) -> int:
+    """Import local seed files and write the normalised data artefacts."""
+
+    supplied = [value is not None for value in (input_dir, input_zip, input_path)]
+    if not any(supplied):
+        print(
+            "error: one of --input-dir, --input-zip or --input is required",
+            file=sys.stderr,
+        )
+        return 2
+    if sum(supplied) > 1:
+        print(
+            "error: pass only one of --input-dir, --input-zip or --input",
+            file=sys.stderr,
+        )
+        return 2
+
+    if output_dir is None:
+        output_dir = load_profile(profile_name).output_dir
+
+    result = import_sources(
+        input_dir,
+        output_dir,
+        input_zip=input_zip,
+        input_path=input_path,
+        registry_path=registry_path,
+        reports_path=reports_path,
+        strict=strict,
+        require=require,
+        write=True,
+    )
+
+    if not result.tables:
+        print("error: no seed files were recognised", file=sys.stderr)
+        return 2
+
+    report = build_data_report(result.output_dir) if result.output_dir else {}
+    snapshot_id = report.get("snapshot_id") if report else None
+
+    if emit_json:
+        payload = {
+            "source_ids": list(result.source_ids),
+            "row_counts": dict(result.row_counts),
+            "reports": {
+                source_id: dict(report_item) for source_id, report_item in result.reports.items()
+            },
+            "registry_entries": len(result.registry.entries),
+            "warnings": list(result.warnings),
+            "errors": dict(result.errors),
+            "missing_sources": list(result.missing_sources),
+            "output_dir": str(result.output_dir) if result.output_dir is not None else None,
+            "files": result.written,
+            "snapshot_id": snapshot_id,
+            "active_snapshot_id": snapshot_id,
+        }
         print(json.dumps(payload, indent=2, sort_keys=True))
         return 0
 
-    print(f"Profile: {profile.profile}")
-    print(f"Data source: {profile.data_source}")
-    print(f"Data directory: {profile.data_dir}")
-    if not status["exists"]:
-        print("Data status: missing")
-        print("Latest data date: none")
-        print("No data available yet.")
-        return 0
-
-    if status["manifest_present"]:
-        if status["manifest_valid"]:
-            print("Manifest: valid")
-        else:
-            print(f"Manifest: invalid ({status['manifest_error']})")
-    else:
-        print("Manifest: not found")
-    print(f"Snapshots: {status['snapshot_count']}")
-    if status["latest_data_date"] is not None:
-        print(f"Latest data date: {status['latest_data_date']}")
-    else:
-        print("Latest data date: none")
-    if not status["data_available"]:
-        print("No data available yet.")
+    print(f"Imported {len(result.tables)} source(s) from {len(result.sources)} file(s).")
+    for source_id, dataset in result.tables.items():
+        parser_report = result.reports.get(source_id) or {}
+        first = parser_report.get("first_observation")
+        last = parser_report.get("last_observation")
+        print(f"  {source_id}: {dataset.row_count} rows (range: {first} .. {last})")
+    print(f"Raw hash registry entries: {len(result.registry.entries)}")
+    if result.output_dir is not None:
+        print(f"Output directory: {result.output_dir}")
+        print(f"Registry: {result.written.get('registry')}")
+        print(f"Parser reports: {result.written.get('reports')}")
+        print(f"Import manifest: {result.written.get('manifest')}")
+    if snapshot_id:
+        print(f"Active snapshot id: {snapshot_id}")
+    for warning in result.warnings:
+        print(f"warning: {warning}", file=sys.stderr)
+    for source_id, message in result.errors.items():
+        print(f"error: {source_id}: {message}", file=sys.stderr)
     return 0
 
 
@@ -240,41 +465,44 @@ def _validate(profile_name: str, *, data_dir: Path | None = None) -> int:
 
 def _validate_data_dir(data_dir: Path) -> int:
     target = Path(data_dir).expanduser()
-    if not target.exists():
-        print(f"error: data directory does not exist: {target}", file=sys.stderr)
-        return 2
-    if not target.is_dir():
-        print(f"error: data path is not a directory: {target}", file=sys.stderr)
-        return 2
-
-    status = inspect_data_directory(target)
-    if status["manifest_present"] and not status["manifest_valid"]:
-        print(
-            f"error: invalid manifest in {target}: {status['manifest_error']}",
-            file=sys.stderr,
-        )
+    validation = validate_data_directory(target)
+    if not validation["valid"]:
+        for problem in validation["problems"]:
+            print(f"error: {problem}", file=sys.stderr)
         return 2
 
-    if status["manifest_valid"]:
-        print(f"Data directory '{target}' is valid.")
-        manifest = status["manifest"] or {}
-        if manifest.get("snapshot_id"):
-            print(f"Snapshot id: {manifest['snapshot_id']}")
-        print(f"Snapshots: {status['snapshot_count']}")
-        if status["latest_data_date"] is not None:
-            print(f"Latest data date: {status['latest_data_date']}")
-        return 0
+    report = validation["report"] or {}
+    print(f"Data directory '{target}' is valid.")
+    if report.get("snapshot_id"):
+        print(f"Snapshot id: {report['snapshot_id']}")
+    print(f"Snapshots: {report.get('snapshot_count', 0)}")
+    if report.get("latest_data_date") is not None:
+        print(f"Latest data date: {report['latest_data_date']}")
 
-    print(f"Data directory '{target}' is valid (no manifest found).")
+    sources = report.get("sources") or {}
+    if sources:
+        print(f"Imported sources: {len(sources)}")
+        print(f"Rows: {report.get('total_rows', 0)}")
+        for source_id, source in sources.items():
+            first = source.get("first_observation")
+            last = source.get("last_observation")
+            print(f"  {source_id}: {source.get('row_count', 0)} rows (range: {first} .. {last})")
+    warnings = report.get("warnings") or []
+    if warnings:
+        print(f"Warnings: {len(warnings)}")
+    elif report.get("imported"):
+        print("Warnings: none")
     return 0
 
 
 def _generate_synthetic(out: Path, *, seed: int = 42) -> int:
-    manifest = generate_synthetic(out, seed=seed)
-    files = [entry["path"] for entry in manifest["files"]]
+    manifest = generate_demo(out, seed=seed)
+    files = sorted(manifest.get("file_hashes", {}))
+    rows = int(manifest.get("total_rows") or manifest.get("row_count") or 0)
     print(f"Generated synthetic data in {out} (seed={seed})")
+    print(f"Tables: {', '.join(DEMO_FILE_NAMES)}")
     print(f"Files: {', '.join(files)}")
-    print(f"Rows: {manifest['row_count']}")
+    print(f"Rows: {rows}")
     return 0
 
 

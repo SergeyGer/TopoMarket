@@ -15,12 +15,12 @@ from pathlib import Path
 from topomarket import __version__
 from topomarket.cli import main
 from topomarket.data import (
-    SYNTHETIC_FILE_NAMES,
     latest_snapshot,
     read_manifest,
     snapshot_id,
     write_snapshot,
 )
+from topomarket.data.schemas import NORMALIZED_FILE_NAMES
 from topomarket.profiles import load_profile
 from topomarket.ui.overview import build_overview
 
@@ -44,7 +44,7 @@ def test_synthetic_cli_pipeline_reaches_the_overview(tmp_path: Path, capsys) -> 
     assert main(["synthetic", "--out", str(data_dir), "--seed", "123"]) == 0
     generated = capsys.readouterr().out
     assert "seed=123" in generated
-    for filename in SYNTHETIC_FILE_NAMES:
+    for filename in NORMALIZED_FILE_NAMES:
         assert (data_dir / filename).is_file()
 
     manifest = read_manifest(data_dir)
@@ -105,7 +105,9 @@ def test_bundled_demo_profile_needs_no_private_data(capsys) -> None:
     payload = json.loads(capsys.readouterr().out)
     assert payload["profile"] == "demo"
     assert payload["data_source"] == "synthetic"
-    assert payload["market_count"] >= 1
+    assert payload["synthetic"] is True
+    assert payload["table_count"] == len(NORMALIZED_FILE_NAMES)
+    assert payload["total_rows"] > 0
 
 
 def test_python_m_topomarket_entry_point() -> None:
