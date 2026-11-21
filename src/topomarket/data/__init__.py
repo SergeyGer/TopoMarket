@@ -1,8 +1,13 @@
-"""Data access helpers for the TopoMarket demo profile.
+"""Data access and local data-directory helpers for TopoMarket.
 
 Only synthetic, repository-safe sample data belongs in this package. Private
 research inputs are expected to live outside the repository (by default under
 ``private_data/``) and are never packaged or committed.
+
+The package also provides manifest and snapshot management for local data
+directories. Writes are atomic, snapshot ids are content-addressed, and all
+relative path handling rejects traversal attempts. See :mod:`topomarket.data.manifest`
+and :mod:`topomarket.data.directory` for details.
 """
 
 from __future__ import annotations
@@ -10,6 +15,74 @@ from __future__ import annotations
 import json
 from pathlib import Path
 from typing import Any
+
+from . import directory, manifest
+from .directory import (
+    DataDir,
+    DataDirectory,
+    LocalDataDirectory,
+    data_directory,
+    open_data_dir,
+    open_data_directory,
+)
+from .manifest import (
+    MANIFEST_FILE,
+    MANIFEST_FILENAME,
+    MANIFEST_GENERATOR,
+    MANIFEST_NAME,
+    MANIFEST_SCHEMA_VERSION,
+    PROVENANCE_FIELDS,
+    REQUIRED_MANIFEST_FIELDS,
+    REQUIRED_PROVENANCE_FIELDS,
+    SNAPSHOT_DIR,
+    SNAPSHOT_DIRNAME,
+    SNAPSHOT_ID_EXCLUDED_FIELDS,
+    SNAPSHOTS_DIR,
+    SNAPSHOTS_DIRNAME,
+    Manifest,
+    ManifestError,
+    ManifestIntegrityError,
+    ManifestNotFoundError,
+    PathTraversalError,
+    Snapshot,
+    atomic_write,
+    atomic_write_json,
+    atomic_write_manifest,
+    canonical_json,
+    compute_snapshot_id,
+    create_data_dir,
+    create_data_directory,
+    create_snapshot,
+    ensure_data_dir,
+    ensure_data_directory,
+    ensure_within,
+    init_data_dir,
+    init_data_directory,
+    join_relative,
+    latest_snapshot,
+    list_snapshot_ids,
+    list_snapshots,
+    make_data_directory,
+    manifest_path,
+    normalise_manifest,
+    normalize_manifest,
+    read_manifest,
+    resolve_path,
+    resolve_relative,
+    resolve_relative_path,
+    safe_join,
+    safe_path,
+    safe_relative_path,
+    save_snapshot,
+    snapshot_id,
+    snapshot_ids,
+    validate_manifest,
+    validate_relative,
+    validate_relative_path,
+    write_json_atomic,
+    write_manifest,
+    write_snapshot,
+)
 
 DEMO_DATA_FILE = Path(__file__).with_name("demo_markets.json")
 
@@ -30,4 +103,71 @@ def load_demo_markets(path: Path | None = None) -> list[dict[str, Any]]:
     return markets
 
 
-__all__ = ["DEMO_DATA_FILE", "load_demo_markets"]
+__all__ = [
+    "DEMO_DATA_FILE",
+    "MANIFEST_FILENAME",
+    "MANIFEST_FILE",
+    "MANIFEST_GENERATOR",
+    "MANIFEST_NAME",
+    "MANIFEST_SCHEMA_VERSION",
+    "PROVENANCE_FIELDS",
+    "REQUIRED_MANIFEST_FIELDS",
+    "REQUIRED_PROVENANCE_FIELDS",
+    "SNAPSHOTS_DIR",
+    "SNAPSHOTS_DIRNAME",
+    "SNAPSHOT_DIR",
+    "SNAPSHOT_DIRNAME",
+    "SNAPSHOT_ID_EXCLUDED_FIELDS",
+    "DataDir",
+    "DataDirectory",
+    "LocalDataDirectory",
+    "Manifest",
+    "ManifestError",
+    "ManifestIntegrityError",
+    "ManifestNotFoundError",
+    "PathTraversalError",
+    "Snapshot",
+    "atomic_write",
+    "atomic_write_json",
+    "atomic_write_manifest",
+    "canonical_json",
+    "compute_snapshot_id",
+    "create_data_dir",
+    "create_data_directory",
+    "create_snapshot",
+    "data_directory",
+    "directory",
+    "ensure_data_dir",
+    "ensure_data_directory",
+    "ensure_within",
+    "init_data_dir",
+    "init_data_directory",
+    "join_relative",
+    "latest_snapshot",
+    "list_snapshot_ids",
+    "list_snapshots",
+    "load_demo_markets",
+    "make_data_directory",
+    "manifest",
+    "manifest_path",
+    "normalise_manifest",
+    "normalize_manifest",
+    "open_data_dir",
+    "open_data_directory",
+    "read_manifest",
+    "resolve_path",
+    "resolve_relative",
+    "resolve_relative_path",
+    "safe_join",
+    "safe_path",
+    "safe_relative_path",
+    "save_snapshot",
+    "snapshot_id",
+    "snapshot_ids",
+    "validate_manifest",
+    "validate_relative",
+    "validate_relative_path",
+    "write_json_atomic",
+    "write_manifest",
+    "write_snapshot",
+]
