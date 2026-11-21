@@ -486,9 +486,7 @@ def build_data_report(
             )
         source_ids = list(sources)
 
-    snapshot_id, snapshot_source = _active_snapshot_id(
-        status, import_manifest, parser_reports
-    )
+    snapshot_id, snapshot_source = _active_snapshot_id(status, import_manifest, parser_reports)
 
     raw_manifest_warnings = status.get("manifest_error")
     if raw_manifest_warnings:
@@ -742,9 +740,7 @@ def validate_data_directory(
         else:
             for entry in entries:
                 if not isinstance(entry, Mapping):
-                    problems.append(
-                        f"invalid registry entry in {directory / RAW_HASHES_FILENAME}"
-                    )
+                    problems.append(f"invalid registry entry in {directory / RAW_HASHES_FILENAME}")
                     break
                 if not entry.get("filename") or not entry.get("sha256"):
                     problems.append(

@@ -369,9 +369,7 @@ def _read_zip_member(
         if PurePosixPath(member.filename).suffix.lower() in _ZIP_DATA_SUFFIXES
     ]
     archive_members = [
-        member
-        for member in members
-        if PurePosixPath(member.filename).suffix.lower() == ".zip"
+        member for member in members if PurePosixPath(member.filename).suffix.lower() == ".zip"
     ]
 
     if data_members:
@@ -411,9 +409,7 @@ def _read_zip_member(
         except zipfile.BadZipFile as exc:
             raise SourceReadError(f"invalid nested zip archive: {relative}") from exc
 
-    raise SourceReadError(
-        f"zip archive {archive_name} must contain a recognisable data file"
-    )
+    raise SourceReadError(f"zip archive {archive_name} must contain a recognisable data file")
 
 
 def _read_zip_source(path: Path) -> ParsedSource:
@@ -980,11 +976,7 @@ def build_parser_report(
         "metadata": dict(metadata or {}),
     }
     industries = sorted(
-        {
-            str(row["industry"])
-            for row in row_objects
-            if row.get("industry") not in (None, "")
-        }
+        {str(row["industry"]) for row in row_objects if row.get("industry") not in (None, "")}
     )
     if industries:
         payload["industries"] = industries

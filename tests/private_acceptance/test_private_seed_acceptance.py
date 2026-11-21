@@ -125,8 +125,7 @@ def imported_seed(seed_location: Path):
         result = _import_seed(seed_location)
     except Exception as exc:  # pragma: no cover - only on a broken private input
         pytest.fail(
-            f"could not import the private seed supplied via {SEED_ENV_VAR}: "
-            f"{type(exc).__name__}"
+            f"could not import the private seed supplied via {SEED_ENV_VAR}: {type(exc).__name__}"
         )
 
     if not result.tables:
@@ -188,11 +187,7 @@ def _private_hashes(seed_location: Path, result) -> set[str]:
     if seed_location.is_file():
         hashes = {_file_sha256(seed_location)}
     else:
-        hashes = {
-            _file_sha256(path)
-            for path in seed_location.rglob("*")
-            if path.is_file()
-        }
+        hashes = {_file_sha256(path) for path in seed_location.rglob("*") if path.is_file()}
     for table_name in NORMALIZED_TABLE_NAMES:
         payload = _table(result, table_name).to_csv().encode("utf-8")
         hashes.add(hashlib.sha256(payload).hexdigest())
@@ -307,15 +302,11 @@ def test_2020_03_16_golden_row_values_within_tolerance(imported_seed) -> None:
     )
 
     tda_row = tda_rows[GOLDEN_DATE]
-    assert float(tda_row["sp500_close"]) == pytest.approx(
-        float(golden["sp500_close"]), abs=1e-9
-    )
+    assert float(tda_row["sp500_close"]) == pytest.approx(float(golden["sp500_close"]), abs=1e-9)
     assert float(tda_row["sp500_log_return"]) == pytest.approx(
         float(golden["sp500_log_return"]), abs=1e-9
     )
-    assert float(tda_row["vix_close"]) == pytest.approx(
-        GOLDEN_VIX_CLOSE, abs=PRICE_ABS_TOLERANCE
-    )
+    assert float(tda_row["vix_close"]) == pytest.approx(GOLDEN_VIX_CLOSE, abs=PRICE_ABS_TOLERANCE)
 
     french_rows = [
         row
@@ -346,9 +337,9 @@ def test_reimport_produces_identical_normalised_table_hashes(seed_location, impo
 
     assert _normalized_table_hashes(imported_seed) == _normalized_table_hashes(reimported)
     for table_name in NORMALIZED_TABLE_NAMES:
-        assert _table(imported_seed, table_name).row_count == _table(
-            reimported, table_name
-        ).row_count
+        assert (
+            _table(imported_seed, table_name).row_count == _table(reimported, table_name).row_count
+        )
 
 
 def test_industry_columns_and_no_private_data_in_repository(seed_location, imported_seed) -> None:

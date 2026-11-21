@@ -155,6 +155,18 @@ class DemoGenerator:
             file_hashes[filename] = digest
             row_counts[filename] = len(rows)
 
+        latest_date: str | None = None
+        for filename in DEMO_FILE_NAMES:
+            header, rows = dataset[filename]
+            if "date" not in header:
+                continue
+            date_index = header.index("date")
+            values = [str(row[date_index]) for row in rows if len(row) > date_index]
+            if values:
+                table_latest = max(values)
+                if latest_date is None or table_latest > latest_date:
+                    latest_date = table_latest
+
         total_rows = sum(row_counts.values())
         table_schemas = {
             table_name: {
@@ -175,6 +187,7 @@ class DemoGenerator:
             "row_counts": dict(row_counts),
             "tables": list(DEMO_TABLE_NAMES),
             "schemas": table_schemas,
+            "latest_data_date": latest_date,
         }
         payload: dict[str, Any] = {
             "schema_version": MANIFEST_SCHEMA_VERSION,
@@ -199,6 +212,8 @@ class DemoGenerator:
             "rows": dict(row_counts),
             "row_count": total_rows,
             "total_rows": total_rows,
+            "latest_data_date": latest_date,
+            "latest_date": latest_date,
             "tables": list(DEMO_TABLE_NAMES),
             "normalized_tables": list(DEMO_TABLE_NAMES),
             "schemas": table_schemas,

@@ -389,9 +389,7 @@ class RawHashRegistry:
     @classmethod
     def from_dict(cls, payload: Mapping[str, Any] | Iterable[Mapping[str, Any]]) -> RawHashRegistry:
         if isinstance(payload, Mapping):
-            entries = (
-                payload.get("entries") or payload.get("records") or payload.get("files") or []
-            )
+            entries = payload.get("entries") or payload.get("records") or payload.get("files") or []
             schema_version = int(payload.get("schema_version", RAW_HASH_SCHEMA_VERSION))
             algorithm = str(payload.get("algorithm", HASH_ALGORITHM))
         else:
@@ -437,6 +435,8 @@ RawFileHash = RawHashEntry
 RawFile = RawHashEntry
 REGISTRY_FILENAME = RAW_HASHES_FILENAME
 DEFAULT_REGISTRY_FILENAME = RAW_HASHES_FILENAME
+
+
 def register_file(
     source: ParsedSource | str | bytes | bytearray | Path | Any,
     source_id: str = "unknown",

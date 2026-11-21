@@ -65,12 +65,37 @@ def _line_row(line: str, delimiter: str) -> list[str]:
         return []
 
 
+_MAX_SECTION_MARKER_LENGTH = 100
+
+
 def _section_weighting(line: str) -> str | None:
-    lowered = line.lower()
-    if "equal" in lowered and ("weight" in lowered or "return" in lowered):
-        return "equal"
-    if "value" in lowered and ("weight" in lowered or "return" in lowered):
+    """Classify a value-/equal-weighted section marker line.
+
+    The raw French archive starts with prose that mentions both "value- and
+    equal-weighted returns"; blindly matching words would classify that prose as
+    an equal-weighted section and subsequently read the value-weighted block as
+    equal-weighted (all value-weight columns empty). Only short heading-like
+    lines are considered, and prose markers are rejected explicitly.
+    """
+
+    stripped = " ".join(line.strip().split())
+    if not stripped or len(stripped) > _MAX_SECTION_MARKER_LENGTH:
+        return None
+    lowered = stripped.lower()
+    if "contains" in lowered or "portfolio" in lowered:
+        return None
+    if (
+        "average value weighted" in lowered
+        or "value weighted returns" in lowered
+        or "value-weighted returns" in lowered
+    ):
         return "value"
+    if (
+        "average equal weighted" in lowered
+        or "equal weighted returns" in lowered
+        or "equal-weighted returns" in lowered
+    ):
+        return "equal"
     return None
 
 
@@ -493,14 +518,8 @@ class French12IndustryAdapter(BaseAdapter):
             columns=columns,
             units={
                 "date": "ISO-8601 date",
-                **{
-                    f"{industry}_value_weighted_return": "percent"
-                    for industry in industries
-                },
-                **{
-                    f"{industry}_equal_weighted_return": "percent"
-                    for industry in industries
-                },
+                **{f"{industry}_value_weighted_return": "percent" for industry in industries},
+                **{f"{industry}_equal_weighted_return": "percent" for industry in industries},
             },
             types={"date": "date"},
             metadata=dict(data.metadata),

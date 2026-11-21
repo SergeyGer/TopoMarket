@@ -12,10 +12,9 @@ from topomarket import __version__
 from topomarket.data import (
     SOURCE_ID_ALIASES,
     SOURCE_IDS,
-    generate_synthetic,
     import_sources,
-    load_demo_markets,
 )
+from topomarket.demo import DEMO_FILE_NAMES, demo_tables, generate_demo
 from topomarket.profiles import PROFILE_NAMES, load_profile
 from topomarket.report import (
     build_data_report,
@@ -274,19 +273,26 @@ def main(argv: Sequence[str] | None = None) -> int:
 
 def _run_demo(emit_json: bool = False) -> int:
     profile = load_profile("demo")
-    markets = load_demo_markets()
+    tables = demo_tables()
+    row_counts = {
+        str(name): int(getattr(dataset, "row_count", len(dataset)))
+        for name, dataset in tables.items()
+    }
     summary = {
         "profile": profile.profile,
         "data_source": profile.data_source,
-        "market_count": len(markets),
-        "markets": [market.get("id", "unknown") for market in markets],
+        "synthetic": True,
+        "table_count": len(row_counts),
+        "tables": sorted(row_counts),
+        "row_counts": row_counts,
+        "total_rows": sum(row_counts.values()),
     }
     if emit_json:
         print(json.dumps(summary, indent=2, sort_keys=True))
     else:
         print(f"TopoMarket demo ({profile.data_source} data)")
-        print(f"Markets: {', '.join(summary['markets'])}")
-        print(f"Total markets: {summary['market_count']}")
+        print(f"Tables: {', '.join(sorted(row_counts))}")
+        print(f"Total rows: {summary['total_rows']}")
     return 0
 
 
@@ -335,9 +341,7 @@ def _show_report(
         # when it actually contains imported data and otherwise keep the
         # profile's configured data directory.
         target = (
-            profile.output_dir
-            if has_import_artifacts(profile.output_dir)
-            else profile.data_dir
+            profile.output_dir if has_import_artifacts(profile.output_dir) else profile.data_dir
         )
 
     report = build_data_report(
@@ -409,8 +413,7 @@ def _import_seed_data(
             "source_ids": list(result.source_ids),
             "row_counts": dict(result.row_counts),
             "reports": {
-                source_id: dict(report_item)
-                for source_id, report_item in result.reports.items()
+                source_id: dict(report_item) for source_id, report_item in result.reports.items()
             },
             "registry_entries": len(result.registry.entries),
             "warnings": list(result.warnings),
@@ -483,10 +486,7 @@ def _validate_data_dir(data_dir: Path) -> int:
         for source_id, source in sources.items():
             first = source.get("first_observation")
             last = source.get("last_observation")
-            print(
-                f"  {source_id}: {source.get('row_count', 0)} rows "
-                f"(range: {first} .. {last})"
-            )
+            print(f"  {source_id}: {source.get('row_count', 0)} rows (range: {first} .. {last})")
     warnings = report.get("warnings") or []
     if warnings:
         print(f"Warnings: {len(warnings)}")
@@ -496,11 +496,13 @@ def _validate_data_dir(data_dir: Path) -> int:
 
 
 def _generate_synthetic(out: Path, *, seed: int = 42) -> int:
-    manifest = generate_synthetic(out, seed=seed)
-    files = [entry["path"] for entry in manifest["files"]]
+    manifest = generate_demo(out, seed=seed)
+    files = sorted(manifest.get("file_hashes", {}))
+    rows = int(manifest.get("total_rows") or manifest.get("row_count") or 0)
     print(f"Generated synthetic data in {out} (seed={seed})")
+    print(f"Tables: {', '.join(DEMO_FILE_NAMES)}")
     print(f"Files: {', '.join(files)}")
-    print(f"Rows: {manifest['row_count']}")
+    print(f"Rows: {rows}")
     return 0
 
 

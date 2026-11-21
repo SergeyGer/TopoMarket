@@ -280,3 +280,24 @@ def test_adapter_cli_accepts_input_dir_and_zip(
     assert adapter_main(["--input-zip", str(archive), "--json"]) == 0
     payload = json.loads(capsys.readouterr().out)
     assert payload["registry_entries"] == len(FIXTURES)
+
+
+def test_french_adapter_ignores_prose_before_weighting_sections() -> None:
+    """The archive preamble mentions both weightings; it must not be a section marker."""
+
+    text = (
+        "It contains value- and equal-weighted returns for 12 industry portfolios.\n"
+        "  Average Value Weighted Returns -- Daily\n"
+        "Date,NoDur,Durbl\n"
+        "2020-03-16,-8.96,-14.49\n"
+        "\n"
+        "  Average Equal Weighted Returns -- Daily\n"
+        "Date,NoDur,Durbl\n"
+        "2020-03-16,-9.87,-10.27\n"
+    )
+    adapter = French12IndustryAdapter()
+    dataset = adapter.parse_bytes(text.encode("utf-8"), filename="french.csv")
+    by_industry = {row["industry"]: row for row in dataset}
+    assert by_industry["NoDur"]["value_weighted_return"] == -8.96
+    assert by_industry["NoDur"]["equal_weighted_return"] == -9.87
+    assert by_industry["Durbl"]["value_weighted_return"] == -14.49

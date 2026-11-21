@@ -31,7 +31,11 @@ def test_demo_json_output(capsys) -> None:
     assert main(["demo", "--json"]) == 0
     payload = json.loads(capsys.readouterr().out)
     assert payload["profile"] == "demo"
-    assert payload["market_count"] >= 1
+    assert payload["data_source"] == "synthetic"
+    assert payload["synthetic"] is True
+    assert payload["table_count"] >= 1
+    assert payload["total_rows"] > 0
+    assert set(payload["tables"]) == {"sp500_daily", "industries_daily", "tda_daily"}
 
 
 def test_info_command(capsys) -> None:

@@ -244,9 +244,7 @@ def _load_zip_bytes(
         with zipfile.ZipFile(io.BytesIO(data)) as archive:
             members = sorted(archive.infolist(), key=lambda item: item.filename)
             if nested:
-                data_members = [
-                    item for item in members if _is_data_file(item.filename)
-                ]
+                data_members = [item for item in members if _is_data_file(item.filename)]
                 csv_members = [
                     item
                     for item in data_members
@@ -257,9 +255,7 @@ def _load_zip_bytes(
                         item for item in csv_members if "daily" in item.filename.lower()
                     ]
                     data_members = daily_members or csv_members
-                archive_members = [
-                    item for item in members if _is_archive_file(item.filename)
-                ]
+                archive_members = [item for item in members if _is_archive_file(item.filename)]
                 members = [*data_members, *archive_members]
             for member in members:
                 if member.is_dir():
@@ -503,8 +499,7 @@ class ImportResult:
     @property
     def normalized_row_counts(self) -> dict[str, int]:
         return {
-            table_name: dataset.row_count
-            for table_name, dataset in self.normalized_tables.items()
+            table_name: dataset.row_count for table_name, dataset in self.normalized_tables.items()
         }
 
     @property
@@ -662,9 +657,7 @@ class ImportResult:
             "reports_by_source": {
                 source_id: dict(self.reports[source_id]) for source_id in ordered_source_ids
             },
-            **{
-                source_id: dict(self.reports[source_id]) for source_id in ordered_source_ids
-            },
+            **{source_id: dict(self.reports[source_id]) for source_id in ordered_source_ids},
         }
         report_destination = (
             Path(reports_path) if reports_path is not None else root / PARSER_REPORTS_FILENAME
@@ -682,8 +675,7 @@ class ImportResult:
             "normalized_tables": normalized_table_paths,
             "derived_tables": normalized_table_paths,
             "normalized_row_counts": {
-                name: dataset.row_count
-                for name, dataset in self.normalized_tables.items()
+                name: dataset.row_count for name, dataset in self.normalized_tables.items()
             },
             "schemas": {
                 name: {
@@ -711,8 +703,7 @@ class ImportResult:
                 "source_ids": list(self.source_ids),
                 "normalized_tables": list(self.normalized_tables),
                 "normalized_row_counts": {
-                    name: dataset.row_count
-                    for name, dataset in self.normalized_tables.items()
+                    name: dataset.row_count for name, dataset in self.normalized_tables.items()
                 },
                 "file_count": len(self.registry.entries),
                 "row_counts": {
@@ -887,9 +878,7 @@ def import_sources(
     # by ``SOURCE_IDS`` makes the result independent of archive/member order.
     def _canonical_order(mapping: Mapping[str, Any]) -> dict[str, Any]:
         ordered = {
-            source_id: mapping[source_id]
-            for source_id in SOURCE_IDS
-            if source_id in mapping
+            source_id: mapping[source_id] for source_id in SOURCE_IDS if source_id in mapping
         }
         for source_id in sorted(set(mapping) - set(SOURCE_IDS)):
             ordered[source_id] = mapping[source_id]
@@ -900,9 +889,7 @@ def import_sources(
 
     from ..normalized import build_normalized_tables_from_sources
 
-    result.normalized_tables = SourceAliasDict(
-        build_normalized_tables_from_sources(result.tables)
-    )
+    result.normalized_tables = SourceAliasDict(build_normalized_tables_from_sources(result.tables))
 
     required = [canonical_source_id(item) for item in require] if require is not None else []
     for source_id in required:
