@@ -24,3 +24,23 @@ build/
 # Environment files and secrets
 .env
 .env.*
+
+# Local data and generated artifacts
+data/local/
+local_data/
+artifacts/
+.cache/
+.ipynb_checkpoints/
+*.log
+*.tmp
+wheels/
+sdist/
+
+# Additional editor and build output caches
+.idea/
+.vscode/
+*.swp
+.DS_Store
+pip-wheel-metadata/
+site/
+

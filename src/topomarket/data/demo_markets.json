@@ -1,0 +1,17 @@
+{
+  "description": "Synthetic demo markets bundled with TopoMarket. Not real market data.",
+  "markets": [
+    {
+      "id": "demo-alpha",
+      "name": "Demo Alpha",
+      "topology": "ring",
+      "participants": 5
+    },
+    {
+      "id": "demo-beta",
+      "name": "Demo Beta",
+      "topology": "star",
+      "participants": 7
+    }
+  ]
+}

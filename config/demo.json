@@ -1,0 +1,11 @@
+{
+  "profile": "demo",
+  "name": "TopoMarket Demo",
+  "description": "Public demo profile backed by bundled synthetic market data.",
+  "data_source": "synthetic",
+  "data_dir": "src/topomarket/data",
+  "output_dir": "artifacts/demo",
+  "cache_dir": ".cache/topomarket/demo",
+  "random_seed": 42,
+  "private_data": false
+}
