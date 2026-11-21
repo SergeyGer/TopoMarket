@@ -11,6 +11,7 @@ from pathlib import Path
 from topomarket import __version__
 from topomarket.data import generate_synthetic, load_demo_markets
 from topomarket.profiles import PROFILE_NAMES, load_profile
+from topomarket.ui.overview import inspect_data_directory
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -52,13 +53,47 @@ def build_parser() -> argparse.ArgumentParser:
 
     validate = subparsers.add_parser(
         "validate",
-        help="Validate a profile configuration file.",
+        help="Validate a profile configuration or a local data directory.",
+        description=(
+            "Validate a profile configuration file, or the manifest and "
+            "snapshots of a local data directory when --data-dir is given."
+        ),
     )
     validate.add_argument(
         "--profile",
         choices=PROFILE_NAMES,
         default="demo",
-        help="Profile to validate (default: demo).",
+        help="Profile configuration to validate (default: demo).",
+    )
+    validate.add_argument(
+        "--data-dir",
+        type=Path,
+        help="Local data directory to validate instead of a profile.",
+    )
+
+    status = subparsers.add_parser(
+        "status",
+        help="Show the data status for a profile or local data directory.",
+        description=(
+            "Show the resolved profile, its data source, manifest validity, "
+            "snapshot count, and latest data date."
+        ),
+    )
+    status.add_argument(
+        "--profile",
+        choices=PROFILE_NAMES,
+        default="demo",
+        help="Profile whose data directory should be inspected (default: demo).",
+    )
+    status.add_argument(
+        "--data-dir",
+        type=Path,
+        help="Local data directory to inspect instead of the profile default.",
+    )
+    status.add_argument(
+        "--json",
+        action="store_true",
+        help="Emit the status as JSON.",
     )
 
     synthetic = subparsers.add_parser(
@@ -99,8 +134,12 @@ def main(argv: Sequence[str] | None = None) -> int:
             return _run_demo(emit_json=args.json)
         if args.command == "info":
             return _show_info(args.profile)
+        if args.command == "status":
+            return _show_status(
+                args.profile, data_dir=args.data_dir, emit_json=args.json
+            )
         if args.command == "validate":
-            return _validate(args.profile)
+            return _validate(args.profile, data_dir=args.data_dir)
         if args.command == "synthetic":
             return _generate_synthetic(args.out, seed=args.seed)
     except (OSError, ValueError) as exc:
@@ -135,7 +174,61 @@ def _show_info(profile_name: str) -> int:
     return 0
 
 
-def _validate(profile_name: str) -> int:
+def _show_status(
+    profile_name: str,
+    *,
+    data_dir: Path | None = None,
+    emit_json: bool = False,
+) -> int:
+    """Print the data status for ``profile_name`` or an explicit directory."""
+
+    profile = load_profile(profile_name, data_dir=data_dir)
+    status = inspect_data_directory(profile.data_dir)
+    payload = {
+        "profile": profile.profile,
+        "data_source": profile.data_source,
+        "data_dir": str(profile.data_dir),
+        "data_available": status["data_available"],
+        "manifest_present": status["manifest_present"],
+        "manifest_valid": status["manifest_valid"],
+        "manifest_error": status["manifest_error"],
+        "snapshot_count": status["snapshot_count"],
+        "latest_data_date": status["latest_data_date"],
+    }
+    if emit_json:
+        print(json.dumps(payload, indent=2, sort_keys=True))
+        return 0
+
+    print(f"Profile: {profile.profile}")
+    print(f"Data source: {profile.data_source}")
+    print(f"Data directory: {profile.data_dir}")
+    if not status["exists"]:
+        print("Data status: missing")
+        print("Latest data date: none")
+        print("No data available yet.")
+        return 0
+
+    if status["manifest_present"]:
+        if status["manifest_valid"]:
+            print("Manifest: valid")
+        else:
+            print(f"Manifest: invalid ({status['manifest_error']})")
+    else:
+        print("Manifest: not found")
+    print(f"Snapshots: {status['snapshot_count']}")
+    if status["latest_data_date"] is not None:
+        print(f"Latest data date: {status['latest_data_date']}")
+    else:
+        print("Latest data date: none")
+    if not status["data_available"]:
+        print("No data available yet.")
+    return 0
+
+
+def _validate(profile_name: str, *, data_dir: Path | None = None) -> int:
+    if data_dir is not None:
+        return _validate_data_dir(data_dir)
+
     profile = load_profile(profile_name)
     if profile.is_private:
         print(
@@ -144,6 +237,37 @@ def _validate(profile_name: str) -> int:
         )
     else:
         print(f"Profile '{profile.profile}' is valid.")
+    return 0
+
+
+def _validate_data_dir(data_dir: Path) -> int:
+    target = Path(data_dir).expanduser()
+    if not target.exists():
+        print(f"error: data directory does not exist: {target}", file=sys.stderr)
+        return 2
+    if not target.is_dir():
+        print(f"error: data path is not a directory: {target}", file=sys.stderr)
+        return 2
+
+    status = inspect_data_directory(target)
+    if status["manifest_present"] and not status["manifest_valid"]:
+        print(
+            f"error: invalid manifest in {target}: {status['manifest_error']}",
+            file=sys.stderr,
+        )
+        return 2
+
+    if status["manifest_valid"]:
+        print(f"Data directory '{target}' is valid.")
+        manifest = status["manifest"] or {}
+        if manifest.get("snapshot_id"):
+            print(f"Snapshot id: {manifest['snapshot_id']}")
+        print(f"Snapshots: {status['snapshot_count']}")
+        if status["latest_data_date"] is not None:
+            print(f"Latest data date: {status['latest_data_date']}")
+        return 0
+
+    print(f"Data directory '{target}' is valid (no manifest found).")
     return 0
 
 
