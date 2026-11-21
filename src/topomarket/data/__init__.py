@@ -16,7 +16,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-from . import directory, manifest
+from . import directory, manifest, synthetic
 from .directory import (
     DataDir,
     DataDirectory,
@@ -83,6 +83,22 @@ from .manifest import (
     write_manifest,
     write_snapshot,
 )
+from .synthetic import (
+    DEFAULT_SEED,
+    GENERATOR_NAME,
+    SYNTHETIC_FILE_NAMES,
+    DataGenerator,
+    SyntheticDataGenerator,
+    SyntheticGenerator,
+    build_dataset,
+    generate,
+    generate_synthetic,
+    generate_synthetic_data,
+    generate_synthetic_dataset,
+    normalise_seed,
+    write_synthetic,
+    write_synthetic_data,
+)
 
 DEMO_DATA_FILE = Path(__file__).with_name("demo_markets.json")
 
@@ -104,7 +120,9 @@ def load_demo_markets(path: Path | None = None) -> list[dict[str, Any]]:
 
 
 __all__ = [
+    "DEFAULT_SEED",
     "DEMO_DATA_FILE",
+    "GENERATOR_NAME",
     "MANIFEST_FILENAME",
     "MANIFEST_FILE",
     "MANIFEST_GENERATOR",
@@ -118,8 +136,10 @@ __all__ = [
     "SNAPSHOT_DIR",
     "SNAPSHOT_DIRNAME",
     "SNAPSHOT_ID_EXCLUDED_FIELDS",
+    "SYNTHETIC_FILE_NAMES",
     "DataDir",
     "DataDirectory",
+    "DataGenerator",
     "LocalDataDirectory",
     "Manifest",
     "ManifestError",
@@ -127,9 +147,12 @@ __all__ = [
     "ManifestNotFoundError",
     "PathTraversalError",
     "Snapshot",
+    "SyntheticDataGenerator",
+    "SyntheticGenerator",
     "atomic_write",
     "atomic_write_json",
     "atomic_write_manifest",
+    "build_dataset",
     "canonical_json",
     "compute_snapshot_id",
     "create_data_dir",
@@ -140,6 +163,10 @@ __all__ = [
     "ensure_data_dir",
     "ensure_data_directory",
     "ensure_within",
+    "generate",
+    "generate_synthetic",
+    "generate_synthetic_data",
+    "generate_synthetic_dataset",
     "init_data_dir",
     "init_data_directory",
     "join_relative",
@@ -151,6 +178,7 @@ __all__ = [
     "manifest",
     "manifest_path",
     "normalise_manifest",
+    "normalise_seed",
     "normalize_manifest",
     "open_data_dir",
     "open_data_directory",
@@ -164,10 +192,13 @@ __all__ = [
     "save_snapshot",
     "snapshot_id",
     "snapshot_ids",
+    "synthetic",
     "validate_manifest",
     "validate_relative",
     "validate_relative_path",
     "write_json_atomic",
     "write_manifest",
     "write_snapshot",
+    "write_synthetic",
+    "write_synthetic_data",
 ]

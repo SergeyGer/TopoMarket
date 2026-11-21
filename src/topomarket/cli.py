@@ -9,7 +9,7 @@ from collections.abc import Sequence
 from pathlib import Path
 
 from topomarket import __version__
-from topomarket.data import load_demo_markets
+from topomarket.data import generate_synthetic, load_demo_markets
 from topomarket.profiles import PROFILE_NAMES, load_profile
 
 
@@ -61,6 +61,30 @@ def build_parser() -> argparse.ArgumentParser:
         help="Profile to validate (default: demo).",
     )
 
+    synthetic = subparsers.add_parser(
+        "synthetic",
+        help="Generate deterministic synthetic CSV data and a manifest.",
+        description=(
+            "Generate deterministic synthetic CSV data plus manifest.json. "
+            "The same seed always produces byte-identical files."
+        ),
+    )
+    synthetic.add_argument(
+        "--out",
+        "--output",
+        "--out-dir",
+        dest="out",
+        required=True,
+        type=Path,
+        help="Directory that receives the generated CSV files and manifest.json.",
+    )
+    synthetic.add_argument(
+        "--seed",
+        type=int,
+        default=42,
+        help="Deterministic random seed (default: 42).",
+    )
+
     return parser
 
 
@@ -77,6 +101,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             return _show_info(args.profile)
         if args.command == "validate":
             return _validate(args.profile)
+        if args.command == "synthetic":
+            return _generate_synthetic(args.out, seed=args.seed)
     except (OSError, ValueError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 2
@@ -118,6 +144,15 @@ def _validate(profile_name: str) -> int:
         )
     else:
         print(f"Profile '{profile.profile}' is valid.")
+    return 0
+
+
+def _generate_synthetic(out: Path, *, seed: int = 42) -> int:
+    manifest = generate_synthetic(out, seed=seed)
+    files = [entry["path"] for entry in manifest["files"]]
+    print(f"Generated synthetic data in {out} (seed={seed})")
+    print(f"Files: {', '.join(files)}")
+    print(f"Rows: {manifest['row_count']}")
     return 0
 
 
