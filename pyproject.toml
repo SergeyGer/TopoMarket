@@ -42,7 +42,7 @@ topomarket = ["data/*.json"]
 minversion = "8.0"
 testpaths = ["tests"]
 addopts = "-ra"
-pythonpath = ["src"]
+pythonpath = ["src", "."]
 
 [tool.ruff]
 line-length = 100
