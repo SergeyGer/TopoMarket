@@ -10,7 +10,7 @@ from dataclasses import dataclass, field
 from pathlib import Path, PurePosixPath
 from typing import Any
 
-from ..manifest import atomic_write_json, ensure_data_directory
+from ..manifest import atomic_write_json, compute_snapshot_id, ensure_data_directory
 from .base import (
     AdapterError,
     AdapterResult,
@@ -726,6 +726,10 @@ class ImportResult:
                 "reports": [dict(self.reports[source_id]) for source_id in ordered_source_ids],
                 "output_hashes": output_hashes,
             }
+            # The id is content-addressed and deterministic: two imports of
+            # identical seed bytes publish the same snapshot id and stay
+            # byte-identical. ``compute_snapshot_id`` ignores this field.
+            manifest_payload["snapshot_id"] = compute_snapshot_id(manifest_payload)
             manifest_destination = root / IMPORT_MANIFEST_FILENAME
             atomic_write_json(manifest_destination, manifest_payload)
             written["manifest"] = str(manifest_destination)
