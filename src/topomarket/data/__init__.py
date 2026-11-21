@@ -16,7 +16,35 @@ import json
 from pathlib import Path
 from typing import Any
 
-from . import directory, manifest, synthetic
+from . import (
+    adapter,
+    adapters,
+    cboe,
+    cli,
+    directory,
+    fred,
+    french,
+    hash_registry,
+    importers,
+    manifest,
+    normalization,
+    normalize,
+    ofr,
+    openintro,
+    parser_report,
+    parser_reports,
+    pipeline,
+    raw_hash_registry,
+    raw_hashes,
+    raw_registry,
+    registry,
+    reports,
+    source_adapters,
+    sources,
+    synthetic,
+)
+from .adapters import *  # noqa: F401,F403 - seed-file adapter API
+from .adapters import __all__ as _ADAPTERS_ALL
 from .directory import (
     DataDir,
     DataDirectory,
@@ -201,4 +229,33 @@ __all__ = [
     "write_snapshot",
     "write_synthetic",
     "write_synthetic_data",
+]
+
+# Seed-file adapters, the raw hash registry and parser reports are re-exported
+# here so callers can use either ``topomarket.data.<name>`` or the explicit
+# ``topomarket.data.adapters`` package.
+__all__ += [name for name in _ADAPTERS_ALL if name not in __all__]
+__all__ += [
+    "adapter",
+    "adapters",
+    "cboe",
+    "cli",
+    "fred",
+    "french",
+    "hash_registry",
+    "importers",
+    "normalization",
+    "normalize",
+    "ofr",
+    "openintro",
+    "parser_report",
+    "parser_reports",
+    "pipeline",
+    "raw_hashes",
+    "raw_hash_registry",
+    "raw_registry",
+    "registry",
+    "reports",
+    "source_adapters",
+    "sources",
 ]
