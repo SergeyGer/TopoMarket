@@ -236,6 +236,15 @@ def inspect_data_directory(data_dir: Path | str) -> dict[str, Any]:
     return status
 
 
+def _active_snapshot_id(data_dir: Path) -> str | None:
+    from topomarket.data.refresh import active_snapshot_id
+
+    try:
+        return active_snapshot_id(Path(data_dir))
+    except (OSError, ValueError):
+        return None
+
+
 def build_overview(
     profile: str = "demo",
     *,
@@ -254,7 +263,10 @@ def build_overview(
         )
 
     resolved = load_profile(profile, data_dir=data_dir)
-    status = inspect_data_directory(resolved.data_dir)
+    from topomarket.data.refresh import resolve_active_data_dir
+
+    active_data_dir = resolve_active_data_dir(resolved.data_dir)
+    status = inspect_data_directory(active_data_dir)
     latest = status["latest_data_date"]
 
     if latest is not None:
