@@ -14,6 +14,15 @@ from topomarket.data import (
     SOURCE_IDS,
     import_sources,
 )
+from topomarket.data.refresh import (
+    DEFAULT_REFRESH_SOURCES,
+    RefreshBusyError,
+    RefreshError,
+    active_snapshot_id,
+    load_refresh_status,
+    refresh_sources,
+    resolve_active_data_dir,
+)
 from topomarket.demo import DEMO_FILE_NAMES, demo_tables, generate_demo
 from topomarket.profiles import PROFILE_NAMES, load_profile
 from topomarket.report import (
@@ -179,6 +188,39 @@ def build_parser() -> argparse.ArgumentParser:
         help="Emit a machine-readable import summary.",
     )
 
+    refresh = subparsers.add_parser(
+        "refresh",
+        help="Refresh fixed provider sources and publish an atomic snapshot.",
+        description=(
+            "Fetch the fixed HTTPS provider sources with conditional GET, validate and "
+            "merge them, and publish a new immutable snapshot atomically. A failed "
+            "refresh keeps the last good snapshot active."
+        ),
+    )
+    refresh.add_argument(
+        "--data-dir",
+        type=Path,
+        required=True,
+        help="Local data directory to refresh (created if missing).",
+    )
+    refresh.add_argument(
+        "--sources",
+        default=",".join(DEFAULT_REFRESH_SOURCES),
+        help="Comma-separated source ids (default: all four providers).",
+    )
+    refresh.add_argument("--json", action="store_true", help="Emit a JSON report.")
+
+    sources = subparsers.add_parser(
+        "sources",
+        help="Show per-source freshness and last refresh outcomes.",
+        description=(
+            "Show the active snapshot and the last attempt/success for every provider "
+            "source recorded by topomarket refresh."
+        ),
+    )
+    sources.add_argument("--data-dir", type=Path, required=True)
+    sources.add_argument("--json", action="store_true", help="Emit JSON.")
+
     report = subparsers.add_parser(
         "report",
         help="Show per-source rows, date ranges, warnings and the active snapshot id.",
@@ -261,6 +303,14 @@ def main(argv: Sequence[str] | None = None) -> int:
             )
         if args.command == "validate":
             return _validate(args.profile, data_dir=args.data_dir)
+        if args.command == "refresh":
+            return _run_refresh(
+                data_dir=args.data_dir,
+                sources=args.sources,
+                emit_json=args.json,
+            )
+        if args.command == "sources":
+            return _show_sources(data_dir=args.data_dir, emit_json=args.json)
         if args.command == "synthetic":
             return _generate_synthetic(args.out, seed=args.seed)
     except (OSError, ValueError) as exc:
@@ -311,11 +361,14 @@ def _show_status(
     """Print the data status for ``profile_name`` or an explicit directory."""
 
     profile = load_profile(profile_name, data_dir=data_dir)
+    target = resolve_active_data_dir(profile.data_dir)
     report = build_data_report(
-        profile.data_dir,
+        target,
         profile=profile.profile,
         data_source=profile.data_source,
     )
+    report["active_data_dir"] = str(target)
+    report["active_snapshot_id"] = active_snapshot_id(profile.data_dir)
     if emit_json:
         print(json.dumps(report, indent=2, sort_keys=True))
         return 0
@@ -344,11 +397,14 @@ def _show_report(
             profile.output_dir if has_import_artifacts(profile.output_dir) else profile.data_dir
         )
 
+    target = resolve_active_data_dir(target)
     report = build_data_report(
         target,
         profile=profile.profile,
         data_source=profile.data_source,
     )
+    report["active_data_dir"] = str(target)
+    report["active_snapshot_id"] = active_snapshot_id(Path(data_dir) if data_dir else target)
     if emit_json:
         print(json.dumps(report, indent=2, sort_keys=True))
         return 0
@@ -464,7 +520,24 @@ def _validate(profile_name: str, *, data_dir: Path | None = None) -> int:
 
 
 def _validate_data_dir(data_dir: Path) -> int:
-    target = Path(data_dir).expanduser()
+    requested = Path(data_dir).expanduser()
+    snapshot_id = active_snapshot_id(requested)
+    target = resolve_active_data_dir(requested)
+    if snapshot_id is not None:
+        snapshot_manifest = target / "refresh_manifest.json"
+        if not snapshot_manifest.is_file():
+            print(
+                f"error: active snapshot {snapshot_id} is missing refresh_manifest.json",
+                file=sys.stderr,
+            )
+            return 2
+        payload = json.loads(snapshot_manifest.read_text(encoding="utf-8"))
+        if payload.get("snapshot_id") != target.name:
+            print(
+                "error: active snapshot manifest id does not match the snapshot directory",
+                file=sys.stderr,
+            )
+            return 2
     validation = validate_data_directory(target)
     if not validation["valid"]:
         for problem in validation["problems"]:
@@ -473,6 +546,8 @@ def _validate_data_dir(data_dir: Path) -> int:
 
     report = validation["report"] or {}
     print(f"Data directory '{target}' is valid.")
+    if snapshot_id is not None:
+        print(f"Active snapshot: {snapshot_id}")
     if report.get("snapshot_id"):
         print(f"Snapshot id: {report['snapshot_id']}")
     print(f"Snapshots: {report.get('snapshot_count', 0)}")
@@ -492,6 +567,67 @@ def _validate_data_dir(data_dir: Path) -> int:
         print(f"Warnings: {len(warnings)}")
     elif report.get("imported"):
         print("Warnings: none")
+    return 0
+
+
+def _run_refresh(*, data_dir: Path, sources: str, emit_json: bool) -> int:
+    """Refresh fixed provider sources and publish an atomic snapshot."""
+
+    requested = [item.strip() for item in sources.split(",") if item.strip()]
+    try:
+        report = refresh_sources(Path(data_dir).expanduser(), source_ids=requested)
+    except (RefreshError, RefreshBusyError) as exc:
+        print(f"error: refresh failed: {exc}", file=sys.stderr)
+        return 2
+    if emit_json:
+        print(json.dumps(report.as_dict(), indent=2, sort_keys=True))
+        return 0
+    print(f"Active snapshot: {report.active_snapshot_id or 'none'}")
+    if report.published:
+        print(f"Published snapshot: {report.new_snapshot_id}")
+    else:
+        print("Snapshot unchanged (no new data accepted)")
+    print(f"Latest data date: {report.latest_data_date or 'none'}")
+    print(f"Revisions: {len(report.revisions)}")
+    for status in report.sources:
+        detail = f"HTTP {status.http_status}" if status.http_status else (status.error or "")
+        print(f"  {status.source_id}: {status.outcome} {detail}".rstrip())
+    for warning in report.warnings:
+        print(f"Warning: {warning}")
+    return 0
+
+
+def _show_sources(*, data_dir: Path, emit_json: bool) -> int:
+    """Show per-source freshness recorded by the last refresh."""
+
+    requested = Path(data_dir).expanduser()
+    status = load_refresh_status(requested)
+    payload = {
+        "active_snapshot_id": active_snapshot_id(requested),
+        "updated_at_utc": status.get("updated_at_utc"),
+        "published": status.get("published"),
+        "error": status.get("error"),
+        "warnings": status.get("warnings") or [],
+        "sources": status.get("sources") or {},
+    }
+    if emit_json:
+        print(json.dumps(payload, indent=2, sort_keys=True))
+        return 0
+    print(f"Active snapshot: {payload['active_snapshot_id'] or 'none'}")
+    print(f"Last refresh: {payload['updated_at_utc'] or 'never'}")
+    if payload["error"]:
+        print(f"Last error: {payload['error']}")
+    for source_id, source in sorted(payload["sources"].items()):
+        outcome = source.get("outcome", "unknown")
+        attempted = source.get("last_attempt_at") or "never"
+        succeeded = source.get("last_success_at") or "never"
+        http_status = source.get("http_status")
+        http = f" HTTP {http_status}" if http_status else ""
+        error = f" ({source.get('error')})" if source.get("error") else ""
+        print(
+            f"  {source_id}: {outcome}{http}; last attempt {attempted}; "
+            f"last success {succeeded}{error}"
+        )
     return 0
 
 

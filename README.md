@@ -17,14 +17,14 @@ release decisions.
 | --- | --- | --- |
 | 1 | Runnable scaffold: package/CLI, Streamlit shell, demo/private profiles, deterministic synthetic fixtures (seed 42), snapshot manifests, CI | **Delivered** |
 | 2 | Import the supplied local seed files: four core adapters + optional OFR, hash registry, parser reports, normalized tables (A2) | **Delivered** |
-| 3 | Update and recovery paths: HTTPS refresh, conditional GET, atomic snapshot publication, revisions (A3) | Planned |
+| 3 | Update and recovery paths: HTTPS refresh, conditional GET, staging/validation, atomic snapshot publication, revisions and last-good recovery (A3) | **Delivered** |
 | 4 | Persistent homology: delay embeddings, H0/H1, midrank scores, frozen configurations (A4) | Planned |
 | 5 | Industry explorer: 60×12 cloud and Mapper graph (A5) | Planned |
 | 6 | Chronological evaluation: labels, events, alert policy, uncertainty, private ledger (A6) | Planned |
 | 7 | Interactive dashboard: four screens, global date selection, accessibility (A7) | Planned |
 | 8 | Package and rehearse the GitHub release (A8) | Planned |
 
-Detailed acceptance criteria live in the GitHub Issues and milestones for each step.
+Detailed acceptance criteria live in the GitHub Issues and milestones for each step; the technical reference is the [project Wiki](https://github.com/SergeyGer/TopoMarket/wiki).
 
 ## Quickstart
 
