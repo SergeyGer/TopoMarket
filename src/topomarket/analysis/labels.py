@@ -292,7 +292,14 @@ def _coerce_threshold(value: Any) -> float:
 
 
 def _coerce_close(value: Any, name: str) -> float:
-    if isinstance(value, bool) or not isinstance(value, numbers.Real):
+    if isinstance(value, bool):
+        raise LabelError(f"{name} must be a positive finite number, got {value!r}")
+    if isinstance(value, str):
+        try:
+            value = float(value.strip())
+        except ValueError as error:
+            raise LabelError(f"{name} must be a positive finite number, got {value!r}") from error
+    if not isinstance(value, numbers.Real):
         raise LabelError(f"{name} must be a positive finite number, got {value!r}")
     close = float(value)
     if not math.isfinite(close) or close <= 0.0:

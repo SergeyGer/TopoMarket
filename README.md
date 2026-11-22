@@ -20,7 +20,7 @@ release decisions.
 | 3 | Update and recovery paths: HTTPS refresh, conditional GET, staging/validation, atomic snapshot publication, revisions and last-good recovery (A3) | **Delivered** |
 | 4 | Persistent homology: delay embeddings, H0/H1, midrank scores, frozen configurations (A4) | **Delivered** |
 | 5 | Industry explorer: 60×12 cloud and Mapper graph (A5) | **Delivered** |
-| 6 | Chronological evaluation: labels, events, alert policy, uncertainty, private ledger (A6) | Planned |
+| 6 | Chronological evaluation: labels, events, alert policy, uncertainty, private ledger (A6) | **Delivered** |
 | 7 | Interactive dashboard: four screens, global date selection, accessibility (A7) | Planned |
 | 8 | Package and rehearse the GitHub release (A8) | Planned |
 
@@ -58,6 +58,28 @@ topomarket synthetic --out ./demo-data --seed 42
 topomarket status --data-dir ./demo-data
 topomarket validate --data-dir ./demo-data
 ```
+
+## Chronological evaluation (Step 6)
+
+`topomarket evaluate` runs the offline, deterministic evaluation pipeline over the active
+snapshot's `normalized/tda_daily.csv`:
+
+```bash
+topomarket evaluate --data-dir /path/to/data
+topomarket evaluate --data-dir /path/to/data --json --report-out report.json
+topomarket evaluate --data-dir /path/to/data --ledger /outside/repo/forecast-ledger.jsonl
+topomarket evaluate --data-dir /path/to/data --ablations   # adds the two control rows (slower)
+```
+
+Pipeline: 20-session, 10% drawdown labels with breach dates, pending labels and chained breach
+episodes -> 2005-2013 calibration of TDA/VIX/realized-volatility thresholds (six percentiles,
+20-session cooldown, preference rules) -> frozen cutoffs with policy hashes -> 2014+ out-of-sample
+evaluation (episode recall, false alerts/year, median lead, average precision, explicit
+matched/missed/false examples) -> paired moving-block bootstrap (60-session blocks, 1,000
+replicates, shared draws) -> evidence wording (`Experimental market anomaly` or, only when the
+documented criteria hold, `Historical early-warning evidence`) -> optional append-only private
+ledger. Optional controls: return-shuffled TDA and unscaled-topology ablation. Every metrics table
+carries the source snapshot id. See [docs/EVALUATION.md](docs/EVALUATION.md).
 
 ## Industry explorer (Step 5)
 

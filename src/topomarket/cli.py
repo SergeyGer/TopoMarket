@@ -300,6 +300,46 @@ def build_parser() -> argparse.ArgumentParser:
         help="Emit the combined cloud and Mapper payload as JSON.",
     )
 
+    evaluate = subparsers.add_parser(
+        "evaluate",
+        help="Run the chronological evaluation and warning-evidence report.",
+        description=(
+            "Calibrate TDA/VIX/realized-volatility alert policies on 2005-2013, freeze the "
+            "cutoffs, evaluate the 2014+ out-of-sample period with paired moving-block "
+            "bootstrap and evidence wording, and optionally append a private ledger."
+        ),
+    )
+    evaluate.add_argument(
+        "--data-dir",
+        type=Path,
+        required=True,
+        help="Data or snapshot directory containing normalized/tda_daily.csv.",
+    )
+    evaluate.add_argument("--json", action="store_true", help="Emit the full report as JSON.")
+    evaluate.add_argument(
+        "--report-out",
+        type=Path,
+        default=None,
+        help="Write the deterministic report JSON to this path.",
+    )
+    evaluate.add_argument(
+        "--ledger",
+        type=Path,
+        default=None,
+        help="Append-only private ledger path (outside the repository checkout).",
+    )
+    evaluate.add_argument(
+        "--seed",
+        type=int,
+        default=42,
+        help="Bootstrap/control seed (default: 42).",
+    )
+    evaluate.add_argument(
+        "--ablations",
+        action="store_true",
+        help="Include the return-shuffled and unscaled-topology control rows (slower).",
+    )
+
     report = subparsers.add_parser(
         "report",
         help="Show per-source rows, date ranges, warnings and the active snapshot id.",
@@ -396,6 +436,15 @@ def main(argv: Sequence[str] | None = None) -> int:
                 config_path=args.config,
                 out=args.out,
                 emit_json=args.json,
+            )
+        if args.command == "evaluate":
+            return _run_evaluation(
+                data_dir=args.data_dir,
+                emit_json=args.json,
+                report_out=args.report_out,
+                ledger=args.ledger,
+                seed=args.seed,
+                ablations=args.ablations,
             )
         if args.command in ("industries", "industry"):
             return _run_industry(
@@ -821,6 +870,76 @@ def _run_topology(
         print(f"Latest: {latest}")
     if out is not None:
         print(f"Wrote: {Path(out).expanduser()}")
+    return 0
+
+
+def _run_evaluation(
+    *,
+    data_dir: Path,
+    emit_json: bool,
+    report_out: Path | None,
+    ledger: Path | None,
+    seed: int,
+    ablations: bool,
+) -> int:
+    """Run the Step 6 chronological evaluation pipeline."""
+
+    from topomarket.analysis.evaluation import (
+        build_evaluation_report,
+        write_evaluation_report,
+    )
+    from topomarket.analysis.ledger import ledger_digest
+    from topomarket.data.refresh import active_snapshot_id
+    from topomarket.topology import compute_topology_scores, load_topology_config
+
+    requested = Path(data_dir).expanduser()
+    target = _resolve_snapshot_dir(requested)
+    rows = load_daily_rows(target)
+    config = load_topology_config()
+    series = compute_topology_scores(rows, config)
+    report = build_evaluation_report(
+        rows,
+        score_series=series,
+        config_hash=str(config.config_hash),
+        snapshot_id=active_snapshot_id(requested) or "",
+        seed=seed,
+        include_ablations=ablations,
+        ledger_path=Path(ledger).expanduser() if ledger is not None else None,
+        ledger_snapshot_id=active_snapshot_id(requested) or "",
+    )
+    if report_out is not None:
+        write_evaluation_report(report, Path(report_out).expanduser())
+    if emit_json:
+        print(json.dumps(report, indent=2, sort_keys=True, default=str))
+        return 0
+
+    primary = report["primary_method"]
+    print(f"Data directory: {target}")
+    print(f"Snapshot: {report.get('snapshot_id') or 'unknown'}")
+    print(f"Rows: {report['row_count']} ({report['data_start']} .. {report['data_end']})")
+    print(f"Episodes: {report['episode_count']} (resolved {report['resolved_episode_count']})")
+    print(f"Primary method: {primary} | comparator: {report['comparator_method']}")
+    print(f"Wording: {report['evidence']['wording']}")
+    for method, method_metrics in report["metrics"].items():
+        print(
+            f"  {method}: recall={method_metrics['episode_recall']} "
+            f"false/year={method_metrics['false_alerts_per_year']} "
+            f"AP={method_metrics['average_precision']} "
+            f"lead={method_metrics['median_lead_sessions']}"
+        )
+    gain = report["bootstrap"]["episode_recall_gain"]
+    print(
+        "Recall gain 95% interval: "
+        f"[{gain['lower']}, {gain['upper']}] valid={gain['valid_replicates']}"
+    )
+    if report.get("ledger"):
+        print(
+            f"Ledger: {report['ledger']['path']} (+{report['ledger']['appended_records']} records)"
+        )
+        if report.get("snapshot_id"):
+            print(f"Ledger digest: {ledger_digest(Path(report['ledger']['path']))[:16]}")
+    if report_out is not None:
+        print(f"Report: {Path(report_out).expanduser()}")
     return 0
 
 
