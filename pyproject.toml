@@ -20,6 +20,8 @@ classifiers = [
 ]
 dependencies = [
   "httpx>=0.27,<1",
+  "numpy>=1.24",
+  "ripser>=0.6,<0.7",
 ]
 
 [project.optional-dependencies]
@@ -38,7 +40,7 @@ package-dir = { "" = "src" }
 where = ["src"]
 
 [tool.setuptools.package-data]
-topomarket = ["data/*.json"]
+topomarket = ["data/*.json", "topology/*.json"]
 
 [tool.pytest.ini_options]
 minversion = "8.0"
