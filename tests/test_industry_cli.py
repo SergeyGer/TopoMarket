@@ -86,7 +86,8 @@ def test_public_exports_include_both_step_five_analyses() -> None:
         "industry_explorer_payload",
     }
     assert expected <= set(analysis.__all__)
-    assert set(analysis.__all__) == set(industries_module.__all__) | set(mapper_module.__all__)
+    # Step 5 exports must remain available; later steps add their own public API.
+    assert set(industries_module.__all__) | set(mapper_module.__all__) <= set(analysis.__all__)
 
     for name in expected:
         assert hasattr(analysis, name), name
