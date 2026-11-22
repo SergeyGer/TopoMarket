@@ -106,13 +106,18 @@ summary on stdout.
 ## Mapper interval edge case
 
 The lens is annualised sample volatility (`std(ddof=1) * sqrt(252)`). The
-normal case splits the lens range into three inclusive, equally wide intervals
-whose adjacent endpoints overlap exactly on the boundary. If all twelve
-volatilities are equal, the range has zero width; the edge case emits one
-inclusive interval `[value, value]` instead of three identical zero-width
-copies. Membership is exact, with no absolute tolerance that could make a tiny
-distinct volatility belong to every interval. Identical member sets across
-intervals are merged once, keeping the lowest interval index.
+specification cover uses **three inclusive overlapping intervals**:
+
+- `width = (max(lens) - min(lens)) / 2.2`
+- `stride = 0.6 * width` (40% overlap between adjacent intervals)
+- starts are `min(lens)`, `min(lens) + stride`, `min(lens) + 2 * stride`; the
+  final interval is clamped to `max(lens)`.
+
+Membership is exact with no absolute tolerance, so tiny but distinct volatility
+values cannot belong to every interval. Identical member sets across intervals
+are merged once, keeping the lowest interval index. If all twelve volatilities
+are equal, the range has zero width; the edge case emits one inclusive interval
+`[value, value]` instead of three identical zero-width copies.
 
 ## Offline data handling
 

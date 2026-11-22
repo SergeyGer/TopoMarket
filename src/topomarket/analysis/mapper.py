@@ -382,18 +382,26 @@ class MapperInterval:
 def mapper_intervals(
     lens: Any,
     n_intervals: int = DEFAULT_INTERVALS,
-    overlap: float = 0.0,
+    overlap: float = 0.4,
 ) -> tuple[MapperInterval, ...]:
-    """Split the lens range into inclusive, equally wide intervals.
+    """Build the specification Mapper interval cover for the lens.
 
-    Adjacent intervals share their boundary endpoint.  A lens with a single
-    distinct value receives one interval instead of three zero-width copies.
+    The A5 contract fixes three overlapping intervals with
+    ``width = (max - min) / 2.2`` and ``stride = 0.6 * width`` (the intervals
+    therefore overlap by 40%).  Endpoints are inclusive and the final interval
+    is clamped to the lens maximum.  A constant lens receives one interval
+    instead of degenerate copies.  ``n_intervals`` is validated for API
+    compatibility; the canonical three-interval cover is enforced.
     """
 
     values = _as_float_array(lens, name="lens").reshape(-1)
     if values.size == 0:
         raise MapperError("lens must contain at least one value")
     count = _coerce_interval_count(n_intervals)
+    if count != DEFAULT_INTERVALS:
+        raise MapperError(
+            f"the A5 Mapper cover requires exactly {DEFAULT_INTERVALS} intervals, got {count}"
+        )
     if isinstance(overlap, bool) or not isinstance(overlap, (int, float, np.integer, np.floating)):
         raise MapperError(f"overlap must be a number in [0, 1), got {overlap!r}")
     overlap_value = float(overlap)
@@ -405,23 +413,14 @@ def mapper_intervals(
     if lower == upper:
         return (MapperInterval(lower, upper, 0),)
 
-    width = (upper - lower) / count
-    if overlap_value == 0.0:
-        edges = np.linspace(lower, upper, count + 1)
-        return tuple(
-            MapperInterval(float(edges[index]), float(edges[index + 1]), index)
-            for index in range(count)
-        )
-
-    # A positive overlap extends each interval beyond the next start; the final
-    # interval is clamped to the lens maximum so the cover stays bounded.
-    step = width * (1.0 - overlap_value)
+    width = (upper - lower) / 2.2
+    stride = 0.6 * width
     intervals: list[MapperInterval] = []
-    for index in range(count):
-        start = lower + index * step
+    for index in range(DEFAULT_INTERVALS):
+        start = lower + index * stride
         stop = min(start + width, upper)
         intervals.append(MapperInterval(float(start), float(stop), index))
-    intervals[-1] = MapperInterval(float(intervals[-1].lower), upper, count - 1)
+    intervals[-1] = MapperInterval(float(intervals[-1].lower), upper, DEFAULT_INTERVALS - 1)
     return tuple(intervals)
 
 

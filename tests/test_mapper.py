@@ -153,24 +153,28 @@ def test_constant_vectors_raise_mapper_error_instead_of_nan_correlations() -> No
 def test_three_inclusive_overlapping_intervals_and_equal_lens_case() -> None:
     intervals = mapper_intervals(np.array([0.0, 1.0]))
 
+    # A5 cover: width = range / 2.2, stride = 0.6 * width (40% overlap).
+    width = 1.0 / 2.2
+    stride = 0.6 * width
     assert len(intervals) == 3
-    np.testing.assert_allclose(
-        [interval.bounds for interval in intervals],
-        np.array([[0.0, 1.0 / 3.0], [1.0 / 3.0, 2.0 / 3.0], [2.0 / 3.0, 1.0]]),
+    expected = np.array(
+        [
+            [0.0, width],
+            [stride, stride + width],
+            [2.0 * stride, 1.0],
+        ]
     )
-    boundary = 1.0 / 3.0
+    np.testing.assert_allclose([interval.bounds for interval in intervals], expected)
+    np.testing.assert_allclose(intervals[0].width, width)
+    np.testing.assert_allclose(intervals[1].lower - intervals[0].lower, stride)
+
+    # Adjacent intervals overlap: a value inside the overlap belongs to both.
+    boundary = width
     assert intervals[0].contains(boundary)
     assert intervals[1].contains(boundary)
-    assert intervals[0] == (0.0, boundary)
-
-    # Membership is strict at the boundary: no absolute tolerance may admit a
-    # value that lies outside the interval.
-    below_boundary = np.nextafter(boundary, -np.inf)
-    assert intervals[0].contains(below_boundary)
-    assert not intervals[1].contains(below_boundary)
-    above_boundary = np.nextafter(boundary, np.inf)
-    assert not intervals[0].contains(above_boundary)
-    assert intervals[1].contains(above_boundary)
+    below = np.nextafter(stride, -np.inf)
+    assert intervals[0].contains(below)
+    assert not intervals[1].contains(below)
 
     equal = mapper_intervals(np.array([2.0, 2.0]))
     assert len(equal) == 1

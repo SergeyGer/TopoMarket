@@ -92,10 +92,11 @@ trailing newline. The public `topomarket.analysis.industry_explorer_payload`
 helper returns the same combined structure without the CLI-only directory
 fields.
 
-The Mapper normally uses three inclusive volatility intervals. When every
-industry has the same annualised sample volatility, the lens has zero width and
-the edge case collapses to one inclusive interval instead of three identical
-zero-width copies. See [docs/INDUSTRY_EXPLORER.md](docs/INDUSTRY_EXPLORER.md)
+The Mapper uses three inclusive overlapping volatility intervals
+(`width = lens range / 2.2`, `stride = 0.6 * width`). When every industry has the
+same annualised sample volatility, the lens has zero width and the edge case
+collapses to one inclusive interval instead of three identical zero-width
+copies. See [docs/INDUSTRY_EXPLORER.md](docs/INDUSTRY_EXPLORER.md)
 for the full Step 5 contract, payload shapes and offline data handling.
 
 ## Data contracts
