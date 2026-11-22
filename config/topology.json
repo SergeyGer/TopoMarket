@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "default": {
+    "name": "default",
+    "config": {
+      "window_sessions": 60,
+      "embedding_dimension": 3,
+      "lag": 2,
+      "max_homology_dimension": 1,
+      "homology_coeff_field": 2,
+      "min_interval": 1e-08,
+      "normalization": "robust",
+      "reference_window": 252,
+      "score_scale": 100.0,
+      "metric": "euclidean",
+      "algorithm_version": "tda-v1"
+    },
+    "config_hash": "39762fe3a08bf80848eeaa1fc7d7bca6febb814e3f370e1ea834ba99c5b1b9bf",
+    "window_sessions": 60,
+    "embedding_dimension": 3,
+    "lag": 2,
+    "max_homology_dimension": 1,
+    "homology_coeff_field": 2,
+    "min_interval": 1e-08,
+    "normalization": "robust",
+    "reference_window": 252,
+    "score_scale": 100.0,
+    "metric": "euclidean",
+    "algorithm_version": "tda-v1"
+  }
+}
