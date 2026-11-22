@@ -18,7 +18,9 @@ classifiers = [
     "Programming Language :: Python :: 3 :: Only",
     "Topic :: Scientific/Engineering :: Information Analysis",
 ]
-dependencies = []
+dependencies = [
+  "httpx>=0.27,<1",
+]
 
 [project.optional-dependencies]
 dev = [
