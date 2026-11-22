@@ -1207,6 +1207,98 @@ def build_industry_cloud(
     )
 
 
+def latest_complete_industry_date(
+    rows: Any = None,
+    window_sessions: int | None = None,
+    **kwargs: Any,
+) -> str | None:
+    """Return the latest as-of date with a complete trailing industry window.
+
+    ``tda_daily`` is an exact-date inner join, so its newest rows can still
+    contain blank industry cells when an upstream source is missing.  Scanning
+    backwards for the first complete ``window_sessions`` window keeps the
+    default explorer useful without changing the strict explicit-date contract
+    of :func:`select_industry_window`.
+    """
+
+    if rows is None and "rows" in kwargs:
+        rows = kwargs.pop("rows")
+    window_sessions = _pop_alias(
+        kwargs,
+        ("sessions", "window", "window_size", "window_length", "n_sessions", "size"),
+        window_sessions,
+    )
+    expected = _resolve_expected_columns(
+        _pop_alias(kwargs, ("columns", "industry_columns", "expected_columns"), None)
+    )
+    config = _pop_alias(kwargs, ("config", "topology_config", "topology"), None)
+    if kwargs:
+        names = ", ".join(sorted(str(key) for key in kwargs))
+        raise IndustryAnalysisError(f"unexpected industry window argument(s): {names}")
+
+    sessions = _coerce_window_sessions(window_sessions, _coerce_config(config).window_sessions)
+    parsed = _normalise_rows(rows, expected)
+    if len(parsed) < sessions:
+        return None
+
+    for end in range(len(parsed) - 1, sessions - 2, -1):
+        window = parsed[end - sessions + 1 : end + 1]
+        complete = True
+        for observation_date, row in window:
+            for column in expected:
+                try:
+                    _window_value(row, column, observation_date)
+                except IndustryAnalysisError:
+                    complete = False
+                    break
+            if not complete:
+                break
+        if complete:
+            return window[-1][0].isoformat()
+    return None
+
+
+def industry_explorer_payload(rows: Any = None, as_of: Any = None) -> dict[str, Any]:
+    """Return the combined cloud and Mapper payload for one as-of window.
+
+    The two analysis products are always computed from the exact same validated
+    window.  When ``as_of`` is omitted the helper selects the latest complete
+    trailing window, matching the ``topomarket industries`` command.
+    """
+
+    if as_of is None:
+        as_of = latest_complete_industry_date(rows)
+        if as_of is None:
+            raise IndustryAnalysisError(
+                "no complete industry window is available; requires at least "
+                f"{WINDOW_SESSIONS} rows with finite values for every industry column"
+            )
+    cloud = build_industry_cloud(rows, as_of=as_of)
+    # Imported lazily so the base industries module does not import the Mapper
+    # module (which itself depends on this shared window contract) at load time.
+    from .mapper import compute_mapper_graph, mapper_payload
+
+    graph = compute_mapper_graph(rows, as_of=cloud.as_of)
+    return {
+        "as_of": cloud.as_of,
+        "as_of_date": cloud.as_of,
+        "start_date": cloud.start_date,
+        "end_date": cloud.end_date,
+        "window_sessions": cloud.window_sessions,
+        "row_count": len(cloud.dates),
+        "columns": list(cloud.columns),
+        "labels": list(cloud.industry_labels),
+        "industry_columns": list(cloud.columns),
+        "industry_labels": list(cloud.industry_labels),
+        "dates": list(cloud.dates),
+        "cloud": cloud.to_payload(),
+        "mapper": mapper_payload(graph),
+        "node_count": graph.node_count,
+        "edge_count": graph.edge_count,
+        "interval_count": len(graph.intervals),
+    }
+
+
 # Friendly aliases for result types.
 IndustryWindowResult = IndustryWindow
 IndustryCloudResult = IndustryCloud
@@ -1240,6 +1332,14 @@ analyze_industry_window = build_industry_cloud
 industry_cloud_analysis = build_industry_cloud
 compute_industry_pca_cloud = build_industry_cloud
 industry_cloud_from_rows = build_industry_cloud
+
+# Combined explorer payload helpers.  The primary name follows the Step 5
+# contract; the shorter aliases keep existing callers working.
+industry_payload = industry_explorer_payload
+build_industry_payload = industry_explorer_payload
+combined_industry_payload = industry_explorer_payload
+latest_complete_as_of = latest_complete_industry_date
+latest_complete_industry_window = latest_complete_industry_date
 
 
 __all__ = [
@@ -1278,17 +1378,24 @@ __all__ = [
     "analyze_industries",
     "build_cloud",
     "build_industry_cloud",
+    "build_industry_payload",
     "build_window",
     "compute_cloud",
     "compute_industry_analysis",
     "compute_industry_cloud",
     "compute_industry_pca_cloud",
+    "combined_industry_payload",
     "industry_analysis",
+    "industry_explorer_payload",
     "industry_cloud",
     "industry_cloud_analysis",
     "industry_cloud_from_rows",
+    "industry_payload",
     "industry_window",
     "industry_window_for",
+    "latest_complete_as_of",
+    "latest_complete_industry_date",
+    "latest_complete_industry_window",
     "prepare_industry_window",
     "select_industry_rows",
     "select_industry_window",

@@ -9,6 +9,10 @@ from collections.abc import Sequence
 from pathlib import Path
 
 from topomarket import __version__
+from topomarket.analysis import (
+    IndustryAnalysisError,
+    industry_explorer_payload,
+)
 from topomarket.data import (
     SOURCE_ID_ALIASES,
     SOURCE_IDS,
@@ -258,6 +262,44 @@ def build_parser() -> argparse.ArgumentParser:
     )
     topology.add_argument("--json", action="store_true", help="Emit the full series as JSON.")
 
+    industry = subparsers.add_parser(
+        "industries",
+        aliases=["industry"],
+        help="Build the industry cloud and Mapper graph for one as-of window.",
+        description=(
+            "Build the robust 60-session industry cloud/PCA/persistence result and "
+            "the correlation-distance Mapper graph from the active snapshot's "
+            "tda_daily table. With no --date the latest complete window is used."
+        ),
+    )
+    industry.add_argument(
+        "--data-dir",
+        type=Path,
+        required=True,
+        help="Data directory or snapshot directory containing normalized/tda_daily.csv.",
+    )
+    industry.add_argument(
+        "--date",
+        "--as-of",
+        "--asof",
+        dest="as_of",
+        default=None,
+        help="Explicit window end date (ISO-8601); default: latest complete window.",
+    )
+    industry.add_argument(
+        "--out",
+        "--output",
+        dest="out",
+        type=Path,
+        default=None,
+        help="Write the deterministic combined JSON payload to this path.",
+    )
+    industry.add_argument(
+        "--json",
+        action="store_true",
+        help="Emit the combined cloud and Mapper payload as JSON.",
+    )
+
     report = subparsers.add_parser(
         "report",
         help="Show per-source rows, date ranges, warnings and the active snapshot id.",
@@ -352,6 +394,13 @@ def main(argv: Sequence[str] | None = None) -> int:
             return _run_topology(
                 data_dir=args.data_dir,
                 config_path=args.config,
+                out=args.out,
+                emit_json=args.json,
+            )
+        if args.command in ("industries", "industry"):
+            return _run_industry(
+                data_dir=args.data_dir,
+                as_of=args.as_of,
                 out=args.out,
                 emit_json=args.json,
             )
@@ -672,6 +721,62 @@ def _show_sources(*, data_dir: Path, emit_json: bool) -> int:
             f"  {source_id}: {outcome}{http}; last attempt {attempted}; "
             f"last success {succeeded}{error}"
         )
+    return 0
+
+
+def _run_industry(
+    *,
+    data_dir: Path,
+    as_of: str | None,
+    out: Path | None,
+    emit_json: bool,
+) -> int:
+    """Build the industry cloud and Mapper graph from the active snapshot."""
+
+    requested = Path(data_dir).expanduser()
+    target = _resolve_snapshot_dir(requested)
+    try:
+        rows = load_daily_rows(target)
+    except ScoreError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 2
+
+    try:
+        payload = industry_explorer_payload(rows, as_of=as_of)
+    except (IndustryAnalysisError, ScoreError, OSError, ValueError) as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 2
+
+    snapshot_id = active_snapshot_id(requested)
+    payload["command"] = "industries"
+    payload["data_dir"] = str(target)
+    payload["active_data_dir"] = str(target)
+    payload["active_snapshot_id"] = snapshot_id
+    payload["snapshot_id"] = snapshot_id
+
+    serialised = json.dumps(payload, indent=2, sort_keys=True) + "\n"
+    if out is not None:
+        destination = Path(out).expanduser()
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        with destination.open("w", encoding="utf-8", newline="\n") as handle:
+            handle.write(serialised)
+
+    if emit_json:
+        sys.stdout.write(serialised)
+        return 0
+
+    print(f"Data directory: {target}")
+    print(f"Active snapshot: {snapshot_id or 'none'}")
+    print(f"As of: {payload['as_of']}")
+    print(f"Window: {payload['start_date']} .. {payload['end_date']}")
+    print(f"Window sessions: {payload['window_sessions']}")
+    print(f"Industries: {len(payload['industry_columns'])}")
+    print(f"PCA components: {len(payload['cloud']['pca_labels'])}")
+    print(f"Nodes: {payload['node_count']}")
+    print(f"Edges: {payload['edge_count']}")
+    print(f"Intervals: {payload['interval_count']}")
+    if out is not None:
+        print(f"Wrote: {Path(out).expanduser()}")
     return 0
 
 

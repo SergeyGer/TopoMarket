@@ -19,7 +19,7 @@ release decisions.
 | 2 | Import the supplied local seed files: four core adapters + optional OFR, hash registry, parser reports, normalized tables (A2) | **Delivered** |
 | 3 | Update and recovery paths: HTTPS refresh, conditional GET, staging/validation, atomic snapshot publication, revisions and last-good recovery (A3) | **Delivered** |
 | 4 | Persistent homology: delay embeddings, H0/H1, midrank scores, frozen configurations (A4) | **Delivered** |
-| 5 | Industry explorer: 60×12 cloud and Mapper graph (A5) | Planned |
+| 5 | Industry explorer: 60×12 cloud and Mapper graph (A5) | **Delivered** |
 | 6 | Chronological evaluation: labels, events, alert policy, uncertainty, private ledger (A6) | Planned |
 | 7 | Interactive dashboard: four screens, global date selection, accessibility (A7) | Planned |
 | 8 | Package and rehearse the GitHub release (A8) | Planned |
@@ -58,6 +58,45 @@ topomarket synthetic --out ./demo-data --seed 42
 topomarket status --data-dir ./demo-data
 topomarket validate --data-dir ./demo-data
 ```
+
+## Industry explorer (Step 5)
+
+`topomarket industries` builds both Step 5 products from the same validated
+60-session window: the robust industry cloud/PCA/H0-H1 persistence result and
+the correlation-distance Mapper graph. It resolves the active snapshot exactly
+like `topomarket topology` and reads only `normalized/tda_daily.csv` from that
+directory; it never downloads data and never uses a fixed private-data path.
+`industry` is accepted as a command alias.
+
+```bash
+# Latest complete window in the active snapshot.
+topomarket industries --data-dir /path/to/data
+
+# Explicit window end date, JSON payload, and deterministic file output.
+topomarket industries --data-dir /path/to/data --date 2020-03-16 --json
+topomarket industries --data-dir /path/to/data --date 2020-03-16 \
+  --out industry.json
+```
+
+`--date` (also `--as-of`) must name a date present in `tda_daily.csv`; without
+it the command skips any trailing rows whose industry cells are incomplete and
+selects the latest complete 60-session window. Missing tables, unavailable
+windows, an unknown date, or malformed industry columns exit with status `2`.
+
+The combined JSON payload contains the window summary (`as_of`, `start_date`,
+`end_date`, `window_sessions`, `industry_columns`, `industry_labels`, `dates`,
+`row_count`) plus nested `cloud` and `mapper` payloads, node/edge/interval
+counts, and the resolved active snapshot id. JSON stdout is sorted-key and
+deterministic. `--out` writes the same UTF-8, LF-only, sorted-key JSON with a
+trailing newline. The public `topomarket.analysis.industry_explorer_payload`
+helper returns the same combined structure without the CLI-only directory
+fields.
+
+The Mapper normally uses three inclusive volatility intervals. When every
+industry has the same annualised sample volatility, the lens has zero width and
+the edge case collapses to one inclusive interval instead of three identical
+zero-width copies. See [docs/INDUSTRY_EXPLORER.md](docs/INDUSTRY_EXPLORER.md)
+for the full Step 5 contract, payload shapes and offline data handling.
 
 ## Data contracts
 
