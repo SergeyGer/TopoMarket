@@ -143,7 +143,8 @@ def _block_bootstrap(
         raise EvaluationError("not enough sessions for a bootstrap")
     block = max(2, min(int(block_sessions), len(period_indices)))
     block_count = max(1, int(math.ceil(len(period_indices) / block)))
-    rng = random.Random(int(seed))
+    # Deterministic statistical bootstrap, not a cryptographic use.
+    rng = random.Random(int(seed))  # nosec B311
 
     primary_onsets = _all_episode_onsets(primary)
     primary_matched = {
@@ -342,7 +343,8 @@ def _topology_readings(rows: Sequence[Mapping[str, Any]], *, normalization: str 
 def _shuffled_rows(rows: Sequence[Mapping[str, Any]], *, seed: int) -> list[dict[str, Any]]:
     shuffled = [dict(row) for row in rows]
     returns = [row.get("sp500_log_return") for row in shuffled]
-    rng = random.Random(int(seed))
+    # Deterministic control permutation, not a cryptographic use.
+    rng = random.Random(int(seed))  # nosec B311
     rng.shuffle(returns)
     for row, value in zip(shuffled, returns, strict=True):
         row["sp500_log_return"] = value
