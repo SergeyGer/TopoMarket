@@ -23,6 +23,7 @@ from topomarket.data.refresh import (
     refresh_sources,
     resolve_active_data_dir,
 )
+from topomarket.data.refresh import resolve_active_data_dir as _resolve_snapshot_dir
 from topomarket.demo import DEMO_FILE_NAMES, demo_tables, generate_demo
 from topomarket.profiles import PROFILE_NAMES, load_profile
 from topomarket.report import (
@@ -30,6 +31,13 @@ from topomarket.report import (
     format_data_report,
     has_import_artifacts,
     validate_data_directory,
+)
+from topomarket.topology import (
+    ScoreError,
+    compute_topology_scores,
+    load_daily_rows,
+    load_topology_config,
+    write_scores_csv,
 )
 
 
@@ -221,6 +229,35 @@ def build_parser() -> argparse.ArgumentParser:
     sources.add_argument("--data-dir", type=Path, required=True)
     sources.add_argument("--json", action="store_true", help="Emit JSON.")
 
+    topology = subparsers.add_parser(
+        "topology",
+        help="Compute the causal daily topological anomaly score.",
+        description=(
+            "Compute the causally valid daily delay-embedding/Vietoris-Rips score "
+            "series from the active snapshot's tda_daily table. Custom configs are "
+            "flagged exploratory; the frozen default comes from config/topology.json."
+        ),
+    )
+    topology.add_argument(
+        "--data-dir",
+        type=Path,
+        required=True,
+        help="Data directory or snapshot directory containing normalized/tda_daily.csv.",
+    )
+    topology.add_argument(
+        "--config",
+        type=Path,
+        default=None,
+        help="Exploratory topology configuration JSON file (default: frozen config).",
+    )
+    topology.add_argument(
+        "--out",
+        type=Path,
+        default=None,
+        help="Write the deterministic score CSV (plus metadata sidecar) to this path.",
+    )
+    topology.add_argument("--json", action="store_true", help="Emit the full series as JSON.")
+
     report = subparsers.add_parser(
         "report",
         help="Show per-source rows, date ranges, warnings and the active snapshot id.",
@@ -311,6 +348,13 @@ def main(argv: Sequence[str] | None = None) -> int:
             )
         if args.command == "sources":
             return _show_sources(data_dir=args.data_dir, emit_json=args.json)
+        if args.command == "topology":
+            return _run_topology(
+                data_dir=args.data_dir,
+                config_path=args.config,
+                out=args.out,
+                emit_json=args.json,
+            )
         if args.command == "synthetic":
             return _generate_synthetic(args.out, seed=args.seed)
     except (OSError, ValueError) as exc:
@@ -628,6 +672,50 @@ def _show_sources(*, data_dir: Path, emit_json: bool) -> int:
             f"  {source_id}: {outcome}{http}; last attempt {attempted}; "
             f"last success {succeeded}{error}"
         )
+    return 0
+
+
+def _run_topology(
+    *,
+    data_dir: Path,
+    config_path: Path | None,
+    out: Path | None,
+    emit_json: bool,
+) -> int:
+    """Compute the default or exploratory daily topology score series."""
+
+    requested = Path(data_dir).expanduser()
+    target = _resolve_snapshot_dir(requested)
+    if config_path is not None:
+        config = load_topology_config(config_path=Path(config_path).expanduser(), allow_custom=True)
+    else:
+        config = load_topology_config()
+    try:
+        rows = load_daily_rows(target)
+    except ScoreError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 2
+    series = compute_topology_scores(rows, config)
+    if out is not None:
+        write_scores_csv(series, Path(out).expanduser())
+    if emit_json:
+        print(json.dumps(series.as_dict(), indent=2, sort_keys=True))
+        return 0
+    print(f"Data directory: {target}")
+    print(f"Config hash: {series.config_hash}")
+    print(f"Exploratory: {series.exploratory}")
+    print(f"Cache key: {series.cache_key}")
+    print(f"Rows: {len(series.points)}")
+    print(f"Scored: {series.scored_count}")
+    print(f"Warming up: {series.warmup_count}")
+    print(f"Unavailable: {series.unavailable_count}")
+    if series.first_scored_date:
+        print(f"First scored date: {series.first_scored_date}")
+    if series.latest_date:
+        latest = f"{series.latest_date} score={series.latest_score}"
+        print(f"Latest: {latest}")
+    if out is not None:
+        print(f"Wrote: {Path(out).expanduser()}")
     return 0
 
 

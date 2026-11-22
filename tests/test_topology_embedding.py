@@ -223,7 +223,7 @@ def test_square_diagrams_and_lifetimes_match_ripser_directly() -> None:
     expected_lifetimes = finite_lifetimes(expected[1], DEFAULT_CONFIG.min_interval)
     np.testing.assert_allclose(np.asarray(result.lifetimes), expected_lifetimes)
     np.testing.assert_allclose(result.lifetimes[1], expected_lifetimes)
-    assert result.L == pytest.approx(float(np.sum(expected_lifetimes)))
+    assert result.L == pytest.approx(float(np.max(expected_lifetimes)))
 
 
 def test_l_zero_when_no_finite_h1_pair_exists() -> None:

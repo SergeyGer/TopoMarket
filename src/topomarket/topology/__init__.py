@@ -22,6 +22,8 @@ from .persistence import *  # noqa: F401,F403 - public persistence API
 from .persistence import __all__ as _PERSISTENCE_ALL
 from .scaling import *  # noqa: F401,F403 - public scaling API
 from .scaling import __all__ as _SCALING_ALL
+from .score import *  # noqa: F401,F403 - public daily score API
+from .score import __all__ as _SCORE_ALL
 from .window import *  # noqa: F401,F403 - public window API
 from .window import __all__ as _WINDOW_ALL
 
@@ -51,5 +53,6 @@ __all__ = [
     *_EMBEDDING_ALL,
     *_PERSISTENCE_ALL,
     *_WINDOW_ALL,
+    *_SCORE_ALL,
     "Topology",
 ]

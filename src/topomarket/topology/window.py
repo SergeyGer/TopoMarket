@@ -404,7 +404,9 @@ def window_topology(
         diagrams = persistence_diagrams(points, config)
         lifetime_values = finite_lifetimes(diagrams, config.min_interval)
         h1_values = lifetime_values.h1 if len(lifetime_values) > 1 else np.empty(0, dtype=float)
-        score = float(np.sum(np.asarray(h1_values, dtype=float)))
+        # The anomaly score uses the largest finite H1 lifetime; a valid cloud
+        # without finite H1 pairs has L = 0.0.
+        score = float(np.max(h1_values)) if h1_values.size else 0.0
     except PersistenceError as error:
         return _unavailable(config, str(error), points=points, **metadata)
     except Exception as error:
