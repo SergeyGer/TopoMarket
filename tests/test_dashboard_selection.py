@@ -45,7 +45,7 @@ def test_selection_is_frozen_and_has_the_documented_fields() -> None:
     assert selection.member is None
     assert selection.run is None
     with pytest.raises(FrozenInstanceError):
-        selection.screen = "markets"  # type: ignore[misc]
+        selection.screen = "topology"  # type: ignore[misc]
 
 
 @pytest.mark.parametrize("screen", SCREENS)
@@ -107,7 +107,7 @@ def test_selection_rejects_unknown_loaded_session_member_and_run() -> None:
 
 def test_selection_round_trips_all_public_fields() -> None:
     selection = DashboardSelection(
-        screen="evaluation",
+        screen="validation",
         mode="replay",
         date="2024-03-04",
         reveal=True,
@@ -331,7 +331,7 @@ def test_explicit_empty_collections_reject_selected_values(kwargs: dict, match: 
 
 def test_validate_rejects_values_absent_from_explicit_empty_collections() -> None:
     selection = DashboardSelection(
-        screen="evaluation",
+        screen="validation",
         mode="replay",
         date="2024-01-02",
         reveal=True,

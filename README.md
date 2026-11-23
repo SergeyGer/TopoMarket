@@ -59,6 +59,33 @@ topomarket status --data-dir ./demo-data
 topomarket validate --data-dir ./demo-data
 ```
 
+## Interactive dashboard (Step 7)
+
+```bash
+pip install -e ".[ui]"
+streamlit run app.py -- --profile demo
+streamlit run app.py -- --profile private --data-dir /path/to/data
+```
+
+Four screens share one persistent selection: **Overview** (latest/replay session, score percentile,
+frozen cutoff status, 20-session horizon and pending labels), **Topology** (60-session industry
+cloud/PCA, persistence barcode, Mapper graph with linked member inspector, optional 3D view),
+**Validation** (frozen evaluation runs, metrics, bootstrap uncertainty, evidence status, drill-down
+and CSV export) and **Data** (import preview, active snapshot, refresh attempts/failures,
+revisions, schema/units/coverage). Replay is blind by default: "Reveal next 20 sessions" unlocks
+only the outcome layer for the current selection and can be hidden again; it never changes scores,
+cutoffs or features. Validation runs are discovered from `reports/evaluation*.json` written by
+`topomarket evaluate --report-out`.
+
+The pure dashboard layer (`topomarket.ui.dashboard`, `topomarket.ui.panels`,
+`topomarket.ui.performance`) is Streamlit-free and fully tested offline; `app.py` falls back to a
+plain-text four-screen summary when Streamlit is not installed. Accessibility: neutral canvas, teal
+market line, amber benchmark, shape+text alert marks, labelled inputs, table alternatives, reduced
+motion, keyboard equivalents (Alt+Arrow/PageUp/PageDown/R/B/M) and 2D-default/optional-3D views.
+Cached date-change p95 is measured against the 500 ms limit and cached demo startup against 5 s
+(environment/build metadata is recorded in the benchmark payload). See
+[docs/DASHBOARD.md](docs/DASHBOARD.md).
+
 ## Chronological evaluation (Step 6)
 
 `topomarket evaluate` runs the offline, deterministic evaluation pipeline over the active

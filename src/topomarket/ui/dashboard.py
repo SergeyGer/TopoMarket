@@ -26,7 +26,7 @@ from enum import Enum
 from typing import Any
 
 #: The four dashboard screens.  Values are lower-case, stable identifiers.
-SCREENS: tuple[str, ...] = ("overview", "markets", "topology", "evaluation")
+SCREENS: tuple[str, ...] = ("overview", "topology", "validation", "data")
 
 #: Replay reveals a future outcome only when explicitly requested.
 MODES: tuple[str, ...] = ("live", "replay")
@@ -64,19 +64,22 @@ _MODE_ALIASES = {
 _SCREEN_ALIASES = {
     "overview": "overview",
     "overview_screen": "overview",
-    "data": "overview",
-    "data_status": "overview",
+    "data": "data",
+    "data_status": "data",
+    "data_screen": "data",
     "status": "overview",
-    "markets": "markets",
-    "market": "markets",
-    "market_screen": "markets",
+    "markets": "topology",
+    "market": "topology",
+    "market_screen": "topology",
     "topology": "topology",
     "tda": "topology",
     "topology_screen": "topology",
-    "evaluation": "evaluation",
-    "evaluate": "evaluation",
-    "alerts": "evaluation",
-    "evaluation_screen": "evaluation",
+    "evaluation": "validation",
+    "evaluate": "validation",
+    "alerts": "validation",
+    "validation": "validation",
+    "validation_screen": "validation",
+    "evaluation_screen": "validation",
 }
 
 
@@ -1018,9 +1021,9 @@ class DashboardScreen(str, Enum):
     """Enumeration form of :data:`SCREENS` for embedders that prefer enums."""
 
     OVERVIEW = "overview"
-    MARKETS = "markets"
     TOPOLOGY = "topology"
-    EVALUATION = "evaluation"
+    VALIDATION = "validation"
+    DATA = "data"
 
 
 Screen = DashboardScreen

@@ -123,15 +123,17 @@ def test_streamlit_app_smoke_run() -> None:
     app_test.run()
 
     assert not list(app_test.exception)
-    assert [title.value for title in app_test.title] == ["TopoMarket"]
+    assert [title.value for title in app_test.title] == ["TopoMarket research"]
     assert [heading.value for heading in app_test.subheader] == ["Overview"]
 
+    captions = " ".join(item.value.lower() for item in app_test.caption)
+    assert "snapshot" in captions
+    assert "selected session" in captions
     markdown = " ".join(item.value.lower() for item in app_test.markdown)
-    assert "profile badge" in markdown
-    assert "demo" in markdown
-    assert "data source" in markdown
-    assert "synthetic" in markdown
+    assert "outcome horizon" in markdown
 
-    sidebar = " ".join(item.value for item in app_test.sidebar.markdown)
-    for placeholder in ("Overview", "Markets", "Topology", "Evaluation"):
-        assert placeholder in sidebar
+    sidebar_labels = {widget.label for widget in app_test.sidebar.selectbox}
+    assert "Screen" in sidebar_labels
+    assert "Selected session" in sidebar_labels
+    sidebar_radios = {widget.label for widget in app_test.sidebar.radio}
+    assert "Mode" in sidebar_radios
