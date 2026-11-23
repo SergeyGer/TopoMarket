@@ -472,7 +472,7 @@ def render_observation_panel(ui: Any, payload: Mapping[str, Any]) -> None:
             ui,
             "info",
             "This is the latest available session, so there are no future sessions to reveal. "
-            "Choose an earlier session or a replay preset in the sidebar to inspect a historical alert.",
+            "Choose an earlier session or a replay preset to inspect a historical alert.",
         )
     replay = payload.get("replay") or {}
     if replay.get("blind"):
