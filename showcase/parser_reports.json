@@ -1,0 +1,10 @@
+{
+  "by_source": {
+    "showcase_synthetic": {
+      "row_count": 5673,
+      "first_observation": "2005-01-03",
+      "last_observation": "2026-09-30",
+      "synthetic": true
+    }
+  }
+}

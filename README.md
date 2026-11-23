@@ -22,7 +22,7 @@ release decisions.
 | 5 | Industry explorer: 60×12 cloud and Mapper graph (A5) | **Delivered** |
 | 6 | Chronological evaluation: labels, events, alert policy, uncertainty, private ledger (A6) | **Delivered** |
 | 7 | Interactive dashboard: four screens, global date selection, accessibility (A7) | Planned |
-| 8 | Package and rehearse the GitHub release (A8) | Planned |
+| 8 | Package and rehearse the GitHub release (A8) | **Delivered** |
 
 Detailed acceptance criteria live in the GitHub Issues and milestones for each step; the technical reference is the [project Wiki](https://github.com/SergeyGer/TopoMarket/wiki).
 
@@ -58,6 +58,27 @@ topomarket synthetic --out ./demo-data --seed 42
 topomarket status --data-dir ./demo-data
 topomarket validate --data-dir ./demo-data
 ```
+
+## Release rehearsal (Step 8)
+
+```bash
+# offline release checks: versions, hygiene, packaged data, lock, fixtures, public smoke
+topomarket release-check
+topomarket release-check --json --skip-smoke
+
+# build and validate distributions
+python -m pip install build twine
+python -m build
+python -m twine check dist/*
+```
+
+The repository ships a deterministic dependency lock (`requirements.lock`), a release workflow
+(`.github/workflows/release.yml`) that runs the public suite with a retained JUnit report, builds and
+validates sdist/wheel artifacts (including packaged JSON resources and a private-input guard) and a
+synthetic public walkthrough. `CHANGELOG.md` records each step; releases are tagged `v0.x.0` with no
+release dates in repository content. The committed `showcase/` fixture is fully synthetic and lets a
+reviewer launch the dashboard, follow a replay and inspect an alert without any key. See
+[docs/RELEASING.md](docs/RELEASING.md) and [docs/WALKTHROUGH.md](docs/WALKTHROUGH.md).
 
 ## Interactive dashboard (Step 7)
 

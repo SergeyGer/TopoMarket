@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "snapshot_id": "showcase-synthetic",
+  "source_ids": [
+    "showcase_synthetic"
+  ],
+  "row_counts": {
+    "showcase_synthetic": 5673
+  },
+  "normalized_row_counts": {
+    "sp500_daily": 5673,
+    "industries_daily": 5673,
+    "tda_daily": 5673
+  },
+  "normalized_tables": [
+    "sp500_daily",
+    "industries_daily",
+    "tda_daily"
+  ],
+  "latest_data_date": "2026-09-30",
+  "synthetic": true,
+  "private_data": false
+}

@@ -1,0 +1,134 @@
+include CHANGELOG.md
+include LICENSE
+include NOTICE.md
+include README.md
+include SECURITY.md
+include CONTRIBUTING.md
+include requirements.lock
+recursive-include docs *.md
+recursive-include showcase *.json *.csv
+PY
+cat > .github/workflows/release.yml <<'YML'
+name: release
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  release-checks:
+    name: release checks (py3.12)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install locked dependencies and package
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.lock
+          python -m pip install --no-deps -e .
+          python -m pip install build twine
+      - name: Compile, lint and format
+        run: |
+          python -m compileall -q src tests app.py scripts
+          python -m ruff check .
+          python -m ruff format --check .
+      - name: Public test report
+        run: python -m pytest -q --junitxml=test-report.xml
+      - name: Offline release checks
+        run: |
+          python -m topomarket release-check --json > release-check-report.json
+          python - <<'PY'
+          import json
+          report = json.load(open("release-check-report.json"))
+          print(json.dumps(report, indent=2))
+          raise SystemExit(0 if report["passed"] else 1)
+          PY
+      - name: Build distributions and validate metadata
+        run: |
+          python -m build
+          python -m twine check dist/*
+      - name: Verify wheel content (package data, no private inputs)
+        run: |
+          python - <<'PY'
+          import glob, zipfile
+          wheels = glob.glob("dist/*.whl")
+          assert wheels, "no wheel built"
+          with zipfile.ZipFile(wheels[0]) as archive:
+              names = archive.namelist()
+          required = [
+              "topomarket/data/demo_markets.json",
+              "topomarket/topology/topology.json",
+          ]
+          missing = [name for name in required if not any(entry.endswith(name) for entry in names)]
+          forbidden = [name for name in names if "private_data" in name or name.endswith(".env")]
+          print(f"{len(names)} wheel entries; missing={missing}; forbidden={forbidden}")
+          raise SystemExit(1 if missing or forbidden else 0)
+          PY
+      - name: Upload release artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: topomarket-release-artifacts
+          path: |
+            dist/*
+            test-report.xml
+            release-check-report.json
+          if-no-files-found: error
+YML
+cat > docs/WALKTHROUGH.md <<'MD'
+# Public walkthrough (60-90 seconds, synthetic data only)
+
+This walkthrough uses the committed `showcase/` fixture: a deterministic, fully synthetic market
+history (5,673 sessions, 2005-2026) with engineered drawdowns, a synthetic VIX series, 12 synthetic
+industry series, a frozen topology score file and a frozen evaluation report. It contains **no
+private or genuine market data** and requires no API key, credentials or network access.
+
+## 1. Install and launch the dashboard
+
+```bash
+git clone https://github.com/SergeyGer/TopoMarket.git
+cd TopoMarket
+python -m venv .venv && source .venv/bin/activate
+python -m pip install -e ".[ui]"
+streamlit run app.py -- --profile private --data-dir showcase
+```
+
+The same fixture works without Streamlit for a text summary:
+`python app.py -- --profile private --data-dir showcase`.
+
+## 2. Follow a replay
+
+1. In the sidebar choose **Topology**, mode **replay**.
+2. Select session **2020-03-13** (a synthetic alert date) and inspect the 60-session industry cloud,
+   persistence summary and Mapper graph.
+3. Click **Reveal next 20 sessions**: only the outcome layer appears; score, percentile and cutoff
+   remain unchanged. Click **Hide outcome** to return to the blind view.
+4. Use the keyboard equivalents: previous/next session, reveal and blind.
+
+## 3. Inspect an alert
+
+1. Switch to **Validation**. The frozen showcase run lists its metrics, bootstrap uncertainty and
+   evidence wording.
+2. Drill into the matched/missed/false alert tables and download the CSV.
+3. Switch to **Data** to inspect the active synthetic snapshot, source row counts and first/last
+   observations.
+4. The **Overview** screen shows the selected session's score percentile and frozen cutoff status
+   from the showcase policy.
+
+## Notes and limitations
+
+- The evidence wording is `Experimental market anomaly`: the synthetic showcase does not satisfy
+  the historical early-warning evidence rule.
+- Synthetic data must never be presented as genuine market history. Screenshots for publication
+  should use the synthetic showcase only; genuine data/charts require a separate review of the
+  provider notices in `NOTICE.md`.
+- No release dates or schedules are published in repository content.
