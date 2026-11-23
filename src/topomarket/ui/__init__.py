@@ -1,10 +1,29 @@
-"""User-interface placeholders for TopoMarket.
+"""Dashboard UI layer for TopoMarket.
 
-The command-line interface lives in :mod:`topomarket.cli`. Any future textual
-or web UI should consume the profile and data helpers rather than reading
-configuration files directly.
+The pure selection/payload/performance modules can be imported without
+Streamlit; the Streamlit shell lives in ``app.py`` at the repository root.
 """
 
 from __future__ import annotations
 
-__all__: list[str] = []
+from .dashboard import DashboardSelection, DashboardSelectionError
+from .panels import (
+    DashboardData,
+    DashboardDataError,
+    PanelCache,
+    build_screen_payloads,
+    load_dashboard_data,
+)
+from .performance import measure_cached_date_changes, measure_dashboard_startup
+
+__all__ = [
+    "DashboardData",
+    "DashboardDataError",
+    "DashboardSelection",
+    "DashboardSelectionError",
+    "PanelCache",
+    "build_screen_payloads",
+    "load_dashboard_data",
+    "measure_cached_date_changes",
+    "measure_dashboard_startup",
+]
