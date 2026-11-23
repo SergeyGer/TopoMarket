@@ -34,8 +34,11 @@ The same fixture works without Streamlit for a text summary:
 2. Drill into the matched/missed/false alert tables and download the CSV.
 3. Switch to **Data** to inspect the active synthetic snapshot, source row counts and first/last
    observations.
-4. The **Overview** screen shows the selected session's score percentile and frozen cutoff status
-   from the showcase policy.
+4. The **Overview** screen shows the selected session's score percentile, the frozen cutoff status
+   and a score-history timeline. The latest showcase session has no future outcome horizon, so the
+   screen explains how to move to a historical session.
+5. In replay mode use the sidebar **Replay presets** (2020-03-16, 2020-03-13, 2008-10-10,
+   2008-09-15) to jump to a historical alert and reveal its next-20-session outcome layer.
 
 ## Notes and limitations
 

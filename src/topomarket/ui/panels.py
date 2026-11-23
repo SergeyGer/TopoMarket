@@ -483,6 +483,25 @@ def _score_status(score: float | None, policy: Mapping[str, Any] | None) -> dict
     }
 
 
+def _score_history(data: DashboardData, *, limit: int = 120) -> list[dict[str, Any]]:
+    """Recent scored sessions for the Overview timeline (deterministic order)."""
+
+    history: list[dict[str, Any]] = []
+    for session in data.session_dates[-limit:]:
+        point = data.score_by_date.get(session)
+        if not point or str(point.get("state") or "") != "scored":
+            continue
+        raw = point.get("score")
+        try:
+            value = float(raw)
+        except (TypeError, ValueError):
+            continue
+        if not math.isfinite(value):
+            continue
+        history.append({"date": session, "score": value})
+    return history
+
+
 # --------------------------------------------------------------------------- #
 # Screen payloads
 # --------------------------------------------------------------------------- #
@@ -514,6 +533,7 @@ def _overview_payload(
             "reason": reason,
             "cutoff_status": _score_status(score, policy),
         },
+        "score_history": _score_history(data),
         "data_source": "synthetic demo" if data.demo else "private research",
         "snapshot_id": data.snapshot_id,
         "horizon": {
