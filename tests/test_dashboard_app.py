@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import sys
+from pathlib import Path
+
 import app
 import pytest
 
@@ -119,3 +122,17 @@ def test_run_shell_plain_fallback(capsys: pytest.CaptureFixture[str]) -> None:
     assert app.run_shell(args, streamlit_module=None) == 0
     output = capsys.readouterr().out
     assert "TopoMarket dashboard" in output
+
+
+def test_apptest_overview_renders_without_streamlit_exception(monkeypatch) -> None:
+    pytest.importorskip("streamlit")
+    from streamlit.testing.v1 import AppTest
+
+    root = Path(__file__).resolve().parents[1]
+    monkeypatch.setattr(
+        sys, "argv", ["app.py", "--profile", "private", "--data-dir", str(root / "showcase")]
+    )
+    app_test = AppTest.from_file(root / "app.py", default_timeout=120).run()
+    assert not list(app_test.exception), [item.message for item in app_test.exception]
+    assert len(app_test.get("vega_lite_chart")) >= 1
+    assert any("latest available session" in info.value for info in app_test.info)

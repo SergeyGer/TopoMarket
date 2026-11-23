@@ -15,7 +15,7 @@
       "metric": "euclidean",
       "algorithm_version": "tda-v1"
     },
-    "config_hash": "71d9587f7006c81c56060f7ac9760a18a7d5ef3e18e8abcdda3ab3a692c81992",
+    "config_hash": "b3ef6026ace7e758d8ca05bf6df16189472670ea716bf8f54a827625e10c175d",
     "window_sessions": 60,
     "embedding_dimension": 3,
     "lag": 2,
