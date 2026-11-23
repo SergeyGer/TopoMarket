@@ -3,6 +3,24 @@
 Release notes per implementation step. TopoMarket identifies releases by step number and semantic
 version; no release dates or schedules are published in repository content.
 
+## v0.8.2 - Operator UI replay visibility
+
+- Overview renders a score-history timeline (recent scored sessions) with the frozen cutoff
+  caption, so the landing screen exposes the research history instead of three sparse metrics.
+- Replay at the latest available session explains that no future outcome horizon exists and guides
+  the operator to an earlier session or a replay preset instead of a silent `0/20`.
+- Sidebar replay presets jump to the documented historical alerts: 2020-03-16, 2020-03-13,
+  2008-10-10, 2008-09-15.
+- Explicit x/y chart columns fix the Streamlit mixed-type exception; real Streamlit AppTest against
+  the showcase profile covers the chart and latest-session hint.
+- Frozen topology config hash refreshed for the 0.8.2 package version.
+- No private data, credentials, ledgers or release dates are committed.
+
+## v0.8.1 - Operator UI replay visibility (superseded by v0.8.2)
+
+- First patch of the operator UI: score-history preview and replay presets. Superseded by v0.8.2,
+  which fixes the Overview chart construction and refreshes the frozen configuration hash.
+
 ## v0.8.0 - Step 8: Package and rehearse the public release
 
 - Offline `topomarket release-check` command: version consistency, repository hygiene, packaged

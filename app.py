@@ -456,6 +456,8 @@ def render_observation_panel(ui: Any, payload: Mapping[str, Any]) -> None:
                 "date": [item["date"] for item in history],
                 "score percentile": [item["score"] for item in history],
             },
+            x="date",
+            y="score percentile",
         )
         cutoff = (score.get("cutoff_status") or {}).get("cutoff")
         if cutoff is not None:
