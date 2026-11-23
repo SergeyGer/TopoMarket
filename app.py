@@ -332,6 +332,18 @@ def render_dashboard(
     if date_value:
         selection = _replace_selection(selection, date=str(date_value))
 
+    replay_presets = [
+        value
+        for value in ("2020-03-16", "2020-03-13", "2008-10-10", "2008-09-15")
+        if value in data.session_dates
+    ]
+    if replay_presets:
+        _call(sidebar, "caption", "Replay presets")
+        for preset in replay_presets:
+            label = f"Jump to {preset}"
+            if _call(sidebar, "button", label, key=f"tm_preset_{preset}"):
+                selection = _replace_selection(selection, date=preset, mode=REPLAY)
+
     if _call(sidebar, "button", "◀ Previous session"):
         try:
             selection = previous_session(selection)
@@ -435,6 +447,19 @@ def render_observation_panel(ui: Any, payload: Mapping[str, Any]) -> None:
     else:
         _call(ui, "markdown", f"**Selected session:** {payload.get('date', '—')}")
 
+    history = payload.get("score_history") or []
+    if len(history) >= 2:
+        _call(
+            ui,
+            "line_chart",
+            {
+                "date": [item["date"] for item in history],
+                "score percentile": [item["score"] for item in history],
+            },
+        )
+        cutoff = (score.get("cutoff_status") or {}).get("cutoff")
+        if cutoff is not None:
+            _call(ui, "caption", f"Frozen cutoff: {cutoff:.1f} percentile")
     horizon = payload.get("horizon") or {}
     _call(
         ui,
@@ -442,6 +467,13 @@ def render_observation_panel(ui: Any, payload: Mapping[str, Any]) -> None:
         f"Outcome horizon: {horizon.get('sessions', 0)}/{horizon.get('required', OUTCOME_HORIZON)} "
         f"sessions · pending: {bool(horizon.get('pending'))}",
     )
+    if int(horizon.get("sessions", 0)) == 0:
+        _call(
+            ui,
+            "info",
+            "This is the latest available session, so there are no future sessions to reveal. "
+            "Choose an earlier session or a replay preset to inspect a historical alert.",
+        )
     replay = payload.get("replay") or {}
     if replay.get("blind"):
         _call(ui, "info", "Blind replay: outcome layer hidden until you reveal it.")

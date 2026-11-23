@@ -42,6 +42,10 @@ def test_showcase_dashboard_supports_replay_and_alert_inspection() -> None:
         screen="topology", mode="replay", date=replay_date, sessions=data.session_dates
     )
     payloads = build_screen_payloads(data, selection)
+    history = payloads["overview"]["score_history"]
+    assert history
+    assert all({"date", "score"} <= set(item) for item in history)
+    assert any(item["date"] == selection.date for item in history)
     assert payloads["topology"]["available"] is True
     assert payloads["topology"]["outcome"] is None
     assert payloads["validation"]["available"] is True
