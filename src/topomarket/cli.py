@@ -222,6 +222,22 @@ def build_parser() -> argparse.ArgumentParser:
     )
     refresh.add_argument("--json", action="store_true", help="Emit a JSON report.")
 
+    release_check = subparsers.add_parser(
+        "release-check",
+        help="Run the offline public-release checks.",
+        description=(
+            "Verify version consistency, repository hygiene, packaged resources, the dependency "
+            "lock, synthetic fixture determinism and the offline public smoke commands."
+        ),
+    )
+    release_check.add_argument("--json", action="store_true", help="Emit the report as JSON.")
+    release_check.add_argument(
+        "--skip-smoke",
+        action="store_true",
+        help="Skip fixture regeneration and CLI/app smoke commands.",
+    )
+    release_check.add_argument("--root", type=Path, default=None, help="Repository root.")
+
     sources = subparsers.add_parser(
         "sources",
         help="Show per-source freshness and last refresh outcomes.",
@@ -430,6 +446,12 @@ def main(argv: Sequence[str] | None = None) -> int:
             )
         if args.command == "sources":
             return _show_sources(data_dir=args.data_dir, emit_json=args.json)
+        if args.command == "release-check":
+            return _run_release_check(
+                root=args.root,
+                emit_json=args.json,
+                skip_smoke=args.skip_smoke,
+            )
         if args.command == "topology":
             return _run_topology(
                 data_dir=args.data_dir,
@@ -941,6 +963,29 @@ def _run_evaluation(
     if report_out is not None:
         print(f"Report: {Path(report_out).expanduser()}")
     return 0
+
+
+def _run_release_check(*, root: Path | None, emit_json: bool, skip_smoke: bool) -> int:
+    """Run the Step 8 release checks."""
+
+    from topomarket.release import ReleaseCheckError, run_release_check
+
+    try:
+        report = run_release_check(root, skip_smoke=skip_smoke)
+    except ReleaseCheckError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 2
+    if emit_json:
+        print(json.dumps(report, indent=2, sort_keys=True))
+    else:
+        print(f"Release checks for TopoMarket {report['package_version']}")
+        for check in report["checks"]:
+            status = "PASS" if check["passed"] else "FAIL"
+            print(f"  [{status}] {check['name']}")
+            for problem in check.get("details", {}).get("problems") or ():
+                print(f"    - {problem}")
+        print("Release checks passed." if report["passed"] else "Release checks failed.")
+    return 0 if report["passed"] else 2
 
 
 def _generate_synthetic(out: Path, *, seed: int = 42) -> int:

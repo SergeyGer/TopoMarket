@@ -4,11 +4,12 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "topomarket"
-version = "0.7.0"
+version = "0.8.0"
 description = "Topology-aware market research toolkit with demo and private data profiles."
 readme = "README.md"
 requires-python = ">=3.11"
-license = { text = "MIT" }
+license = "MIT"
+license-files = ["LICENSE"]
 authors = [{ name = "TopoMarket contributors" }]
 keywords = ["market", "topology", "research", "demo"]
 classifiers = [
@@ -28,10 +29,18 @@ dependencies = [
 dev = [
     "pytest>=8.0",
     "ruff>=0.6",
+    "build>=1.0",
+    "twine>=5.0",
 ]
 ui = [
     "streamlit>=1.30,<2",
 ]
+
+[project.urls]
+Homepage = "https://github.com/SergeyGer/TopoMarket"
+Repository = "https://github.com/SergeyGer/TopoMarket"
+Issues = "https://github.com/SergeyGer/TopoMarket/issues"
+Wiki = "https://github.com/SergeyGer/TopoMarket/wiki"
 
 [project.scripts]
 topomarket = "topomarket.cli:main"
@@ -43,7 +52,7 @@ package-dir = { "" = "src" }
 where = ["src"]
 
 [tool.setuptools.package-data]
-topomarket = ["data/*.json", "topology/*.json"]
+topomarket = ["data/*.json", "topology/*.json", "config/*.json"]
 
 [tool.pytest.ini_options]
 minversion = "8.0"

@@ -22,8 +22,16 @@ from typing import Any
 
 PROFILE_NAMES: tuple[str, ...] = ("demo", "private")
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_CONFIG_DIR = REPOSITORY_ROOT / "config"
-DEFAULT_DEMO_DATA_DIR = (REPOSITORY_ROOT / "src" / "topomarket" / "data").resolve()
+PACKAGE_ROOT = Path(__file__).resolve().parent
+# An installed wheel has no repository checkout around it; profile templates and
+# bundled demo data then come from the package itself.
+INSTALLED_LAYOUT = not (REPOSITORY_ROOT / "pyproject.toml").is_file()
+DEFAULT_CONFIG_DIR = (
+    PACKAGE_ROOT / "config" if INSTALLED_LAYOUT else REPOSITORY_ROOT / "config"
+).resolve()
+DEFAULT_DEMO_DATA_DIR = (
+    PACKAGE_ROOT / "data" if INSTALLED_LAYOUT else REPOSITORY_ROOT / "src" / "topomarket" / "data"
+).resolve()
 
 # Environment variables understood by the profile loader. Profile-specific
 # variables take precedence over the generic data-directory override.
@@ -271,7 +279,9 @@ def _resolve_data_dir(
 
     configured = raw.get("data_dir")
     if configured is not None and str(configured).strip():
-        return _resolve(root, configured)
+        candidate = _resolve(root, configured)
+        if candidate.exists() or not INSTALLED_LAYOUT:
+            return candidate
     return DEFAULT_DEMO_DATA_DIR
 
 
@@ -308,14 +318,22 @@ def load_profile(
 
     root = path.resolve().parent.parent
     resolved_data_dir = _resolve_data_dir(profile, raw, root, data_dir, path)
+    if INSTALLED_LAYOUT:
+        # Never write build artefacts into the installed site-packages tree.
+        scratch = Path(tempfile.gettempdir()) / "topomarket" / str(raw["profile"])
+        output_dir = scratch / "artifacts"
+        cache_dir = scratch / "cache"
+    else:
+        output_dir = _resolve(root, raw["output_dir"])
+        cache_dir = _resolve(root, raw["cache_dir"])
     return Profile(
         profile=str(raw["profile"]),
         name=str(raw["name"]),
         description=str(raw["description"]),
         data_source=str(raw["data_source"]),
         data_dir=resolved_data_dir,
-        output_dir=_resolve(root, raw["output_dir"]),
-        cache_dir=_resolve(root, raw["cache_dir"]),
+        output_dir=output_dir,
+        cache_dir=cache_dir,
         random_seed=raw["random_seed"],
         private_data=raw["private_data"],
         config_path=path,

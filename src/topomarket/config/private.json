@@ -1,0 +1,11 @@
+{
+  "profile": "private",
+  "name": "TopoMarket Private",
+  "description": "Local research profile for user-supplied private data. No private data or credentials are included in this repository.",
+  "data_source": "private",
+  "data_dir": "private_data",
+  "output_dir": "artifacts/private",
+  "cache_dir": ".cache/topomarket/private",
+  "random_seed": 42,
+  "private_data": true
+}

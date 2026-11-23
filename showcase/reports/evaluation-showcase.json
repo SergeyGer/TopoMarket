@@ -1,0 +1,860 @@
+{
+  "bootstrap": {
+    "comparator_episode_recall": {
+      "lower": 0.0,
+      "mean": 0.33350767085076705,
+      "total_replicates": 1000,
+      "upper": 1.0,
+      "valid_replicates": 956
+    },
+    "comparator_false_alerts_per_year": {
+      "lower": 0.0,
+      "mean": 0.15288009514351902,
+      "total_replicates": 1000,
+      "upper": 0.2579324462640737,
+      "valid_replicates": 1000
+    },
+    "episode_recall_gain": {
+      "lower": -1.0,
+      "mean": -0.33350767085076705,
+      "total_replicates": 1000,
+      "upper": 0.0,
+      "valid_replicates": 956
+    },
+    "tda_episode_recall": {
+      "lower": 0.0,
+      "mean": 0.0,
+      "total_replicates": 1000,
+      "upper": 0.0,
+      "valid_replicates": 956
+    },
+    "tda_false_alerts_per_year": {
+      "lower": 0.47191011235955055,
+      "mean": 0.8422290857402732,
+      "total_replicates": 1000,
+      "upper": 1.1909262759924386,
+      "valid_replicates": 1000
+    }
+  },
+  "calibrations": {
+    "realized_vol": {
+      "calibrated": true,
+      "calibration_hash": "39cffc202a3ef3d073fcd5161db4ae5ffd712274f8eae21a395a9a625bb07c62",
+      "candidates": [
+        {
+          "constrained": true,
+          "cutoff": 0.08423791679496195,
+          "episode_count": 1,
+          "episode_recall": 0.0,
+          "false_alerts_per_year": 3.24881822088526,
+          "false_count": 30,
+          "matched_count": 0,
+          "percentile": 85.0,
+          "selected": false
+        },
+        {
+          "constrained": true,
+          "cutoff": 0.08820450546454504,
+          "episode_count": 1,
+          "episode_recall": 0.0,
+          "false_alerts_per_year": 2.1658788139235066,
+          "false_count": 20,
+          "matched_count": 0,
+          "percentile": 90.0,
+          "selected": false
+        },
+        {
+          "constrained": false,
+          "cutoff": 0.09085478390478866,
+          "episode_count": 1,
+          "episode_recall": 0.0,
+          "false_alerts_per_year": 1.62440911044263,
+          "false_count": 15,
+          "matched_count": 0,
+          "percentile": 92.5,
+          "selected": false
+        },
+        {
+          "constrained": false,
+          "cutoff": 0.09398374335076493,
+          "episode_count": 1,
+          "episode_recall": 0.0,
+          "false_alerts_per_year": 1.1912333476579287,
+          "false_count": 11,
+          "matched_count": 0,
+          "percentile": 95.0,
+          "selected": false
+        },
+        {
+          "constrained": false,
+          "cutoff": 0.09792022640517428,
+          "episode_count": 1,
+          "episode_recall": 0.0,
+          "false_alerts_per_year": 0.974645466265578,
+          "false_count": 9,
+          "matched_count": 0,
+          "percentile": 97.5,
+          "selected": false
+        },
+        {
+          "constrained": false,
+          "cutoff": 0.10727190502348415,
+          "episode_count": 1,
+          "episode_recall": 0.0,
+          "false_alerts_per_year": 0.21658788139235066,
+          "false_count": 2,
+          "matched_count": 0,
+          "percentile": 99.0,
+          "selected": true
+        }
+      ],
+      "config_hash": "e43cfc0ea16302963f161b8686fd8761bd979934f1d53f8b00136d0e9655ad5a",
+      "cutoff": 0.10727190502348415,
+      "eligible_sessions": 2327,
+      "eligible_years": 9.234126984126984,
+      "episode_recall": 0.0,
+      "false_alerts_per_year": 0.21658788139235066,
+      "method": "realized_vol",
+      "percentile": 99.0,
+      "reason": null,
+      "selected": {
+        "constrained": false,
+        "cutoff": 0.10727190502348415,
+        "episode_count": 1,
+        "episode_recall": 0.0,
+        "false_alerts_per_year": 0.21658788139235066,
+        "false_count": 2,
+        "matched_count": 0,
+        "percentile": 99.0,
+        "selected": true
+      },
+      "session_digest": "c1f3ccbc6d6828d193315d8417d763e098753b3b5839305ed9e69a5b1a654c8b",
+      "validation_end": "2013-12-31",
+      "validation_start": "2005-01-01"
+    },
+    "tda": {
+      "calibrated": true,
+      "calibration_hash": "fb61c0b805eb034a7e422cfaf9140a9de7421dc052b32e15c7e59fefc9a33ee7",
+      "candidates": [
+        {
+          "constrained": true,
+          "cutoff": 85.71428571428571,
+          "episode_count": 1,
+          "episode_recall": 0.0,
+          "false_alerts_per_year": 4.115169746454662,
+          "false_count": 38,
+          "matched_count": 0,
+          "percentile": 85.0,
+          "selected": false
+        },
+        {
+          "constrained": true,
+          "cutoff": 90.43650793650794,
+          "episode_count": 1,
+          "episode_recall": 0.0,
+          "false_alerts_per_year": 2.599054576708208,
+          "false_count": 24,
+          "matched_count": 0,
+          "percentile": 90.0,
+          "selected": false
+        },
+        {
+          "constrained": true,
+          "cutoff": 92.46031746031746,
+          "episode_count": 1,
+          "episode_recall": 0.0,
+          "false_alerts_per_year": 2.057584873227331,
+          "false_count": 19,
+          "matched_count": 0,
+          "percentile": 92.5,
+          "selected": false
+        },
+        {
+          "constrained": false,
+          "cutoff": 97.18253968253973,
+          "episode_count": 1,
+          "episode_recall": 0.0,
+          "false_alerts_per_year": 1.4078212290502794,
+          "false_count": 13,
+          "matched_count": 0,
+          "percentile": 95.0,
+          "selected": false
+        },
+        {
+          "constrained": false,
+          "cutoff": 99.2063492063492,
+          "episode_count": 1,
+          "episode_recall": 0.0,
+          "false_alerts_per_year": 1.1912333476579287,
+          "false_count": 11,
+          "matched_count": 0,
+          "percentile": 97.5,
+          "selected": false
+        },
+        {
+          "constrained": false,
+          "cutoff": 100.0,
+          "episode_count": 1,
+          "episode_recall": 0.0,
+          "false_alerts_per_year": 0.649763644177052,
+          "false_count": 6,
+          "matched_count": 0,
+          "percentile": 99.0,
+          "selected": true
+        }
+      ],
+      "config_hash": "e43cfc0ea16302963f161b8686fd8761bd979934f1d53f8b00136d0e9655ad5a",
+      "cutoff": 100.0,
+      "eligible_sessions": 2327,
+      "eligible_years": 9.234126984126984,
+      "episode_recall": 0.0,
+      "false_alerts_per_year": 0.649763644177052,
+      "method": "tda",
+      "percentile": 99.0,
+      "reason": null,
+      "selected": {
+        "constrained": false,
+        "cutoff": 100.0,
+        "episode_count": 1,
+        "episode_recall": 0.0,
+        "false_alerts_per_year": 0.649763644177052,
+        "false_count": 6,
+        "matched_count": 0,
+        "percentile": 99.0,
+        "selected": true
+      },
+      "session_digest": "c1f3ccbc6d6828d193315d8417d763e098753b3b5839305ed9e69a5b1a654c8b",
+      "validation_end": "2013-12-31",
+      "validation_start": "2005-01-01"
+    },
+    "vix": {
+      "calibrated": true,
+      "calibration_hash": "12473f2a4c819e5cea99ef902b0af00e1a0f8ce984572b6a51f2c1d019f64c7b",
+      "candidates": [
+        {
+          "constrained": true,
+          "cutoff": 18.6481085,
+          "episode_count": 1,
+          "episode_recall": 0.0,
+          "false_alerts_per_year": 8.555221314997851,
+          "false_count": 79,
+          "matched_count": 0,
+          "percentile": 85.0,
+          "selected": false
+        },
+        {
+          "constrained": true,
+          "cutoff": 19.4360958,
+          "episode_count": 1,
+          "episode_recall": 0.0,
+          "false_alerts_per_year": 7.363987967339923,
+          "false_count": 68,
+          "matched_count": 0,
+          "percentile": 90.0,
+          "selected": false
+        },
+        {
+          "constrained": true,
+          "cutoff": 19.9322763,
+          "episode_count": 1,
+          "episode_recall": 0.0,
+          "false_alerts_per_year": 6.172754619681994,
+          "false_count": 57,
+          "matched_count": 0,
+          "percentile": 92.5,
+          "selected": false
+        },
+        {
+          "constrained": true,
+          "cutoff": 20.609200899999998,
+          "episode_count": 1,
+          "episode_recall": 0.0,
+          "false_alerts_per_year": 4.440051568543189,
+          "false_count": 41,
+          "matched_count": 0,
+          "percentile": 95.0,
+          "selected": false
+        },
+        {
+          "constrained": true,
+          "cutoff": 21.570871399999998,
+          "episode_count": 1,
+          "episode_recall": 0.0,
+          "false_alerts_per_year": 2.599054576708208,
+          "false_count": 24,
+          "matched_count": 0,
+          "percentile": 97.5,
+          "selected": false
+        },
+        {
+          "constrained": false,
+          "cutoff": 23.018437719999998,
+          "episode_count": 1,
+          "episode_recall": 0.0,
+          "false_alerts_per_year": 0.4331757627847013,
+          "false_count": 4,
+          "matched_count": 0,
+          "percentile": 99.0,
+          "selected": true
+        }
+      ],
+      "config_hash": "e43cfc0ea16302963f161b8686fd8761bd979934f1d53f8b00136d0e9655ad5a",
+      "cutoff": 23.018437719999998,
+      "eligible_sessions": 2327,
+      "eligible_years": 9.234126984126984,
+      "episode_recall": 0.0,
+      "false_alerts_per_year": 0.4331757627847013,
+      "method": "vix",
+      "percentile": 99.0,
+      "reason": null,
+      "selected": {
+        "constrained": false,
+        "cutoff": 23.018437719999998,
+        "episode_count": 1,
+        "episode_recall": 0.0,
+        "false_alerts_per_year": 0.4331757627847013,
+        "false_count": 4,
+        "matched_count": 0,
+        "percentile": 99.0,
+        "selected": true
+      },
+      "session_digest": "c1f3ccbc6d6828d193315d8417d763e098753b3b5839305ed9e69a5b1a654c8b",
+      "validation_end": "2013-12-31",
+      "validation_start": "2005-01-01"
+    }
+  },
+  "censored_episodes": [],
+  "comparator_method": "realized_vol",
+  "config_hash": "e43cfc0ea16302963f161b8686fd8761bd979934f1d53f8b00136d0e9655ad5a",
+  "data_end": "2026-09-30",
+  "data_start": "2005-01-03",
+  "episode_count": 4,
+  "evidence": {
+    "criteria": {
+      "comparator_false_alerts_per_year": 0.15245009074410165,
+      "enough_evaluable_episodes": false,
+      "evaluable_episodes": 3,
+      "false_alert_rate_within_rule": false,
+      "max_false_alerts_per_year": 2.0,
+      "min_evaluable_episodes": 5,
+      "positive_lower_recall_gain_bound": false,
+      "recall_gain_lower_95": -1.0,
+      "recall_gain_upper_95": 0.0,
+      "recall_gain_valid_replicates": 956,
+      "tda_false_alerts_per_year": 0.9147005444646098
+    },
+    "historical_evidence": false,
+    "limitations": [
+      "fewer than 5 evaluable held-out episodes; the result is descriptive only",
+      "the lower 95% bootstrap bound on the episode-recall gain is not above zero",
+      "the held-out false-alert rate does not satisfy the evidence rule (<= 2/year and no higher than the comparator)"
+    ],
+    "wording": "Experimental market anomaly"
+  },
+  "examples": {
+    "realized_vol": {
+      "false_alerts": [
+        "2016-07-07",
+        "2020-03-24"
+      ],
+      "matched": [
+        {
+          "alert_date": "2022-01-13",
+          "episode_onset": "2022-01-24",
+          "lead_sessions": 7
+        }
+      ],
+      "missed": [
+        {
+          "breach_dates": [
+            "2020-02-25",
+            "2020-02-26",
+            "2020-02-27",
+            "2020-03-02",
+            "2020-03-03",
+            "2020-03-04",
+            "2020-03-06",
+            "2020-03-09",
+            "2020-03-13",
+            "2020-03-17"
+          ],
+          "episode_onset": "2020-02-25"
+        },
+        {
+          "breach_dates": [
+            "2025-03-06",
+            "2025-03-07",
+            "2025-03-10",
+            "2025-03-12"
+          ],
+          "episode_onset": "2025-03-06"
+        }
+      ]
+    },
+    "tda": {
+      "false_alerts": [
+        "2014-02-14",
+        "2015-03-20",
+        "2015-04-20",
+        "2016-11-02",
+        "2017-11-17"
+      ],
+      "matched": [],
+      "missed": [
+        {
+          "breach_dates": [
+            "2020-02-25",
+            "2020-02-26",
+            "2020-02-27",
+            "2020-03-02",
+            "2020-03-03",
+            "2020-03-04",
+            "2020-03-06",
+            "2020-03-09",
+            "2020-03-13",
+            "2020-03-17"
+          ],
+          "episode_onset": "2020-02-25"
+        },
+        {
+          "breach_dates": [
+            "2022-01-24",
+            "2022-01-25",
+            "2022-01-26",
+            "2022-01-28",
+            "2022-02-03",
+            "2022-02-04"
+          ],
+          "episode_onset": "2022-01-24"
+        },
+        {
+          "breach_dates": [
+            "2025-03-06",
+            "2025-03-07",
+            "2025-03-10",
+            "2025-03-12"
+          ],
+          "episode_onset": "2025-03-06"
+        }
+      ]
+    },
+    "vix": {
+      "false_alerts": [
+        "2016-08-11",
+        "2017-01-04",
+        "2017-08-18",
+        "2020-03-19",
+        "2024-10-25"
+      ],
+      "matched": [
+        {
+          "alert_date": "2020-02-20",
+          "episode_onset": "2020-02-25",
+          "lead_sessions": 3
+        },
+        {
+          "alert_date": "2022-01-12",
+          "episode_onset": "2022-01-24",
+          "lead_sessions": 8
+        },
+        {
+          "alert_date": "2025-02-20",
+          "episode_onset": "2025-03-06",
+          "lead_sessions": 10
+        }
+      ],
+      "missed": []
+    }
+  },
+  "label_counts": {
+    "negative": 5589,
+    "pending": 20,
+    "positive": 64
+  },
+  "methods": [
+    "tda",
+    "vix",
+    "realized_vol"
+  ],
+  "metrics": {
+    "realized_vol": {
+      "alert_values": [
+        0.10782804568602461,
+        0.11529853649020846,
+        0.14752538656789316,
+        0.10896518574709595
+      ],
+      "alerts": [
+        "2016-07-07",
+        "2020-02-25",
+        "2020-03-24",
+        "2022-01-13"
+      ],
+      "average_precision": 0.5,
+      "eligible_sessions": 3306,
+      "eligible_years": 13.119047619047619,
+      "end": "2026-09-02",
+      "episode_count": 3,
+      "episode_recall": 0.3333333333333333,
+      "event_prevalence": 0.013309134906231096,
+      "false_alert_count": 2,
+      "false_alerts": [
+        "2016-07-07",
+        "2020-03-24"
+      ],
+      "false_alerts_per_year": 0.15245009074410165,
+      "losing_examples": [
+        {
+          "breach_dates": [
+            "2020-02-25",
+            "2020-02-26",
+            "2020-02-27",
+            "2020-03-02",
+            "2020-03-03",
+            "2020-03-04",
+            "2020-03-06",
+            "2020-03-09",
+            "2020-03-13",
+            "2020-03-17"
+          ],
+          "episode_onset": "2020-02-25"
+        },
+        {
+          "breach_dates": [
+            "2025-03-06",
+            "2025-03-07",
+            "2025-03-10",
+            "2025-03-12"
+          ],
+          "episode_onset": "2025-03-06"
+        }
+      ],
+      "matched": [
+        {
+          "alert_date": "2022-01-13",
+          "episode_onset": "2022-01-24",
+          "lead_sessions": 7
+        }
+      ],
+      "matched_count": 1,
+      "max_lead_sessions": 7,
+      "median_lead_sessions": 7.0,
+      "method": "realized_vol",
+      "min_lead_sessions": 7,
+      "missed_episodes": [
+        {
+          "breach_dates": [
+            "2020-02-25",
+            "2020-02-26",
+            "2020-02-27",
+            "2020-03-02",
+            "2020-03-03",
+            "2020-03-04",
+            "2020-03-06",
+            "2020-03-09",
+            "2020-03-13",
+            "2020-03-17"
+          ],
+          "episode_onset": "2020-02-25"
+        },
+        {
+          "breach_dates": [
+            "2025-03-06",
+            "2025-03-07",
+            "2025-03-10",
+            "2025-03-12"
+          ],
+          "episode_onset": "2025-03-06"
+        }
+      ],
+      "pending_alerts": [],
+      "policy_hash": "7b1c09fb9e8df312b31780835952266f5fd10375c410e7a4049a1c6df425427a",
+      "post_onset_alerts": [
+        "2020-02-25"
+      ],
+      "snapshot_id": "showcase-synthetic",
+      "start": "2014-01-01"
+    },
+    "tda": {
+      "alert_values": [
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0
+      ],
+      "alerts": [
+        "2014-02-14",
+        "2015-03-20",
+        "2015-04-20",
+        "2016-11-02",
+        "2017-11-17",
+        "2019-03-11",
+        "2020-03-13",
+        "2020-05-20",
+        "2021-12-21",
+        "2024-04-11",
+        "2024-06-18",
+        "2024-10-14",
+        "2025-03-10",
+        "2026-08-20"
+      ],
+      "average_precision": 0.0,
+      "eligible_sessions": 3306,
+      "eligible_years": 13.119047619047619,
+      "end": "2026-09-02",
+      "episode_count": 3,
+      "episode_recall": 0.0,
+      "event_prevalence": 0.013309134906231096,
+      "false_alert_count": 12,
+      "false_alerts": [
+        "2014-02-14",
+        "2015-03-20",
+        "2015-04-20",
+        "2016-11-02",
+        "2017-11-17",
+        "2019-03-11",
+        "2020-05-20",
+        "2021-12-21",
+        "2024-04-11",
+        "2024-06-18",
+        "2024-10-14",
+        "2026-08-20"
+      ],
+      "false_alerts_per_year": 0.9147005444646098,
+      "losing_examples": [
+        {
+          "breach_dates": [
+            "2020-02-25",
+            "2020-02-26",
+            "2020-02-27",
+            "2020-03-02",
+            "2020-03-03",
+            "2020-03-04",
+            "2020-03-06",
+            "2020-03-09",
+            "2020-03-13",
+            "2020-03-17"
+          ],
+          "episode_onset": "2020-02-25"
+        },
+        {
+          "breach_dates": [
+            "2022-01-24",
+            "2022-01-25",
+            "2022-01-26",
+            "2022-01-28",
+            "2022-02-03",
+            "2022-02-04"
+          ],
+          "episode_onset": "2022-01-24"
+        },
+        {
+          "breach_dates": [
+            "2025-03-06",
+            "2025-03-07",
+            "2025-03-10",
+            "2025-03-12"
+          ],
+          "episode_onset": "2025-03-06"
+        }
+      ],
+      "matched": [],
+      "matched_count": 0,
+      "max_lead_sessions": null,
+      "median_lead_sessions": null,
+      "method": "tda",
+      "min_lead_sessions": null,
+      "missed_episodes": [
+        {
+          "breach_dates": [
+            "2020-02-25",
+            "2020-02-26",
+            "2020-02-27",
+            "2020-03-02",
+            "2020-03-03",
+            "2020-03-04",
+            "2020-03-06",
+            "2020-03-09",
+            "2020-03-13",
+            "2020-03-17"
+          ],
+          "episode_onset": "2020-02-25"
+        },
+        {
+          "breach_dates": [
+            "2022-01-24",
+            "2022-01-25",
+            "2022-01-26",
+            "2022-01-28",
+            "2022-02-03",
+            "2022-02-04"
+          ],
+          "episode_onset": "2022-01-24"
+        },
+        {
+          "breach_dates": [
+            "2025-03-06",
+            "2025-03-07",
+            "2025-03-10",
+            "2025-03-12"
+          ],
+          "episode_onset": "2025-03-06"
+        }
+      ],
+      "pending_alerts": [],
+      "policy_hash": "dba443ff78b76cfeed9e33012e3eee5ca8456a2b23f9e2d1da894d4c69139c21",
+      "post_onset_alerts": [
+        "2020-03-13",
+        "2025-03-10"
+      ],
+      "snapshot_id": "showcase-synthetic",
+      "start": "2014-01-01"
+    },
+    "vix": {
+      "alert_values": [
+        25.200766,
+        23.576394,
+        23.58141,
+        26.801183,
+        26.46948,
+        23.444135,
+        23.964464,
+        24.350926
+      ],
+      "alerts": [
+        "2016-08-11",
+        "2017-01-04",
+        "2017-08-18",
+        "2020-02-20",
+        "2020-03-19",
+        "2022-01-12",
+        "2024-10-25",
+        "2025-02-20"
+      ],
+      "average_precision": 0.25,
+      "eligible_sessions": 3306,
+      "eligible_years": 13.119047619047619,
+      "end": "2026-09-02",
+      "episode_count": 3,
+      "episode_recall": 1.0,
+      "event_prevalence": 0.013309134906231096,
+      "false_alert_count": 5,
+      "false_alerts": [
+        "2016-08-11",
+        "2017-01-04",
+        "2017-08-18",
+        "2020-03-19",
+        "2024-10-25"
+      ],
+      "false_alerts_per_year": 0.3811252268602541,
+      "losing_examples": [],
+      "matched": [
+        {
+          "alert_date": "2020-02-20",
+          "episode_onset": "2020-02-25",
+          "lead_sessions": 3
+        },
+        {
+          "alert_date": "2022-01-12",
+          "episode_onset": "2022-01-24",
+          "lead_sessions": 8
+        },
+        {
+          "alert_date": "2025-02-20",
+          "episode_onset": "2025-03-06",
+          "lead_sessions": 10
+        }
+      ],
+      "matched_count": 3,
+      "max_lead_sessions": 10,
+      "median_lead_sessions": 8.0,
+      "method": "vix",
+      "min_lead_sessions": 3,
+      "missed_episodes": [],
+      "pending_alerts": [],
+      "policy_hash": "9caaca44afadcd7a7266306509743ee0ed0e55859bad9e2cb20a4e81ba8b3d94",
+      "post_onset_alerts": [],
+      "snapshot_id": "showcase-synthetic",
+      "start": "2014-01-01"
+    }
+  },
+  "package_version": "0.7.0",
+  "periods": {
+    "development": {
+      "end": "2004-12-31",
+      "start": "1990-01-01"
+    },
+    "test": {
+      "end": "2026-09-02",
+      "start": "2014-01-01"
+    },
+    "validation": {
+      "end": "2013-12-31",
+      "start": "2005-01-01"
+    }
+  },
+  "policies": {
+    "realized_vol": {
+      "annualization": 252.0,
+      "calibration_hash": "39cffc202a3ef3d073fcd5161db4ae5ffd712274f8eae21a395a9a625bb07c62",
+      "config_hash": "e43cfc0ea16302963f161b8686fd8761bd979934f1d53f8b00136d0e9655ad5a",
+      "cooldown_sessions": 20,
+      "cutoff": 0.10727190502348415,
+      "eligible_years": 9.234126984126984,
+      "method": "realized_vol",
+      "percentile": 99.0,
+      "policy_hash": "7b1c09fb9e8df312b31780835952266f5fd10375c410e7a4049a1c6df425427a",
+      "session_digest": "c1f3ccbc6d6828d193315d8417d763e098753b3b5839305ed9e69a5b1a654c8b",
+      "validation_end": "2013-12-31",
+      "validation_start": "2005-01-01",
+      "window_sessions": 20
+    },
+    "tda": {
+      "annualization": 252.0,
+      "calibration_hash": "fb61c0b805eb034a7e422cfaf9140a9de7421dc052b32e15c7e59fefc9a33ee7",
+      "config_hash": "e43cfc0ea16302963f161b8686fd8761bd979934f1d53f8b00136d0e9655ad5a",
+      "cooldown_sessions": 20,
+      "cutoff": 100.0,
+      "eligible_years": 9.234126984126984,
+      "method": "tda",
+      "percentile": 99.0,
+      "policy_hash": "dba443ff78b76cfeed9e33012e3eee5ca8456a2b23f9e2d1da894d4c69139c21",
+      "session_digest": "c1f3ccbc6d6828d193315d8417d763e098753b3b5839305ed9e69a5b1a654c8b",
+      "validation_end": "2013-12-31",
+      "validation_start": "2005-01-01",
+      "window_sessions": 20
+    },
+    "vix": {
+      "annualization": 252.0,
+      "calibration_hash": "12473f2a4c819e5cea99ef902b0af00e1a0f8ce984572b6a51f2c1d019f64c7b",
+      "config_hash": "e43cfc0ea16302963f161b8686fd8761bd979934f1d53f8b00136d0e9655ad5a",
+      "cooldown_sessions": 20,
+      "cutoff": 23.018437719999998,
+      "eligible_years": 9.234126984126984,
+      "method": "vix",
+      "percentile": 99.0,
+      "policy_hash": "9caaca44afadcd7a7266306509743ee0ed0e55859bad9e2cb20a4e81ba8b3d94",
+      "session_digest": "c1f3ccbc6d6828d193315d8417d763e098753b3b5839305ed9e69a5b1a654c8b",
+      "validation_end": "2013-12-31",
+      "validation_start": "2005-01-01",
+      "window_sessions": 20
+    }
+  },
+  "primary_method": "tda",
+  "purged_validation_sessions": 20,
+  "resolved_episode_count": 4,
+  "row_count": 5673,
+  "schema_version": 1,
+  "seed": 42,
+  "snapshot_id": "showcase-synthetic"
+}
