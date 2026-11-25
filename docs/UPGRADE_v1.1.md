@@ -127,6 +127,10 @@ The specification's order is binding; a later package starts only when the previ
   500 ms budget, uncached p95 438 ms. Plotly 6.5 is pinned in `[ui]`, Cloud requirements and the
   lock; license audit still 0 GPL/AGPL.
 
+- **WP-D / release (in progress, #46/#47)** - new 60-second film from the public v1.1 app,
+  version bump 1.1.0 with rebuilt artifacts, acceptance pack, hosted smoke, README/Wiki and release
+  assets.
+
 ## Reporting
 
 After each build step: what landed, remaining steps, failures/limitations, and expected actions from

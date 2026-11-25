@@ -1,23 +1,26 @@
-# Demo narration (English)
+# Narration script (v1.1 film)
 
-Voice: `en-US-GuyNeural` (edge-tts), natural pace; the opening line is generated at
-`+15%` so the 18-word purpose line fits the 6.5 s opening card. Every other line is
-generated at the default rate. The final mix is normalised to approximately
-**-16 LUFS integrated** with a true peak of **-3.97 dBTP** (at or below the -1 dBTP limit).
+Voice: `en-US-GuyNeural`, 48 kHz mono, normalised into the final mix at about -16 LUFS
+(integrated) with a true peak at or below -1.5 dBTP. Rate is adjusted per scene to fit the
+storyboard window. All claims are verified against the released synthetic fixture and the
+regenerated v1.1 evaluation report in `docs/video/production_notes.md`.
 
-| Scene | Window | Spoken line |
+| Window | Scene | Narration |
 | --- | --- | --- |
-| Opening | 0.0-6.5 s | TopoMarket explores how market structure changes under stress and tests whether topology can flag major declines early. |
-| Structure | 6.5-16.0 s | Start with twelve industry portfolios. As I move from a quiet window to a stressed one, more industries begin moving together. |
-| Mapper | 16.0-27.0 s | The correlation map shows which industries move together. Mapper groups them by similar behavior and highlights industries shared between groups. |
-| Alert | 27.0-39.0 s | A separate indicator uses the shape of recent S and P five hundred returns to flag unusual behavior. Here is the alert and the feature behind it. |
-| Replay (late-warning alternate) | 39.0-50.0 s | Replay shows when the alert appeared. Revealing the outcome lets us see that the decline had already begun. |
-| Validation | 50.0-55.0 s | The results show where the signal works and where it misses. |
-| End card | 55.0-60.0 s | Explore the code and the live demo on GitHub. |
+| 00:00-00:06 | Opening card | TopoMarket visualizes market structure and tests whether topology can warn of sharp declines. |
+| 00:06-00:18 | Two-window comparison | These twelve industry portfolios contrast two market regimes. Watch how the network becomes far more connected under stress. |
+| 00:18-00:27 | Direct exploration + Mapper | Explore the relationships directly. Mapper connects groups that share industry portfolios. |
+| 00:27-00:39 | Alert explanation | A separate indicator studies the shape of recent S and P five hundred returns. This percentile measures unusual behavior. |
+| 00:39-00:50 | Blind Replay -> Reveal | Now test the warning without hindsight. Reveal the next twenty sessions and see whether the index fell ten percent. The decline had already begun; the next twenty sessions did not reach the ten percent target. |
+| 00:50-00:55 | Validation evidence | Forecasting remains experimental. Compare the results with simpler benchmarks. |
+| 00:55-01:00 | End card | Explore the code and the live demo on GitHub. |
 
-The spoken narration writes "S and P five hundred" for correct pronunciation; the
-reviewed English SRT uses the correct spelling **S&P 500**. The storyboard's
-matched-warning sentence is replaced by the specification's approved late-warning
-alternate because the frozen synthetic showcase has no alert credited by the revised
-evaluator; the on-screen preset is explicitly labelled "Late warning (teaching example)"
-and is excluded from the evaluation.
+Notes
+- The synthetic fixture's quiet preset is later than the stress transition, so the film uses the
+  specification's approved "contrast two market regimes" wording and makes no chronological
+  crisis-emergence claim.
+- The replay example is a clearly labelled late-warning teaching example outside the frozen
+  evaluation; the narration states the actual outcome (no 10% decline within the 20-session
+  horizon) rather than promising a successful prediction.
+- SRT captions are generated from this script and manually reviewed for TopoMarket, Mapper and
+  S&P 500 spellings; the captioned playback variant burns the reviewed cues into a social-ready MP4.

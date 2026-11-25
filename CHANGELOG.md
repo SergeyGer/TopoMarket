@@ -3,6 +3,31 @@
 Release notes per implementation step. TopoMarket identifies releases by step number and semantic
 version; no release dates or schedules are published in repository content.
 
+## v1.1.0 - Acceptance-review release: auditable evidence, causal Replay and Market Structure Studio
+
+Follow-up release implementing the v1.1 acceptance review (epic #48). See
+`docs/ACCEPTANCE_v1.1.md` for the evidence matrix and `docs/UPGRADE_v1.1.md` for the plan.
+
+- **WP-A evidence integrity (F01).** Calibration recall now counts unique matched episode onsets
+  (the v1.0 code read a non-existent field and always reported zero recall); reports are versioned
+  (`report_version 1.1`, `schema_version 2`) with provenance and a v1.0-baseline before/after
+  comparison; the synthetic showcase was regenerated (validation recall is non-zero for VIX and
+  realized volatility, holdout metrics/policies unchanged) and the Validation screen shows large
+  per-method cards, a comparison chart and a details expander. Issue #37 closed.
+- **WP-B causal blind Replay (F02).** Blind Replay and the Structure timeline derive alert state
+  only from readings/policy/history at or before the selected session; neutral `Alert recorded`
+  markers, no retrospective classifications/matches/onsets/outcome hints; review classifications are
+  bounded to the revealed scope and flagged retrospective. Mutation and DOM-neutrality tests.
+- **WP-C Market Structure Studio (F03).** Interactive Plotly landing frame with direct
+  node/timeline box-selection and keyboard equivalents, three above-fold metrics, honest two-window
+  comparison, guided Quiet -> Stress -> Explain -> Replay tour; Plotly 6.5 pinned and license-audited.
+  Cached date-change browser p95 497 ms over 100 transitions (target 500 ms).
+- **WP-D new film.** Re-recorded 60-second demo from the public v1.1 app with reviewed SRT,
+  captioned playback variant, narration and editable production source.
+- **Release.** Version bump to 1.1.0 with rebuilt frozen topology registry/showcase/presets; v1.0
+  report retained as a baseline; README/Wiki updated; release assets and CI reports attached.
+- No private data, credentials, ledgers or release dates are committed.
+
 ## v1.0.0 - Public release: structure, replay, cloud and demo video
 
 Final release of the TopoMarket Upgrade and Demo Video Specification. See
