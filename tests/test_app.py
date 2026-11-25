@@ -204,13 +204,17 @@ def test_streamlit_blind_replay_is_neutral_about_outcomes() -> None:
 
     app_test = AppTest.from_file(str(APP_PATH), default_timeout=120).run()
     assert not list(app_test.exception)
-    sidebar_text = " ".join(
-        str(item.value)
-        for item in [
-            *app_test.sidebar.markdown,
-            *app_test.sidebar.caption,
-        ]
-    ) + " " + " ".join(button.label for button in app_test.sidebar.button)
+    sidebar_text = (
+        " ".join(
+            str(item.value)
+            for item in [
+                *app_test.sidebar.markdown,
+                *app_test.sidebar.caption,
+            ]
+        )
+        + " "
+        + " ".join(button.label for button in app_test.sidebar.button)
+    )
     assert "Guided alert example" in sidebar_text
     assert "Late warning" not in sidebar_text
 
