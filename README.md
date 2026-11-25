@@ -157,6 +157,7 @@ A ~60 second English demo video shows the released synthetic experience end to e
 - [Master MP4](https://github.com/SergeyGer/TopoMarket/releases/latest/download/TopoMarket_demo_60s.mp4) -
   1920x1080, 30 fps, H.264 High, AAC 48 kHz stereo, 60.0 s, approximately -16 LUFS integrated;
 - [English SRT captions](https://github.com/SergeyGer/TopoMarket/releases/latest/download/TopoMarket_demo_60s.srt);
+  [captioned playback variant](https://github.com/SergeyGer/TopoMarket/releases/latest/download/TopoMarket_demo_60s_captioned.mp4);
 - production source: [storyboard](docs/video/storyboard.json), [narration](docs/video/narration.md),
   [captions](docs/video/TopoMarket_demo_60s.srt), [production notes](docs/video/production_notes.md)
   and the re-runnable [build pipeline](tools/video/build_demo_video.py).
