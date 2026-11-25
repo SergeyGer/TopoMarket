@@ -1,0 +1,138 @@
+{
+  "schema_version": 1,
+  "title": "TopoMarket - market structure and early warning research",
+  "repository_url": "https://github.com/SergeyGer/TopoMarket",
+  "end_card_url": "github.com/SergeyGer/TopoMarket",
+  "target_seconds": 60,
+  "tolerance_seconds": 2,
+  "output": {
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "video_codec": "H.264 High",
+    "pix_fmt": "yuv420p",
+    "audio_codec": "AAC LC",
+    "audio_rate": 48000,
+    "audio_channels": 2,
+    "integrated_loudness_lufs": -16.0,
+    "true_peak_db": -1.5
+  },
+  "fixture": {
+    "id": "showcase-synthetic",
+    "synthetic": true,
+    "seed": 4242,
+    "rows": 5673,
+    "range": "2005-01-03..2026-09-30",
+    "presets_file": "showcase/presets.json"
+  },
+  "timing": {
+    "opening_s": 6.5,
+    "app_s": 48.5,
+    "end_s": 5.0
+  },
+  "scenes": [
+    {
+      "id": "opening",
+      "start_s": 0.0,
+      "end_s": 6.5,
+      "picture": "GitHub social preview (1280x640) fitted to 16:9 without distortion",
+      "asset": "docs/assets/opening_card_16x9.png",
+      "narration": "TopoMarket explores how market structure changes under stress and tests whether topology can flag major declines early."
+    },
+    {
+      "id": "structure",
+      "start_s": 6.5,
+      "end_s": 16.0,
+      "picture": "Structure screen: quiet preset then stress transition preset; synthetic label visible",
+      "narration": "Start with twelve industry portfolios. As I move from a quiet window to a stressed one, more industries begin moving together.",
+      "interactions": [
+        {
+          "action": "preset",
+          "preset": "quiet",
+          "at_s": 6.7
+        },
+        {
+          "action": "preset",
+          "preset": "stress_transition",
+          "at_s": 11.5
+        }
+      ]
+    },
+    {
+      "id": "mapper",
+      "start_s": 16.0,
+      "end_s": 27.0,
+      "picture": "Select an industry, open the Mapper view, highlight a group pair and its shared portfolios",
+      "narration": "The correlation map shows which industries move together. Mapper groups them by similar behavior and highlights industries shared between groups.",
+      "interactions": [
+        {
+          "action": "open inspectors"
+        },
+        {
+          "action": "select member",
+          "member": "money"
+        },
+        {
+          "action": "network view",
+          "view": "mapper"
+        },
+        {
+          "action": "highlight mapper edge"
+        }
+      ]
+    },
+    {
+      "id": "alert",
+      "start_s": 27.0,
+      "end_s": 39.0,
+      "picture": "Late-warning teaching example alert, shared S&P 500/VIX/score timeline, Takens and H1 explanation",
+      "narration": "A separate indicator uses the shape of recent S and P five hundred returns to flag unusual behavior. Here is the alert and the feature behind it.",
+      "teaching_example": true,
+      "interactions": [
+        {
+          "action": "preset",
+          "preset": "matched_warning (labelled late-warning teaching example)",
+          "date": "2025-03-10"
+        },
+        {
+          "action": "scroll to shared timeline"
+        },
+        {
+          "action": "scroll to score explanation"
+        }
+      ]
+    },
+    {
+      "id": "replay",
+      "start_s": 39.0,
+      "end_s": 50.0,
+      "picture": "Blind Replay at the cutoff, then Reveal: origin close, 10% boundary, lowest close, first breach",
+      "narration": "Replay shows when the alert appeared. Revealing the outcome lets us see that the decline had already begun.",
+      "alternate_line_used": "late warning (the frozen synthetic showcase has no evaluator-credited TDA alert)",
+      "interactions": [
+        {
+          "action": "screen",
+          "screen": "Replay"
+        },
+        {
+          "action": "reveal next 20 sessions"
+        }
+      ]
+    },
+    {
+      "id": "validation",
+      "start_s": 50.0,
+      "end_s": 55.0,
+      "picture": "Validation screen: Experimental market anomaly, metrics, sample size and false-alert rate",
+      "narration": "The results show where the signal works and where it misses."
+    },
+    {
+      "id": "end",
+      "start_s": 55.0,
+      "end_s": 60.0,
+      "picture": "Static end card with the exact repository URL held for the full five seconds",
+      "asset": "docs/assets/end_card_16x9.png",
+      "narration": "Explore the code and the live demo on GitHub."
+    }
+  ]
+}

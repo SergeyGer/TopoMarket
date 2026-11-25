@@ -3,6 +3,27 @@
 Release notes per implementation step. TopoMarket identifies releases by step number and semantic
 version; no release dates or schedules are published in repository content.
 
+## v0.9.2 - Demo video and production assets
+
+- **One-minute demo video (VD02).** 1920x1080 / 30 fps / H.264 High / AAC 48 kHz stereo master
+  (60.0 s), reviewed English SRT captions, narration master, editable storyboard/narration/build
+  pipeline and a production-source archive, published as release assets and linked from the README.
+  The footage uses the synthetic showcase only, opens with the GitHub social preview and holds the
+  exact repository URL for the final five seconds; every claim is verified against the released
+  fixture in `docs/video/production_notes.md`. The specification's late-warning alternate line is
+  used for the labelled teaching example because the frozen synthetic showcase has no
+  evaluator-credited TDA alert.
+- **Structure screen interaction fix.** The session date slider is now scoped to the selected date, so
+  a preset/alert-jump/previous-next date change is no longer reverted by stale widget state on the
+  next rerun (`tests/test_app.py`/AppTest coverage).
+- **Mapper edge picker.** The Structure screen offers a keyboard-operable "Highlight Mapper edge"
+  selector with the shared portfolios listed on screen and highlighted in the graph (UI02).
+- **Mapper readability.** Group labels are enlarged for 1080p playback; click locations in the video
+  are marked with a short amber highlight (headless capture has no visible cursor).
+- Docs: README video links, `docs/video/` production files, acceptance A07 evidence and deployment
+  status notes.
+- No private data, credentials, ledgers or release dates are committed.
+
 ## v0.9.0 - Upgrade: Structure/Replay experience and evaluation integrity
 
 - **One authoritative selected session (RE01).** The selected date is applied before any payload is

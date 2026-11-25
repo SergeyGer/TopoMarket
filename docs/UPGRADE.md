@@ -141,5 +141,5 @@ The repository owner (not automatable in this checkout):
 | --- | --- | --- |
 | v0.8.3 / PR #36 | upgrade plan, social preview assets, license and data-notice audit, issue #10 closed | delivered |
 | v0.9.0 | build steps 1-2: authoritative replay date, independent calendars, corrected evaluation, Structure/Replay experience, Cloud dependency definition (CL01/CL02 partial) | delivered |
-| v0.9.2 | frozen demonstration presets, captioned demo video, SRT and editable production files | planned |
-| v1.0.0 | hosted verification, README/Wiki links, final tagged release | planned |
+| v0.9.2 | frozen demonstration presets, captioned demo video, SRT and editable production files | delivered |
+| v1.0.0 | hosted verification, README/Wiki links, final tagged release | pending hosted anonymous access |

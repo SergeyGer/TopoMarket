@@ -104,11 +104,27 @@ Public tests cover the new payload builders and chart builders for the Structure
   isolation require the app to be publicly viewable; the owner must change the Cloud sharing
   setting first. Tracked as the remaining item in the deployment checklist.
 
-## A07 Demo video (pending)
+## A07 Demo video (delivered in v0.9.2)
 
-The ~60-second captioned video master, English SRT and editable production files are the remaining
-deliverable (VD02). The video toolchain is installed and rehearsed (ffmpeg/libx264/aac, Playwright
-Chromium, edge-tts); capture and publication are tracked in issue #34.
+- Master: 1920x1080, 30 fps, H.264 High, AAC 48 kHz stereo, **60.000 s**, approximately -15.8 LUFS
+  integrated and -3.96 dBTP true peak (`docs/video/build_report.json`, hashes recorded).
+- Opening uses the uploaded GitHub social preview fitted to 16:9 without distortion; the end card
+  holds the exact `github.com/SergeyGer/TopoMarket` URL for the final five seconds.
+- Footage shows actual interactions on the synthetic showcase: quiet -> stress preset switch,
+  industry selection, Mapper view and edge highlight, alert explanation with the 56-point Takens
+  window and H1 diagram, blind Replay -> Reveal with origin/10% boundary, and Validation.
+- Every visible date, marker and numeric claim is verified against the released fixture in
+  `docs/video/production_notes.md`; the "Late warning (teaching example)" scene is labelled on
+  screen and excluded from the evaluation (the specification's approved alternate narration is
+  used because the frozen synthetic showcase has no evaluator-credited TDA alert).
+- English SRT reviewed (correct TopoMarket/Mapper/S&P 500 spellings, clear of the alert label and
+  end-card URL). Published as release assets with the master, narration WAV, production-source
+  archive and the README video links.
+- Deviation: recorded from the local release candidate because the hosted app still redirected
+  anonymous viewers at capture time; the same commit/fixture is deployed. Re-record from the hosted
+  URL with `tools/video/build_demo_video.py --app-url ...` once anonymous access is confirmed.
+- Pending: owner sign-off on the final cut (the owner approved requirements and requirements in
+  advance).
 
 ## Performance and licensing evidence
 

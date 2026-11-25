@@ -1,0 +1,43 @@
+1
+00:00:00,050 --> 00:00:06,386
+TopoMarket explores how market structure changes under stress and tests whether topology can flag major declines early.
+
+2
+00:00:06,550 --> 00:00:09,198
+Start with twelve industry portfolios.
+
+3
+00:00:09,218 --> 00:00:15,282
+As I move from a quiet window to a stressed one, more industries begin moving together.
+
+4
+00:00:16,050 --> 00:00:19,708
+The correlation map shows which industries move together.
+
+5
+00:00:19,728 --> 00:00:25,310
+Mapper groups them by similar behavior and highlights industries shared between groups.
+
+6
+00:00:27,050 --> 00:00:33,505
+A separate indicator uses the shape of recent S&P 500 returns to flag unusual behavior.
+
+7
+00:00:33,525 --> 00:00:36,790
+Here is the alert and the feature behind it.
+
+8
+00:00:39,050 --> 00:00:41,622
+Replay shows when the alert appeared.
+
+9
+00:00:41,642 --> 00:00:46,438
+Revealing the outcome lets us see that the decline had already begun.
+
+10
+00:00:50,050 --> 00:00:53,914
+The results show where the signal works and where it misses.
+
+11
+00:00:55,050 --> 00:00:58,602
+Explore the code and the live demo on GitHub.

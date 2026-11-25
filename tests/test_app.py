@@ -144,3 +144,50 @@ def test_streamlit_app_smoke_run() -> None:
     # The landing screen renders the network and the shared timeline sections.
     headings = [item.value for item in app_test.subheader]
     assert headings[:2] == ["Industry correlation network", "Shared timeline"]
+
+
+@pytest.mark.skipif(
+    importlib.util.find_spec("streamlit") is None,
+    reason="Streamlit is an optional dependency",
+)
+def test_streamlit_mapper_edge_selector_and_highlight() -> None:
+    from streamlit.testing.v1 import AppTest
+
+    app_test = AppTest.from_file(str(APP_PATH), default_timeout=120).run()
+    assert not list(app_test.exception)
+    app_test.radio(key="tm_view_label").set_value("Mapper groups").run()
+    assert not list(app_test.exception)
+    edge_select = app_test.selectbox(key="tm_edge_select")
+    assert len(edge_select.options) > 1, "mapper edge picker should list the group pairs"
+    edge_select.select(edge_select.options[1]).run()
+    markdown = " ".join(item.value for item in app_test.markdown)
+    assert "Highlighted edge" in markdown
+    assert "shared portfolios" in markdown
+
+
+@pytest.mark.skipif(
+    importlib.util.find_spec("streamlit") is None,
+    reason="Streamlit is an optional dependency",
+)
+def test_streamlit_preset_date_persists_across_screen_switch() -> None:
+    """Regression: a programmatic date change must not be reverted by widget state."""
+
+    from streamlit.testing.v1 import AppTest
+
+    app_test = AppTest.from_file(str(APP_PATH), default_timeout=120).run()
+    assert not list(app_test.exception)
+    app_test.button(key="tm_preset_matched_warning").click().run()
+    assert not list(app_test.exception)
+    assert app_test.session_state["tm_date"] == "2025-03-10"
+    app_test.selectbox(key="tm_screen_label").select("Replay").run()
+    assert not list(app_test.exception)
+    assert app_test.session_state["tm_date"] == "2025-03-10"
+    app_test.button(key="tm_reveal_action").click().run()
+    assert not list(app_test.exception)
+    assert app_test.session_state["tm_reveal"] is True
+    markdown = " ".join(item.value for item in app_test.markdown)
+    assert "Replay" in [item.value for item in app_test.title]
+    assert (
+        "Outcome" in markdown
+        or "boundary" in " ".join(item.value for item in app_test.caption).lower()
+    )

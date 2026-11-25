@@ -13,7 +13,8 @@ release decisions.
 
 **Live demo:** <https://topomarket-juhbvrgk2k67pnr6qbpfmc.streamlit.app/> ·
 **Local one-command demo:** `streamlit run app.py` (bundled synthetic showcase, no key) ·
-**Demo video:** coming in the v1.0 release (production assets under `docs/video/`).
+**One-minute demo video:** [watch the synthetic-data walkthrough](https://github.com/SergeyGer/TopoMarket/releases/latest/download/TopoMarket_demo_60s.mp4)
+([captions](https://github.com/SergeyGer/TopoMarket/releases/latest/download/TopoMarket_demo_60s.srt))
 
 ![TopoMarket social preview](docs/assets/social_preview.png)
 
@@ -30,7 +31,7 @@ release decisions.
 | 7 | Interactive dashboard: four screens, global date selection, accessibility (A7) | **Delivered** |
 | 8 | Package and rehearse the GitHub release (A8) | **Delivered** |
 | 9 | Upgrade: authoritative replay date, independent calendars, corrected evaluation, Structure/Replay experience, Community Cloud packaging (v0.9.0) | **Delivered** |
-| 10 | Demo video, frozen presets, hosted release and final v1.0 publication | **In progress** |
+| 10 | Demo video, frozen presets, hosted release and final v1.0 publication | Video and presets **delivered** (v0.9.2); hosted verification pending owner sharing setting |
 
 The v1.0 upgrade plan, defects closed and the build sequence live in
 [docs/UPGRADE.md](docs/UPGRADE.md); the tracked work is GitHub milestone *Upgrade v1.0* and
@@ -147,6 +148,22 @@ equivalents and keyboard controls, honours reduced motion, and reuses fixed grap
 date changes. Cached date-change p95 is measured against the 500 ms budget by
 `topomarket.ui.performance`; the cold public startup is measured separately. See
 [docs/WALKTHROUGH.md](docs/WALKTHROUGH.md) and [docs/DASHBOARD.md](docs/DASHBOARD.md).
+
+## One-minute demo video (v1.0)
+
+A ~60 second English demo video shows the released synthetic experience end to end:
+
+- [Master MP4](https://github.com/SergeyGer/TopoMarket/releases/latest/download/TopoMarket_demo_60s.mp4) -
+  1920x1080, 30 fps, H.264 High, AAC 48 kHz stereo, 60.0 s, approximately -16 LUFS integrated;
+- [English SRT captions](https://github.com/SergeyGer/TopoMarket/releases/latest/download/TopoMarket_demo_60s.srt);
+- production source: [storyboard](docs/video/storyboard.json), [narration](docs/video/narration.md),
+  [captions](docs/video/TopoMarket_demo_60s.srt), [production notes](docs/video/production_notes.md)
+  and the re-runnable [build pipeline](tools/video/build_demo_video.py).
+
+The footage uses the committed synthetic showcase only (fixture `showcase-synthetic`), opens with
+the uploaded GitHub social preview and closes on the exact repository URL held for five seconds.
+Every on-screen date, marker and numeric claim is verified against the released fixture in the
+production notes (A07 in [docs/ACCEPTANCE_v0.9.md](docs/ACCEPTANCE_v0.9.md)).
 
 ## Chronological evaluation (Step 6)
 

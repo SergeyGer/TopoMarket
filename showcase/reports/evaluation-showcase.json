@@ -39,7 +39,7 @@
   "calibrations": {
     "realized_vol": {
       "calibrated": true,
-      "calibration_hash": "cb6315a7f995b99b5279b755c6d811e8e240f9d3829ae7bbfc1d3bbb8d347bea",
+      "calibration_hash": "54493eb8073875f7a98dfa682ba4df1193874740e21ee7a175b40e6fe7a3e28f",
       "candidates": [
         {
           "constrained": true,
@@ -108,7 +108,7 @@
           "selected": true
         }
       ],
-      "config_hash": "b88c1e95e4a35038d52fd71afe2fe8fe9a268b7329a3d28092c4b657bf24e351",
+      "config_hash": "88dee70da6389b072d291dc47ee67b5a63ad55fbb2b983f4c8dbade6b90d3ce8",
       "cutoff": 0.10727190502348415,
       "eligible_sessions": 2327,
       "eligible_years": 9.234126984126984,
@@ -135,7 +135,7 @@
     },
     "tda": {
       "calibrated": true,
-      "calibration_hash": "1868a9ebf91d9895af657519b009cf5c5d07df7e8a818573a48dfb28986be358",
+      "calibration_hash": "03feded700c6f7317eb9208af09c41affbb3ee95224cc5267c5f191573a5d8c7",
       "candidates": [
         {
           "constrained": true,
@@ -204,7 +204,7 @@
           "selected": true
         }
       ],
-      "config_hash": "b88c1e95e4a35038d52fd71afe2fe8fe9a268b7329a3d28092c4b657bf24e351",
+      "config_hash": "88dee70da6389b072d291dc47ee67b5a63ad55fbb2b983f4c8dbade6b90d3ce8",
       "cutoff": 100.0,
       "eligible_sessions": 2327,
       "eligible_years": 9.234126984126984,
@@ -231,7 +231,7 @@
     },
     "vix": {
       "calibrated": true,
-      "calibration_hash": "024f5bae0e77a622bbe486fd55e541e522bb34b3859a4acfe8363a567e455f8c",
+      "calibration_hash": "1c539d442263e980b4576771342b64eb8dbd7f9f531cff3ee183c585d2f3fdd0",
       "candidates": [
         {
           "constrained": true,
@@ -300,7 +300,7 @@
           "selected": true
         }
       ],
-      "config_hash": "b88c1e95e4a35038d52fd71afe2fe8fe9a268b7329a3d28092c4b657bf24e351",
+      "config_hash": "88dee70da6389b072d291dc47ee67b5a63ad55fbb2b983f4c8dbade6b90d3ce8",
       "cutoff": 23.018437719999998,
       "eligible_sessions": 2327,
       "eligible_years": 9.234126984126984,
@@ -344,7 +344,7 @@
     "start": "2014-01-01"
   },
   "comparator_method": "realized_vol",
-  "config_hash": "b88c1e95e4a35038d52fd71afe2fe8fe9a268b7329a3d28092c4b657bf24e351",
+  "config_hash": "88dee70da6389b072d291dc47ee67b5a63ad55fbb2b983f4c8dbade6b90d3ce8",
   "credit_rule": "label_positive_and_breach_owned",
   "data_end": "2026-09-30",
   "data_start": "2005-01-03",
@@ -626,7 +626,7 @@
         }
       ],
       "pending_alerts": [],
-      "policy_hash": "47eb15e1c6c10bd7b28ed13a31903c65237fca93162de5a5f47504ac89a81918",
+      "policy_hash": "a8c2ca50bcc6842d77a1ecaf3224501176eb2da88756de000ac6910c7f2d74f7",
       "post_onset_alerts": [
         "2020-02-25"
       ],
@@ -775,7 +775,7 @@
         }
       ],
       "pending_alerts": [],
-      "policy_hash": "3998b0d0495e02605b079027dfc88dbc1feb4253239a5d419ce985a601ed650b",
+      "policy_hash": "65e147da9c33b0070bd0021e8e04fc46deddbdf3fb1fe728b87141f685b6359b",
       "post_onset_alerts": [
         "2020-03-13",
         "2025-03-10"
@@ -884,14 +884,14 @@
         }
       ],
       "pending_alerts": [],
-      "policy_hash": "a13f928147bf98caa6846013c2b1c1980e155c567829f8c75436cedb0576c4c2",
+      "policy_hash": "b51eba57569572bfe61318a93791c385bbe647dae9f51810720e8112da238b0d",
       "post_onset_alerts": [],
       "silent_policy": false,
       "snapshot_id": "showcase-synthetic",
       "start": "2014-01-01"
     }
   },
-  "package_version": "0.9.0",
+  "package_version": "0.9.2",
   "periods": {
     "development": {
       "end": "2004-12-31",
@@ -909,14 +909,14 @@
   "policies": {
     "realized_vol": {
       "annualization": 252.0,
-      "calibration_hash": "cb6315a7f995b99b5279b755c6d811e8e240f9d3829ae7bbfc1d3bbb8d347bea",
-      "config_hash": "b88c1e95e4a35038d52fd71afe2fe8fe9a268b7329a3d28092c4b657bf24e351",
+      "calibration_hash": "54493eb8073875f7a98dfa682ba4df1193874740e21ee7a175b40e6fe7a3e28f",
+      "config_hash": "88dee70da6389b072d291dc47ee67b5a63ad55fbb2b983f4c8dbade6b90d3ce8",
       "cooldown_sessions": 20,
       "cutoff": 0.10727190502348415,
       "eligible_years": 9.234126984126984,
       "method": "realized_vol",
       "percentile": 99.0,
-      "policy_hash": "47eb15e1c6c10bd7b28ed13a31903c65237fca93162de5a5f47504ac89a81918",
+      "policy_hash": "a8c2ca50bcc6842d77a1ecaf3224501176eb2da88756de000ac6910c7f2d74f7",
       "session_digest": "c1f3ccbc6d6828d193315d8417d763e098753b3b5839305ed9e69a5b1a654c8b",
       "silent": false,
       "validation_end": "2013-12-31",
@@ -925,14 +925,14 @@
     },
     "tda": {
       "annualization": 252.0,
-      "calibration_hash": "1868a9ebf91d9895af657519b009cf5c5d07df7e8a818573a48dfb28986be358",
-      "config_hash": "b88c1e95e4a35038d52fd71afe2fe8fe9a268b7329a3d28092c4b657bf24e351",
+      "calibration_hash": "03feded700c6f7317eb9208af09c41affbb3ee95224cc5267c5f191573a5d8c7",
+      "config_hash": "88dee70da6389b072d291dc47ee67b5a63ad55fbb2b983f4c8dbade6b90d3ce8",
       "cooldown_sessions": 20,
       "cutoff": 100.0,
       "eligible_years": 9.234126984126984,
       "method": "tda",
       "percentile": 99.0,
-      "policy_hash": "3998b0d0495e02605b079027dfc88dbc1feb4253239a5d419ce985a601ed650b",
+      "policy_hash": "65e147da9c33b0070bd0021e8e04fc46deddbdf3fb1fe728b87141f685b6359b",
       "session_digest": "c1f3ccbc6d6828d193315d8417d763e098753b3b5839305ed9e69a5b1a654c8b",
       "silent": false,
       "validation_end": "2013-12-31",
@@ -941,14 +941,14 @@
     },
     "vix": {
       "annualization": 252.0,
-      "calibration_hash": "024f5bae0e77a622bbe486fd55e541e522bb34b3859a4acfe8363a567e455f8c",
-      "config_hash": "b88c1e95e4a35038d52fd71afe2fe8fe9a268b7329a3d28092c4b657bf24e351",
+      "calibration_hash": "1c539d442263e980b4576771342b64eb8dbd7f9f531cff3ee183c585d2f3fdd0",
+      "config_hash": "88dee70da6389b072d291dc47ee67b5a63ad55fbb2b983f4c8dbade6b90d3ce8",
       "cooldown_sessions": 20,
       "cutoff": 23.018437719999998,
       "eligible_years": 9.234126984126984,
       "method": "vix",
       "percentile": 99.0,
-      "policy_hash": "a13f928147bf98caa6846013c2b1c1980e155c567829f8c75436cedb0576c4c2",
+      "policy_hash": "b51eba57569572bfe61318a93791c385bbe647dae9f51810720e8112da238b0d",
       "session_digest": "c1f3ccbc6d6828d193315d8417d763e098753b3b5839305ed9e69a5b1a654c8b",
       "silent": false,
       "validation_end": "2013-12-31",

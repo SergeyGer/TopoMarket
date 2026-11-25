@@ -251,12 +251,12 @@ def mapper_figure(
             zorder=4,
         )
         axes.annotate(
-            f"{node['node_id']} · {node['member_count']}",
+            f"{node['node_id']} ({node['member_count']})",
             (node["x"], node["y"]),
             xytext=(node["x"], node["y"] + node["_radius"] + 0.22),
             ha="center",
             va="bottom",
-            fontsize=8,
+            fontsize=9.5,
             color=INK,
             zorder=5,
         )
