@@ -1,19 +1,39 @@
 {
   "counts": {
     "fail": 0,
-    "pass": 59,
+    "pass": 78,
     "review": 1,
-    "total": 60
+    "total": 79
   },
   "generated_by": "scripts/refresh_dependency_licenses.py",
   "generated_from": [
     "pyproject.toml",
-    "requirements.lock"
+    "requirements.lock",
+    "requirements.txt"
   ],
   "packages": {
+    "altair": {
+      "classification": "permissive",
+      "cloud": true,
+      "declared": "cloud",
+      "evidence": [
+        "License :: OSI Approved :: BSD License"
+      ],
+      "license": "OSI Approved :: BSD License",
+      "license_classifiers": [
+        "License :: OSI Approved :: BSD License"
+      ],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "altair",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "6.3.0"
+    },
     "anyio": {
       "classification": "permissive",
-      "declared": "lock",
+      "cloud": true,
+      "declared": "cloud",
       "evidence": [
         "MIT"
       ],
@@ -26,8 +46,25 @@
       "risk": "PASS",
       "version": "4.16.0"
     },
+    "attrs": {
+      "classification": "permissive",
+      "cloud": true,
+      "declared": "cloud",
+      "evidence": [
+        "MIT"
+      ],
+      "license": "MIT",
+      "license_classifiers": [],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "attrs",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "26.1.0"
+    },
     "build": {
       "classification": "permissive",
+      "cloud": false,
       "declared": "pyproject",
       "evidence": [
         "MIT"
@@ -43,7 +80,8 @@
     },
     "certifi": {
       "classification": "weak-copyleft",
-      "declared": "lock",
+      "cloud": true,
+      "declared": "cloud",
       "evidence": [
         "License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)"
       ],
@@ -60,6 +98,7 @@
     },
     "cffi": {
       "classification": "permissive",
+      "cloud": false,
       "declared": "lock",
       "evidence": [
         "MIT-0"
@@ -75,7 +114,8 @@
     },
     "charset-normalizer": {
       "classification": "permissive",
-      "declared": "lock",
+      "cloud": true,
+      "declared": "cloud",
       "evidence": [
         "MIT"
       ],
@@ -86,11 +126,28 @@
       "name": "charset-normalizer",
       "pyproject_requirement": null,
       "risk": "PASS",
-      "version": "3.5.2"
+      "version": "3.5.3"
+    },
+    "click": {
+      "classification": "permissive",
+      "cloud": true,
+      "declared": "cloud",
+      "evidence": [
+        "BSD-3-Clause"
+      ],
+      "license": "BSD-3-Clause",
+      "license_classifiers": [],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "click",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "8.5.1"
     },
     "cloudpickle": {
       "classification": "permissive",
-      "declared": "lock",
+      "cloud": true,
+      "declared": "cloud",
       "evidence": [
         "BSD-3-Clause"
       ],
@@ -105,7 +162,8 @@
     },
     "contourpy": {
       "classification": "permissive",
-      "declared": "lock",
+      "cloud": true,
+      "declared": "cloud",
       "evidence": [
         "BSD-3-Clause"
       ],
@@ -120,6 +178,7 @@
     },
     "cryptography": {
       "classification": "permissive",
+      "cloud": false,
       "declared": "lock",
       "evidence": [
         "Apache-2.0 OR BSD-3-Clause"
@@ -135,7 +194,8 @@
     },
     "cycler": {
       "classification": "permissive",
-      "declared": "lock",
+      "cloud": true,
+      "declared": "cloud",
       "evidence": [
         "License :: OSI Approved :: BSD License"
       ],
@@ -152,7 +212,8 @@
     },
     "cython": {
       "classification": "permissive",
-      "declared": "lock",
+      "cloud": true,
+      "declared": "cloud",
       "evidence": [
         "Apache-2.0"
       ],
@@ -163,11 +224,12 @@
       "name": "cython",
       "pyproject_requirement": null,
       "risk": "PASS",
-      "version": "3.3.1"
+      "version": "3.3.2"
     },
     "deprecated": {
       "classification": "permissive",
-      "declared": "lock",
+      "cloud": true,
+      "declared": "cloud",
       "evidence": [
         "MIT"
       ],
@@ -182,6 +244,7 @@
     },
     "docutils": {
       "classification": "permissive",
+      "cloud": false,
       "declared": "lock",
       "evidence": [
         "License :: OSI Approved :: BSD License",
@@ -202,7 +265,8 @@
     },
     "fonttools": {
       "classification": "permissive",
-      "declared": "lock",
+      "cloud": true,
+      "declared": "cloud",
       "evidence": [
         "MIT"
       ],
@@ -217,7 +281,8 @@
     },
     "h11": {
       "classification": "permissive",
-      "declared": "lock",
+      "cloud": true,
+      "declared": "cloud",
       "evidence": [
         "License :: OSI Approved :: MIT License"
       ],
@@ -234,7 +299,8 @@
     },
     "httpcore": {
       "classification": "permissive",
-      "declared": "lock",
+      "cloud": true,
+      "declared": "cloud",
       "evidence": [
         "BSD-3-Clause"
       ],
@@ -249,6 +315,7 @@
     },
     "httpx": {
       "classification": "permissive",
+      "cloud": true,
       "declared": "pyproject",
       "evidence": [
         "License :: OSI Approved :: BSD License"
@@ -266,6 +333,7 @@
     },
     "id": {
       "classification": "permissive",
+      "cloud": false,
       "declared": "lock",
       "evidence": [
         "License :: OSI Approved :: Apache Software License"
@@ -283,7 +351,8 @@
     },
     "idna": {
       "classification": "permissive",
-      "declared": "lock",
+      "cloud": true,
+      "declared": "cloud",
       "evidence": [
         "BSD-3-Clause"
       ],
@@ -298,6 +367,7 @@
     },
     "iniconfig": {
       "classification": "permissive",
+      "cloud": false,
       "declared": "lock",
       "evidence": [
         "MIT"
@@ -311,8 +381,27 @@
       "risk": "PASS",
       "version": "2.3.1"
     },
+    "itsdangerous": {
+      "classification": "permissive",
+      "cloud": true,
+      "declared": "cloud",
+      "evidence": [
+        "License :: OSI Approved :: BSD License"
+      ],
+      "license": "OSI Approved :: BSD License",
+      "license_classifiers": [
+        "License :: OSI Approved :: BSD License"
+      ],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "itsdangerous",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "2.2.0"
+    },
     "jaraco.classes": {
       "classification": "permissive",
+      "cloud": false,
       "declared": "lock",
       "evidence": [
         "License :: OSI Approved :: MIT License"
@@ -330,6 +419,7 @@
     },
     "jaraco.context": {
       "classification": "permissive",
+      "cloud": false,
       "declared": "lock",
       "evidence": [
         "MIT"
@@ -345,6 +435,7 @@
     },
     "jaraco.functools": {
       "classification": "permissive",
+      "cloud": false,
       "declared": "lock",
       "evidence": [
         "MIT"
@@ -360,6 +451,7 @@
     },
     "jeepney": {
       "classification": "permissive",
+      "cloud": false,
       "declared": "lock",
       "evidence": [
         "MIT"
@@ -373,9 +465,28 @@
       "risk": "PASS",
       "version": "0.9.0"
     },
+    "jinja2": {
+      "classification": "permissive",
+      "cloud": true,
+      "declared": "cloud",
+      "evidence": [
+        "License :: OSI Approved :: BSD License"
+      ],
+      "license": "OSI Approved :: BSD License",
+      "license_classifiers": [
+        "License :: OSI Approved :: BSD License"
+      ],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "jinja2",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "3.1.6"
+    },
     "joblib": {
       "classification": "permissive",
-      "declared": "lock",
+      "cloud": true,
+      "declared": "cloud",
       "evidence": [
         "BSD-3-Clause"
       ],
@@ -388,8 +499,41 @@
       "risk": "PASS",
       "version": "1.6.0"
     },
+    "jsonschema": {
+      "classification": "permissive",
+      "cloud": true,
+      "declared": "cloud",
+      "evidence": [
+        "MIT"
+      ],
+      "license": "MIT",
+      "license_classifiers": [],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "jsonschema",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "4.26.0"
+    },
+    "jsonschema-specifications": {
+      "classification": "permissive",
+      "cloud": true,
+      "declared": "cloud",
+      "evidence": [
+        "MIT"
+      ],
+      "license": "MIT",
+      "license_classifiers": [],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "jsonschema-specifications",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "2025.9.1"
+    },
     "keyring": {
       "classification": "permissive",
+      "cloud": false,
       "declared": "lock",
       "evidence": [
         "MIT"
@@ -405,7 +549,8 @@
     },
     "kiwisolver": {
       "classification": "permissive",
-      "declared": "lock",
+      "cloud": true,
+      "declared": "cloud",
       "evidence": [
         "License :: OSI Approved :: BSD License"
       ],
@@ -422,6 +567,7 @@
     },
     "markdown-it-py": {
       "classification": "permissive",
+      "cloud": false,
       "declared": "lock",
       "evidence": [
         "License :: OSI Approved :: MIT License"
@@ -437,9 +583,26 @@
       "risk": "PASS",
       "version": "4.3.0"
     },
+    "markupsafe": {
+      "classification": "permissive",
+      "cloud": true,
+      "declared": "cloud",
+      "evidence": [
+        "BSD-3-Clause"
+      ],
+      "license": "BSD-3-Clause",
+      "license_classifiers": [],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "markupsafe",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "3.0.4"
+    },
     "matplotlib": {
       "classification": "permissive",
-      "declared": "lock",
+      "cloud": true,
+      "declared": "pyproject",
       "evidence": [
         "License :: OSI Approved :: Python Software Foundation License"
       ],
@@ -450,12 +613,13 @@
       "locked": true,
       "metadata_source": "pypi",
       "name": "matplotlib",
-      "pyproject_requirement": null,
+      "pyproject_requirement": "ui: matplotlib>=3.8,<4",
       "risk": "PASS",
       "version": "3.11.2"
     },
     "mdurl": {
       "classification": "permissive",
+      "cloud": false,
       "declared": "lock",
       "evidence": [
         "License :: OSI Approved :: MIT License"
@@ -473,6 +637,7 @@
     },
     "more-itertools": {
       "classification": "permissive",
+      "cloud": false,
       "declared": "lock",
       "evidence": [
         "MIT"
@@ -488,7 +653,8 @@
     },
     "narwhals": {
       "classification": "permissive",
-      "declared": "lock",
+      "cloud": true,
+      "declared": "cloud",
       "evidence": [
         "MIT"
       ],
@@ -503,6 +669,7 @@
     },
     "nh3": {
       "classification": "permissive",
+      "cloud": false,
       "declared": "lock",
       "evidence": [
         "MIT"
@@ -518,6 +685,7 @@
     },
     "numpy": {
       "classification": "permissive",
+      "cloud": true,
       "declared": "pyproject",
       "evidence": [
         "BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0"
@@ -533,7 +701,8 @@
     },
     "packaging": {
       "classification": "permissive",
-      "declared": "lock",
+      "cloud": true,
+      "declared": "cloud",
       "evidence": [
         "Apache-2.0 OR BSD-2-Clause"
       ],
@@ -544,11 +713,28 @@
       "name": "packaging",
       "pyproject_requirement": null,
       "risk": "PASS",
-      "version": "26.3"
+      "version": "26.4"
+    },
+    "pandas": {
+      "classification": "permissive",
+      "cloud": true,
+      "declared": "cloud",
+      "evidence": [
+        "BSD-3-Clause"
+      ],
+      "license": "BSD-3-Clause",
+      "license_classifiers": [],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "pandas",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "3.1.1"
     },
     "persim": {
       "classification": "permissive",
-      "declared": "lock",
+      "cloud": true,
+      "declared": "cloud",
       "evidence": [
         "License :: OSI Approved :: MIT License"
       ],
@@ -565,7 +751,8 @@
     },
     "pillow": {
       "classification": "permissive",
-      "declared": "lock",
+      "cloud": true,
+      "declared": "cloud",
       "evidence": [
         "MIT-CMU"
       ],
@@ -580,6 +767,7 @@
     },
     "pluggy": {
       "classification": "permissive",
+      "cloud": false,
       "declared": "lock",
       "evidence": [
         "License :: OSI Approved :: MIT License"
@@ -595,8 +783,41 @@
       "risk": "PASS",
       "version": "1.7.0"
     },
+    "protobuf": {
+      "classification": "permissive",
+      "cloud": true,
+      "declared": "cloud",
+      "evidence": [
+        "3-Clause BSD License"
+      ],
+      "license": "3-Clause BSD License",
+      "license_classifiers": [],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "protobuf",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "7.36.2"
+    },
+    "pyarrow": {
+      "classification": "permissive",
+      "cloud": true,
+      "declared": "cloud",
+      "evidence": [
+        "Apache-2.0"
+      ],
+      "license": "Apache-2.0",
+      "license_classifiers": [],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "pyarrow",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "26.0.1"
+    },
     "pycparser": {
       "classification": "permissive",
+      "cloud": false,
       "declared": "lock",
       "evidence": [
         "BSD-3-Clause"
@@ -610,8 +831,25 @@
       "risk": "PASS",
       "version": "3.12"
     },
+    "pydeck": {
+      "classification": "permissive",
+      "cloud": true,
+      "declared": "cloud",
+      "evidence": [
+        "Apache License 2.0"
+      ],
+      "license": "Apache License 2.0",
+      "license_classifiers": [],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "pydeck",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "0.9.3"
+    },
     "pygments": {
       "classification": "permissive",
+      "cloud": false,
       "declared": "lock",
       "evidence": [
         "BSD-2-Clause"
@@ -627,7 +865,8 @@
     },
     "pyparsing": {
       "classification": "permissive",
-      "declared": "lock",
+      "cloud": true,
+      "declared": "cloud",
       "evidence": [
         "MIT"
       ],
@@ -642,6 +881,7 @@
     },
     "pyproject-hooks": {
       "classification": "permissive",
+      "cloud": false,
       "declared": "lock",
       "evidence": [
         "MIT"
@@ -657,6 +897,7 @@
     },
     "pytest": {
       "classification": "permissive",
+      "cloud": false,
       "declared": "pyproject",
       "evidence": [
         "MIT"
@@ -672,7 +913,8 @@
     },
     "python-dateutil": {
       "classification": "permissive",
-      "declared": "lock",
+      "cloud": true,
+      "declared": "cloud",
       "evidence": [
         "BSD-3-Clause"
       ],
@@ -685,8 +927,25 @@
       "risk": "PASS",
       "version": "4.0.0"
     },
+    "python-multipart": {
+      "classification": "permissive",
+      "cloud": true,
+      "declared": "cloud",
+      "evidence": [
+        "Apache-2.0"
+      ],
+      "license": "Apache-2.0",
+      "license_classifiers": [],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "python-multipart",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "0.0.34"
+    },
     "readme-renderer": {
       "classification": "permissive",
+      "cloud": false,
       "declared": "lock",
       "evidence": [
         "Apache-2.0"
@@ -700,9 +959,26 @@
       "risk": "PASS",
       "version": "46.0"
     },
+    "referencing": {
+      "classification": "permissive",
+      "cloud": true,
+      "declared": "cloud",
+      "evidence": [
+        "MIT"
+      ],
+      "license": "MIT",
+      "license_classifiers": [],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "referencing",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "0.37.0"
+    },
     "requests": {
       "classification": "permissive",
-      "declared": "lock",
+      "cloud": true,
+      "declared": "cloud",
       "evidence": [
         "License :: OSI Approved :: Apache Software License"
       ],
@@ -719,6 +995,7 @@
     },
     "requests-toolbelt": {
       "classification": "permissive",
+      "cloud": false,
       "declared": "lock",
       "evidence": [
         "License :: OSI Approved :: Apache Software License"
@@ -736,6 +1013,7 @@
     },
     "rfc3986": {
       "classification": "permissive",
+      "cloud": false,
       "declared": "lock",
       "evidence": [
         "License :: OSI Approved :: Apache Software License"
@@ -753,6 +1031,7 @@
     },
     "rich": {
       "classification": "permissive",
+      "cloud": false,
       "declared": "lock",
       "evidence": [
         "License :: OSI Approved :: MIT License"
@@ -770,6 +1049,7 @@
     },
     "ripser": {
       "classification": "permissive",
+      "cloud": true,
       "declared": "pyproject",
       "evidence": [
         "License :: OSI Approved :: MIT License"
@@ -785,8 +1065,25 @@
       "risk": "PASS",
       "version": "0.6.15"
     },
+    "rpds-py": {
+      "classification": "permissive",
+      "cloud": true,
+      "declared": "cloud",
+      "evidence": [
+        "MIT"
+      ],
+      "license": "MIT",
+      "license_classifiers": [],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "rpds-py",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "2026.9.1"
+    },
     "ruff": {
       "classification": "permissive",
+      "cloud": false,
       "declared": "pyproject",
       "evidence": [
         "MIT"
@@ -802,7 +1099,8 @@
     },
     "scikit-learn": {
       "classification": "permissive",
-      "declared": "lock",
+      "cloud": true,
+      "declared": "cloud",
       "evidence": [
         "BSD-3-Clause"
       ],
@@ -817,7 +1115,8 @@
     },
     "scipy": {
       "classification": "permissive",
-      "declared": "lock",
+      "cloud": true,
+      "declared": "cloud",
       "evidence": [
         "License :: OSI Approved :: BSD License"
       ],
@@ -834,6 +1133,7 @@
     },
     "secretstorage": {
       "classification": "permissive",
+      "cloud": false,
       "declared": "lock",
       "evidence": [
         "BSD-3-Clause"
@@ -847,15 +1147,32 @@
       "risk": "PASS",
       "version": "3.5.0"
     },
+    "starlette": {
+      "classification": "permissive",
+      "cloud": true,
+      "declared": "cloud",
+      "evidence": [
+        "BSD-3-Clause"
+      ],
+      "license": "BSD-3-Clause",
+      "license_classifiers": [],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "starlette",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "1.10.0"
+    },
     "streamlit": {
       "classification": "permissive",
+      "cloud": true,
       "declared": "pyproject",
       "evidence": [
         "Apache-2.0"
       ],
       "license": "Apache-2.0",
       "license_classifiers": [],
-      "locked": false,
+      "locked": true,
       "metadata_source": "pypi",
       "name": "streamlit",
       "pyproject_requirement": "ui: streamlit>=1.30,<2",
@@ -864,7 +1181,8 @@
     },
     "threadpoolctl": {
       "classification": "permissive",
-      "declared": "lock",
+      "cloud": true,
+      "declared": "cloud",
       "evidence": [
         "BSD-3-Clause"
       ],
@@ -879,6 +1197,7 @@
     },
     "twine": {
       "classification": "permissive",
+      "cloud": false,
       "declared": "pyproject",
       "evidence": [
         "Apache-2.0"
@@ -894,7 +1213,8 @@
     },
     "typing-extensions": {
       "classification": "permissive",
-      "declared": "lock",
+      "cloud": true,
+      "declared": "cloud",
       "evidence": [
         "PSF-2.0"
       ],
@@ -909,7 +1229,8 @@
     },
     "tzdata": {
       "classification": "permissive",
-      "declared": "lock",
+      "cloud": true,
+      "declared": "cloud",
       "evidence": [
         "Apache-2.0"
       ],
@@ -924,7 +1245,8 @@
     },
     "urllib3": {
       "classification": "permissive",
-      "declared": "lock",
+      "cloud": true,
+      "declared": "cloud",
       "evidence": [
         "MIT"
       ],
@@ -937,9 +1259,58 @@
       "risk": "PASS",
       "version": "2.8.0"
     },
+    "uvicorn": {
+      "classification": "permissive",
+      "cloud": true,
+      "declared": "cloud",
+      "evidence": [
+        "BSD-3-Clause"
+      ],
+      "license": "BSD-3-Clause",
+      "license_classifiers": [],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "uvicorn",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "0.54.0"
+    },
+    "watchdog": {
+      "classification": "permissive",
+      "cloud": true,
+      "declared": "cloud",
+      "evidence": [
+        "Apache-2.0"
+      ],
+      "license": "Apache-2.0",
+      "license_classifiers": [],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "watchdog",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "7.1.1"
+    },
+    "websockets": {
+      "classification": "permissive",
+      "cloud": true,
+      "declared": "cloud",
+      "evidence": [
+        "BSD-3-Clause"
+      ],
+      "license": "BSD-3-Clause",
+      "license_classifiers": [],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "websockets",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "17.4"
+    },
     "wrapt": {
       "classification": "permissive",
-      "declared": "lock",
+      "cloud": true,
+      "declared": "cloud",
       "evidence": [
         "BSD-2-Clause"
       ],

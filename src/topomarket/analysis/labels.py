@@ -20,10 +20,16 @@ The public surface is small:
     episode.  Each episode records the positive label origins whose first
     breach belongs to it.
 
-``match_alerts(alerts, episodes)``
+``match_alerts(alerts, episodes, labels=...)``
     Match early alerts to future episodes chronologically and one-to-one.
     Duplicate, post-onset, false mature, missed and still-pending events are
-    reported separately.
+    reported separately.  When the target labels are supplied, a strict credit
+    rule applies: an alert is credited only when its *own* label is positive
+    (a close at or below 90% of the alert close within 20 sessions), the
+    label's first breach belongs to the matched episode and the episode onset
+    is one to ``lead_sessions`` sessions after the alert.  Without labels the
+    matcher falls back to the historical onset-window rule
+    (``credit_rule="onset_window"``).
 
 All results are frozen, ordered and JSON-serialisable through ``as_dict``.
 """
@@ -71,6 +77,10 @@ FALSE_MATURE = "false_mature"
 POST_ONSET = "post_onset"
 DUPLICATE = "duplicate"
 UNMATCHED_PENDING = "pending"
+
+#: Credit rule identifiers recorded on :class:`AlertMatchResult`.
+CREDIT_RULE_LABEL_BREACH = "label_positive_and_breach_owned"
+CREDIT_RULE_ONSET_WINDOW = "onset_window"
 
 
 class LabelStatus:
@@ -2119,6 +2129,7 @@ class AlertMatchResult:
     outcomes: tuple[AlertOutcome, ...] = ()
     n_sessions: int | None = None
     lead_sessions: int = DEFAULT_ALERT_LEAD_SESSIONS
+    credit_rule: str = CREDIT_RULE_ONSET_WINDOW
 
     def __post_init__(self) -> None:
         for name in (
@@ -2238,6 +2249,7 @@ class AlertMatchResult:
             "post_onset_count": self.post_onset_count,
             "n_sessions": self.n_sessions,
             "lead_sessions": self.lead_sessions,
+            "credit_rule": self.credit_rule,
         }
 
     def __getitem__(self, key: Any) -> Any:
@@ -2601,6 +2613,43 @@ def match_alerts(
     duplicate_alerts: list[Alert] = []
     post_onset_alerts: list[Alert] = []
 
+    # Strict credit needs the target label of the alert session.  Labels stay
+    # optional so the primitive keeps working on bare episode rows; the
+    # evaluation pipeline always supplies them.
+    label_by_index: dict[int, TargetLabel] | None = None
+    label_by_date: dict[str, TargetLabel] | None = None
+    breach_owner: dict[int, tuple[int, BreachEpisode]] = {}
+    credit_rule = CREDIT_RULE_ONSET_WINDOW
+    if label_series is not None:
+        credit_rule = CREDIT_RULE_LABEL_BREACH
+        label_by_date = {label.date: label for label in label_series if label.date is not None}
+        label_by_index = {position: label for position, label in enumerate(label_series)}
+        for label in label_series:
+            label_by_index.setdefault(int(label.index), label)
+        for position, episode in enumerate(ordered_episodes):
+            for breach_index in episode.breach_indices:
+                breach_owner.setdefault(int(breach_index), (position, episode))
+
+    def _record(alert: Alert, status: str, reason: str, match: AlertMatch | None = None) -> None:
+        if match is not None:
+            matches.append(match)
+        elif status == FALSE_MATURE:
+            false_alerts.append(alert)
+        elif status == POST_ONSET:
+            post_onset_alerts.append(alert)
+        elif status == DUPLICATE:
+            duplicate_alerts.append(alert)
+        elif status == UNMATCHED_PENDING:
+            pending_alerts.append(alert)
+        outcomes.append(
+            AlertOutcome(
+                alert=alert,
+                status=status,
+                match=match,
+                reason=None if match is not None else reason,
+            )
+        )
+
     for alert in ordered_alerts:
         alert_index = int(alert.index or 0)
         if alert_index in seen_alert_indices:
@@ -2614,6 +2663,89 @@ def match_alerts(
             )
             continue
         seen_alert_indices.add(alert_index)
+
+        if label_by_date is not None:
+            # EV01 credit rule: own label positive, its first breach belongs to
+            # the matched episode, onset 1..lead sessions after the alert.
+            label = label_by_date.get(alert.date) if alert.date else None
+            if label is None and label_by_index is not None:
+                label = label_by_index.get(alert_index)
+            covering = next(
+                (
+                    episode
+                    for episode in ordered_episodes
+                    if episode.start_index <= alert_index <= episode.end_index
+                ),
+                None,
+            )
+            matured = alert_index + lead_value < int(n_sessions or 0)
+            if covering is not None:
+                # A late alert inside an episode keeps its post-onset status.
+                _record(alert, POST_ONSET, "the alert is inside an episode that already started")
+            elif label is not None and label.pending:
+                _record(
+                    alert,
+                    UNMATCHED_PENDING,
+                    "the alert target label horizon has not matured",
+                )
+            elif label is not None and label.positive and label.first_breach_index is not None:
+                owner = breach_owner.get(int(label.first_breach_index))
+                if owner is None:
+                    if matured:
+                        _record(
+                            alert,
+                            FALSE_MATURE,
+                            "the positive label breach is outside the supplied breach episodes",
+                        )
+                    else:
+                        _record(alert, UNMATCHED_PENDING, "the alert lead has not matured yet")
+                else:
+                    position, episode = owner
+                    onset = episode.start_index
+                    if onset <= alert_index:
+                        _record(
+                            alert,
+                            POST_ONSET,
+                            "the label breach belongs to an episode that already started",
+                        )
+                    elif onset - alert_index > lead_value:
+                        _record(
+                            alert,
+                            FALSE_MATURE,
+                            "the breach episode onset is beyond the alert lead window",
+                        )
+                    elif position in claimed:
+                        _record(
+                            alert,
+                            DUPLICATE,
+                            "the breach episode was already credited to an earlier alert",
+                        )
+                    else:
+                        claimed.add(position)
+                        _record(
+                            alert,
+                            MATCHED,
+                            "",
+                            AlertMatch(
+                                alert=alert,
+                                episode=episode,
+                                lead_sessions=onset - alert_index,
+                                order=alert.order,
+                            ),
+                        )
+            else:
+                # The alert's own target did not breach, so it cannot claim a
+                # neighbouring episode: it is an unmatched mature alert (or
+                # still pending while its own horizon is unobserved).
+                if matured:
+                    _record(
+                        alert,
+                        FALSE_MATURE,
+                        "the alert matured without a positive target label",
+                    )
+                else:
+                    _record(alert, UNMATCHED_PENDING, "the alert lead has not matured yet")
+            continue
 
         candidates = [
             (position, episode)
@@ -2725,6 +2857,7 @@ def match_alerts(
         outcomes=tuple(outcomes),
         n_sessions=n_sessions,
         lead_sessions=lead_value,
+        credit_rule=credit_rule,
     )
 
 
@@ -2852,6 +2985,8 @@ __all__ = [
     "Labels",
     "LabelsResult",
     "MATCHED",
+    "CREDIT_RULE_LABEL_BREACH",
+    "CREDIT_RULE_ONSET_WINDOW",
     "Match",
     "MatchError",
     "MatchResult",

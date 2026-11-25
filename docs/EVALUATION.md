@@ -5,35 +5,63 @@
 ## Pipeline
 
 1. **Labels** - for each origin close `P(t)`, `y(t) = 1` when any of the next 20 closes is
-   `<= 0.9 * P(t)` (inclusive); the first such session is the breach date. Origins without a full
-   20-session horizon are `pending` and are never treated as negative.
+   `<= 0.9 * P(t)` (inclusive: a close exactly at 90% is a breach, day 20 is inside the horizon
+   and day 21 is outside); the first such session is the breach date. Origins whose observed
+   horizon shows no breach and is not yet complete are `pending` and are never treated as
+   negative or used for scoring.
 2. **Episodes** - distinct breach dates, chained when consecutive breach dates are at most 20
    sessions apart; the first breach date is the episode onset.
 3. **Methods** - TDA score (frozen Step 4 configuration), VIX close, and 20-session annualized
-   sample volatility (`std(ddof=1) * sqrt(252)`), evaluated on the same eligible dates.
+   sample volatility (`std(ddof=1) * sqrt(252)`). The three methods are compared on one common set
+   of eligible dates: the intersection of the dates where every compared method has a finite
+   reading, the target label is mature and the session is inside the out-of-sample test period.
+   The report records that window (`common_eligible_dates.start`/`end`), the shared session count
+   and each method's own reading count; average precision, event prevalence and the paired
+   bootstrap all use the same shared dates.
 4. **Calibration** - 2005-2013 validation; percentile cutoffs 85/90/92.5/95/97.5/99 of each
    method's own readings with a 20-session cooldown; preference order: maximum episode recall
    subject to at most 2 false alerts/year, then fewer false alerts, then the higher cutoff. The
    last 20 validation origins are purged before selection; the chosen cutoffs are frozen with a
    policy hash binding method, cutoff, percentile, cooldown, window, annualization, validation
-   period, session-sequence digest and eligible-year denominator.
-5. **Out-of-sample test** - 2014+ through the last mature origin. Metrics: episode recall with
-   numerator/denominator, false alerts per year, median lead with min/max range, daily average
-   precision and event prevalence. Undefined values are explicit `null`; the report records the
-   counts that explain them. Every method table carries the source snapshot id.
-6. **Bootstrap** - paired moving-block bootstrap over 60-session test blocks, 1,000 replicates,
-   identical block draws for all methods, fixed seed in the report; report 95% percentile intervals
-   and valid replicate counts.
-7. **Evidence wording** - `"Experimental market anomaly"` by default. `"Historical early-warning
-   evidence"` only when at least five evaluable held-out episodes exist, the lower 95% paired
-   interval for the episode-recall gain against the comparator is above zero, and the held-out
-   false-alert rate is at most 2/year and no higher than the comparator's. Otherwise the report
-   lists the observed limitation.
-8. **Controls/ablations** - `--ablations` adds a return-shuffled TDA control (deterministic
+   period, session-sequence digest and eligible-year denominator. The percentile is a
+   *comparative* calibration rank within the method's own validation readings, not a probability.
+   If no percentile candidate satisfies the false-alert constraint, calibration records the
+   reason (`calibrated: false`, `silent: true`, `reason: ...`) and freezes a **silent policy**
+   (`silent: true`, no cutoff, emits no alerts) instead of asserting a misleading threshold. The
+   method is still reported, with zero alerts and its score-based average precision.
+5. **Early-alert credit** - an alert is credited only when all three conditions hold:
+   (a) its *own* target label is positive - the alert close itself breaches 90% within 20
+   sessions, so pending labels can never credit; (b) the label's first breach date belongs to the
+   matched episode's breach dates (an alert cannot claim a neighbouring episode's breach); and
+   (c) the matched episode onset is one to 20 sessions after the alert. Each episode is credited
+   at most once. Alerts inside an already-started episode stay `post_onset` (late), alerts that
+   would claim an already-credited episode stay `duplicate`, alerts whose own horizon is unobserved
+   stay `pending`, and mature alerts that are not credited are `false_mature` and enter the
+   false-alert count. Episodes without a qualifying alert stay `missed`.
+6. **Out-of-sample test** - 2014+ through the last mature origin, on the common eligible dates.
+   Metrics: episode recall with numerator/denominator, false alerts per year (over the eligible
+   test sessions), median lead with min/max range, average precision over the **complete eligible
+   scored daily series** and event prevalence. Average precision ranks every scored session by
+   descending score against its mature positive label; all sessions sharing a score form one
+   threshold block (`sum (recall_after - recall_before) * precision_after`), which is the standard
+   tied-score average precision (identical to `sklearn.metrics.average_precision_score`). If the
+   eligible series has no positive label, average precision is `null` and the reason is recorded
+   (`average_precision_reason`) together with the scored-session/positive counts. Undefined values
+   are explicit `null`; the report records the counts that explain them. Every method table carries
+   the source snapshot id.
+7. **Bootstrap** - paired moving-block bootstrap over 60-session test blocks on the shared
+   eligible dates, 1,000 replicates, identical block draws for all methods, fixed seed in the
+   report; report 95% percentile intervals and valid replicate counts.
+8. **Evidence wording** - `"Experimental market anomaly"` by default; the forecast is presented as
+   an experiment. `"Historical early-warning evidence"` only when at least five evaluable held-out
+   episodes exist, the lower 95% paired interval for the episode-recall gain against the comparator
+   is above zero, and the held-out false-alert rate is at most 2/year and no higher than the
+   comparator's. Otherwise the report lists the observed limitations.
+9. **Controls/ablations** - `--ablations` adds a return-shuffled TDA control (deterministic
    permutation with the report seed) and an unscaled-topology ablation (`normalization="none"`).
-9. **Ledger** - `--ledger PATH` appends JSONL forecast records (recorded time, as-of, method,
-   value, cutoff, alert, snapshot id, config/policy hashes). Existing bytes are never rewritten;
-   invalid records are rejected. Keep the ledger outside the repository checkout.
+10. **Ledger** - `--ledger PATH` appends JSONL forecast records (recorded time, as-of, method,
+    value, cutoff, alert, snapshot id, config/policy hashes). Existing bytes are never rewritten;
+    invalid records are rejected. Keep the ledger outside the repository checkout.
 
 ## CLI
 
@@ -54,11 +82,48 @@ exits with status `2`.
 - Labels, episodes, calibrations, policies, bootstrap draws and ablations are deterministic for a
   given rows input and seed; the report digest is stable across runs.
 - Public tests cover the exact 10% boundary, day 20 vs day 21, pending labels, post-onset and
-  duplicate alerts, calibration preference rules, bootstrap determinism, wording rules, ledger
-  append-only behaviour and CLI/report determinism.
+  duplicate alerts, the strict credit rule (own label, breach ownership, one credit per episode),
+  complete-series average precision with tied scores against `sklearn`, common eligible dates,
+  silent policies, calibration preference rules, bootstrap determinism, wording rules, ledger
+  append-only behaviour and CLI/report determinism (`tests/test_evaluation_contract.py` holds the
+  EV01/A05 contract tests).
 - The opt-in private acceptance computes the full report over the real 9,250-row snapshot and checks
   frozen policies, metric provenance, bootstrap validity, wording, ledger appends and future-suffix
   label causality.
-- Real snapshot reference run: 28 episodes, 9 evaluable held-out episodes, TDA recall 1/9,
-  1.03 false alerts/year, average precision 0.1625, median lead 10 sessions; the evidence rule
-  yields `"Experimental market anomaly"` (the false-alert rate is not below the comparator's).
+- Real snapshot reference run (local private seed, 9,250 rows 1990-01-03..2026-09-30, not in this
+  repository): 28 episodes, 9 evaluable held-out episodes, 3,185 common eligible test sessions
+  (2014-01-02..2026-09-01). TDA recall 1/9 (alert 2022-09-08, onset 2022-09-22, lead 10), 13 false
+  alerts = 1.03/year, median lead 10 sessions, average precision 0.0494 on the complete scored
+  daily series (the alert-only value previously quoted was 0.1625). VIX average precision 0.0677
+  (1 alert, 0 false) and realized volatility 0.0704 (1 alert, 0 false); event prevalence 0.0314.
+  The frozen policies remain the 99th percentile of each method's validation readings (TDA 99.60,
+  VIX 62.94, realized volatility 0.7583) with unchanged policy hashes. The evidence rule yields
+  `"Experimental market anomaly"`: the lower 95% paired bound on the episode-recall gain is not
+  above zero (0.0) and TDA's false-alert rate is above the VIX comparator's (0.0).
+- The public synthetic fixture (`showcase/`, seed 4242) records the same schema but its own
+  numbers: 4 episodes, 3 evaluable held-out episodes, 3,306 common eligible sessions, TDA recall
+  0/3 with average precision 0.0154, VIX recall 1/3 with average precision 0.1187, realized
+  volatility recall 0/3 with average precision 0.0556, and `"Experimental market anomaly"`.
+
+## Known calibration defect (deferred)
+
+The EV01 audit discovered one further defect outside the corrected matching/reporting path:
+`alerts.calibrate_method` reads `pair.episode_start` from an `AlertMatch`, but that attribute does
+not exist (the match exposes `episode_onset` / `episode.start_date`). As a result the calibration
+`matched_count` and calibration episode recall are always `0`, so the documented preference rule
+"maximum episode recall, then fewer false alerts, then the higher cutoff" was effectively dead code
+and the frozen cutoffs were selected on the false-alert count only.
+
+Fixing the attribute name moves the frozen validation cutoffs and the holdout numbers. On the local
+private seed the qualified candidates become TDA 97.5th, VIX 95th and realized-volatility 85th
+percentiles (from 99.0 for all three); the paired holdout TDA result changes from the credited
+1/9 episode to 0/9 because the alert set changes with the lower threshold. The EV01 requirement says
+to preserve the frozen validation cutoffs and holdout reporting, so this fix is **intentionally
+deferred**: v0.9.0 keeps calibration selection byte-identical to the previous release (99th
+percentile policies with unchanged policy hashes). The defect is tracked as a follow-up
+recalibration review; a future release may fix the recall computation, re-freeze the cutoffs and
+regenerate the reports with the corrected selection evidence.
+
+Verification of the deferred item: `python -m topomarket evaluate` with the fix applied produces the
+option-A report recorded during the audit (private cutoffs 97.5 / 95.0 / 85.0, holdout TDA 0/9);
+the adopted option-B report is the one quoted above.

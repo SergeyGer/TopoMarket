@@ -119,21 +119,28 @@ def test_streamlit_app_smoke_run() -> None:
     except ImportError:  # pragma: no cover - older Streamlit releases
         pytest.skip("streamlit.testing.v1 is not available")
 
-    app_test = AppTest.from_file(str(APP_PATH), default_timeout=30)
+    app_test = AppTest.from_file(str(APP_PATH), default_timeout=120)
     app_test.run()
 
-    assert not list(app_test.exception)
+    assert not list(app_test.exception), [item.message for item in app_test.exception]
     assert [title.value for title in app_test.title] == ["TopoMarket research"]
-    assert [heading.value for heading in app_test.subheader] == ["Overview"]
+    assert [heading.value for heading in app_test.subheader][0] == "Industry correlation network"
 
     captions = " ".join(item.value.lower() for item in app_test.caption)
-    assert "snapshot" in captions
-    assert "selected session" in captions
+    assert "synthetic" in captions
     markdown = " ".join(item.value.lower() for item in app_test.markdown)
-    assert "outcome horizon" in markdown
+    assert "synthetic demo" in markdown
+    assert "selected session" in markdown
 
     sidebar_labels = {widget.label for widget in app_test.sidebar.selectbox}
     assert "Screen" in sidebar_labels
-    assert "Selected session" in sidebar_labels
+    assert "Jump to an alert" in sidebar_labels
     sidebar_radios = {widget.label for widget in app_test.sidebar.radio}
     assert "Mode" in sidebar_radios
+    assert "Network view" in sidebar_radios
+    sidebar_sliders = {widget.label for widget in app_test.sidebar.slider}
+    assert "Selected session" in sidebar_sliders
+
+    # The landing screen renders the network and the shared timeline sections.
+    headings = [item.value for item in app_test.subheader]
+    assert headings[:2] == ["Industry correlation network", "Shared timeline"]

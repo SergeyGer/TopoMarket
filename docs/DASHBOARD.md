@@ -1,4 +1,4 @@
-# Interactive research dashboard (Step 7)
+# Interactive research dashboard (v1.0: Structure and Replay)
 
 The Streamlit shell has four screens over one persistent global selection.
 
@@ -6,7 +6,7 @@ The Streamlit shell has four screens over one persistent global selection.
 
 ```bash
 python -m pip install -e ".[ui]"
-streamlit run app.py -- --profile demo
+streamlit run app.py                      # public synthetic showcase, no flags
 streamlit run app.py -- --profile private --data-dir /path/to/data
 ```
 
@@ -15,30 +15,39 @@ four-screen dashboard summary and exits 0.
 
 ## Screens
 
-- **Overview** - latest/replay mode, session date, score percentile (0-100 or an explicit
-  unavailable reason), frozen cutoff status (above/below + cutoff/policy hash), source dates, the
-  20-session outcome horizon and pending-label state, evidence wording when a frozen evaluation run
-  is available.
-- **Topology** - selected 60-session window, delay-cloud/PCA projection and H0/H1 barcode summary,
-  12-industry cloud and Mapper graph, linked member inspector (birth/death/lifetime, members,
-  member correlations), 2D default with an optional 3D toggle.
-- **Validation** - frozen evaluation runs discovered under `reports/evaluation*.json`; metrics,
-  bootstrap uncertainty, periods/eligibility/counts, settings and evidence status; drill-down into
-  matched/missed/false alerts with a CSV export table; explicit empty state when no frozen run
-  exists.
-- **Data** - import preview per source (row counts, first/last observation), active snapshot id,
-  selected refresh status with last attempt/success/failures, revisions, schema/units/coverage,
-  snapshots and warnings/failures.
+- **Structure** (landing) - the 12-industry Pearson correlation network (fixed positions, trailing
+  60 valid returns, fixed `r >= 0.80` cutoff, `n/66` accounting, node-degree inspector), the Mapper
+  view of the same window (volatility-band placement, node area = members, edge width = overlap,
+  member/edge inspectors), the shared S&P 500 / VIX / score timeline (aligned panels, shared cursor,
+  frozen threshold, symbol+text alert markers, VIX gaps), and the score explanation (56-point Takens
+  window dim 3/lag 2, display-coordinate scatter, H1 birth-death diagram with the longest finite
+  lifetime highlighted, industry PCA scatter). Four deterministic presets (quiet, stress
+  transition, matched warning, missed/late warning) are bound to verified dates and a fixture id.
+- **Replay** - blind score/price history at the cutoff, explicit reveal of the next 20 S&P 500
+  sessions (origin close, 10% boundary, lowest close, first breach, maximum decline, pending state),
+  hide removes the payload, reveal resets on date navigation.
+- **Validation** - frozen evaluation runs discovered under `reports/evaluation*.json` with the
+  corrected credit rule and complete-series average precision, common eligible dates, bootstrap
+  uncertainty, limitations, evidence wording, drill-down matched/missed/false examples and a CSV
+  export; explicit empty state when no frozen run exists.
+- **Data** - independent S&P 500 price, VIX and industry-return calendars (ranges, gaps, stale-map
+  marker), active snapshot, source coverage, last refresh outcome/failures, revisions,
+  schema/units, read-only public mode and the private-only validated refresh action.
 
-## Replay safety
+## Replay safety (RE01)
 
-Replay is blind by default. **Reveal next 20 sessions** adds only the outcome layer for the current
-selection; **Hide outcome** returns to the blind view. Revealing never changes scores, cutoffs,
-features or windows. A blind payload contains no future outcomes or backdated live forecasts.
+The selected date is authoritative: it is applied before any payload is built and every trace,
+window and inspector is sliced at the cutoff. Replay is blind by default. **Reveal next 20
+sessions** adds only the outcome layer for the current selection; **Hide outcome** returns to the
+blind view. Revealing never changes scores, cutoffs, features or windows, and the reveal state
+resets on navigation while the date persists across screens. A blind payload contains no
+post-cutoff observations, outcome labels or future-dated preset entries; mutation tests rewrite
+every post-cutoff row and assert the blind payload is unchanged.
 
 ## Global selection and keyboard
 
-Screen, mode (latest/replay), date, replay reveal, member and evaluation run persist across screens.
+Screen, mode (latest/replay), date, replay reveal, network view, selected edge, member and
+evaluation run persist across screens.
 A single "Advanced controls" area holds secondary controls. Keyboard equivalents: previous/next
 session, previous/next window, reveal, blind and member previous/next (Alt+Arrow,
 Alt+PageUp/PageDown, Alt+R, Alt+B, Alt+M). The pure selection/keyboard API is testable without
@@ -46,18 +55,21 @@ Streamlit (`topomarket.ui.dashboard`).
 
 ## Accessibility and visual acceptance
 
-- Neutral canvas, teal market line, amber benchmark; alert marks carry both a shape and text.
-- WCAG contrast tokens: text pairs are checked at >= 4.5:1; colour helpers are in
-  `topomarket.ui.accessibility`.
-- Labelled inputs, chart/table text alternatives, focus indicators, reduced-motion CSS support,
-  2D-default/optional-3D cloud, responsive layout for desktop (1440 px) and narrow (390 px)
-  viewports.
-- Charts expose a table alternative; evaluation/data tables include textual summaries.
+- Neutral canvas, teal market series, amber benchmark/threshold/alert; alert marks carry both a
+  symbol and text, never colour alone.
+- Shared theme tokens in `topomarket.ui.theme`; WCAG AA contrast pairs are asserted in
+  `tests/test_theme.py` (>= 4.5:1 for text).
+- Labelled inputs, chart/table text alternatives, focus indicators, reduced-motion CSS support and
+  responsive layout for desktop (1440 px) and narrow (390 px) viewports; the node inspector appears
+  below the map when panels stack.
+- Fixed graph positions across date changes; only meaningful edge/marker changes animate.
+- Chart builders live in `topomarket.ui.charts` and are tested offline; evaluation/data tables
+  include textual summaries.
 
 ## Performance
 
-Cached date changes must stay within p95 <= 500 ms over 100 changes; cached demo startup within 5 s
-on the 2-vCPU/4-GB reference machine. `topomarket.ui.performance` provides
+Cached date changes must stay within p95 <= 500 ms over 100 changes; the cold public startup is
+measured separately and the reference run records it in the payload. `topomarket.ui.performance` provides
 `measure_cached_date_changes` and `measure_dashboard_startup`; both return the measured values plus
 Python/platform/package/NumPy/Ripser versions and build metadata. Public tests assert both limits;
 the opt-in private acceptance exercises the real 9,250-row snapshot for replay, keyboard and data
@@ -65,10 +77,13 @@ provenance, and the cached-date bound on real dates.
 
 ## Evidence (reference run)
 
-- Public tests: selection/accessibility foundation, screen payloads, replay safety, rendering with
-  an injected fake Streamlit module, performance thresholds, CLI compatibility.
+- Public tests: selection/accessibility foundation, payload builders for every screen, replay safety
+  (including mutation-based A03 checks), chart builders, rendering with an injected fake Streamlit
+  module, real AppTest flows, performance thresholds, CLI compatibility.
 - Private acceptance: real March 2020 replay blind -> reveal -> blind with identical score/cutoff,
   data-screen provenance (active snapshot, per-source first/last observations), keyboard
   date/member selection, cached p95 <= 500 ms over 100 real-date changes.
-- Reference benchmark measured on this checkout: cached date-change p95 well below 500 ms and demo
-  startup well below 5 s; the measured values/environment are recorded in the benchmark payload.
+- Reference benchmark measured on this checkout (Python 3.12.3, 60 warmed dates): cached
+  date-change p50 0.030 ms / p95 0.061 ms (limit 500 ms); first payload build in a warm process
+  ~0.75 s. The measured values/environment are recorded in the benchmark payload and in
+  `docs/ACCEPTANCE_v0.9.md`.

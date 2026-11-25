@@ -3,6 +3,54 @@
 Release notes per implementation step. TopoMarket identifies releases by step number and semantic
 version; no release dates or schedules are published in repository content.
 
+## v0.9.0 - Upgrade: Structure/Replay experience and evaluation integrity
+
+- **One authoritative selected session (RE01).** The selected date is applied before any payload is
+  built; history, network windows and alerts are sliced at the cutoff, blind replay no longer emits
+  dates after it, and reveal state resets on navigation while the date persists across screens.
+  Blind payload integrity is proven by mutation tests that rewrite every post-cutoff row.
+- **Corrected chronological evaluation (EV01).** An alert is credited only when its own label is
+  positive, its first breach belongs to the matched episode, and the episode onset is 1-20 sessions
+  after the alert (one credit per episode; late/duplicate/pending/false classifications preserved).
+  Average precision is computed over the complete eligible scored series with tie blocks (matches
+  `sklearn.metrics.average_precision_score`); TDA, VIX and realized volatility are compared on common
+  eligible dates; silent-policy fallback records the reason instead of a misleading threshold.
+  Public synthetic report regenerated (scores byte-identical). Local private reference run:
+  9 evaluable held-out episodes, 3,185 common eligible sessions, TDA recall 1/9, 13 false alerts =
+  1.03/year, average precision 0.0494 (full series; alert-only value before the fix was 0.1625);
+  frozen 99th-percentile policies and policy hashes unchanged; wording stays
+  `Experimental market anomaly`. A calibration-recall defect found during the audit is documented as
+  deferred for a follow-up recalibration review.
+- **Independent observation calendars and source status (DA01).** The S&P 500 price calendar drives
+  signal windows, labels and the replay horizon; VIX gaps stay gaps; the industry-return calendar can
+  lag the price calendar and the map reports the date actually shown. The Data screen shows source
+  coverage, last successful refresh, revisions, errors and the private-only validated refresh action;
+  the public demo stays read-only and dependent scores invalidate on snapshot change.
+- **Structure screen (UI01-UI04).** Landing experience with a warmed-up synthetic scene, four
+  deterministic presets (quiet, stress transition, matched warning, missed/late), a fixed-layout
+  12-industry Pearson correlation network (trailing 60 valid returns, fixed `r >= 0.80` cutoff,
+  `n/66` pair count, node inspector), a Mapper view placed by volatility lens band with member
+  inspector and shared-member edges, the shared S&P 500/VIX/score timeline with cursor, frozen
+  threshold, alert markers and stale-map marking, and the score explanation (56-point Takens window,
+  dim 3/lag 2, 2-D display-coordinate scatter, H1 birth-death diagram with the longest finite
+  lifetime, industry PCA scatter).
+- **Replay screen (RE01).** Blind score/price history, explicit reveal of the next 20 S&P 500
+  sessions with origin close, 10% boundary, lowest close, first breach, maximum decline and pending
+  state; hiding removes the payload.
+- **Cloud packaging (CL01/CL02).** Python 3.12 Cloud definition `requirements.txt` (pinned Streamlit,
+  analysis libraries and the matplotlib chart renderer), the public demo defaults to the 5,673-session
+  synthetic showcase with no flags, deterministic payload caching (cached date-change p95 0.06 ms
+  against the 500 ms budget), and a CI `cloud-smoke` job that installs the Cloud definition, imports
+  the app, runs the plain demo and checks the Streamlit health endpoint.
+- **Accessibility and visual behaviour.** Central theme tokens with WCAG AA contrast tests, teal
+  market series / amber threshold, symbol+text alert marks, keyboard-operable inspectors, table/text
+  alternatives for every chart, reduced-motion support and stable graph positions.
+- **Notices, licensing and preview.** Issue #10 closed with the MIT confirmation and a dependency
+  license audit (79 packages, 0 GPL/AGPL); `NOTICE.md` documents the software license and the
+  synthetic-only publication rule; the 1280x640 GitHub social preview and 16:9 opening/end cards are
+  generated from the synthetic fixture by `scripts/build_social_preview.py`.
+- No private data, credentials, ledgers or release dates are committed.
+
 ## v0.8.2 - Operator UI replay visibility
 
 - Overview renders a score-history timeline (recent scored sessions) with the frozen cutoff

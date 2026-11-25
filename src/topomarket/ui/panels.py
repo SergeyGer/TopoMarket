@@ -1,20 +1,21 @@
-"""Pure dashboard data loading and screen payloads for the Step 7 shell.
+"""Pure dashboard data loading and screen payloads for the v1.0 shell.
 
 The module never imports Streamlit and never touches the network.  It loads a
-profile's local data once and builds the four A7 screen payloads for a
+profile's local data once and builds the four screen payloads for a
 :class:`~topomarket.ui.dashboard.DashboardSelection`:
 
-* Overview - selected session, score percentile, frozen cutoff status, horizon
-  and pending-label state;
-* Topology - the 60-session industry cloud/mapper for the selected date, member
-  inspector data, display flags and a replay-only outcome layer;
-* Validation - frozen evaluation runs (metrics, bootstrap, evidence, drill-down
-  tables, CSV-exportable rows);
-* Data - import preview, active snapshot, refresh attempts/failures, revisions,
-  schema/units/coverage and per-source observation ranges.
+* **Structure** - correlation network, Mapper view, shared S&P 500/VIX/score
+  timeline and the Takens/H1/PCA explanation (UI01-UI04);
+* **Replay** - one authoritative selected session with a blind/revealed
+  20-session outcome layer (RE01);
+* **Validation** - frozen evaluation runs with corrected metrics, sample size,
+  false-alert rate, bootstrap uncertainty and evidence wording (EV01);
+* **Data** - independent observation calendars, source coverage, last refresh,
+  revisions and errors (DA01).
 
-Replay safety is enforced here: outcome data is only added when a replay
-selection has ``reveal=True`` and never alters scores, cutoffs or features.
+Replay safety is enforced here: every payload is sliced by the selected session
+before anything is serialised, and the outcome layer only exists when the
+selection explicitly reveals it.
 """
 
 from __future__ import annotations
@@ -22,10 +23,8 @@ from __future__ import annotations
 import csv
 import hashlib
 import json
-import math
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
-from datetime import date
 from pathlib import Path
 from typing import Any
 
@@ -33,39 +32,40 @@ from topomarket.analysis.evaluation import report_digest
 from topomarket.data.normalized import NORMALIZED_TABLE_NAMES
 from topomarket.data.refresh import active_snapshot_id, load_refresh_status, resolve_active_data_dir
 from topomarket.demo.generator import demo_tables
-from topomarket.profiles import load_profile
+from topomarket.profiles import REPOSITORY_ROOT, load_profile
 from topomarket.topology import load_daily_rows
 
-from .accessibility import alert_marker, alternative_text, table_alternative
+from .calendars import build_calendar_status
 from .dashboard import (
-    DEFAULT_WINDOW_SESSIONS,
     SCREENS,
     DashboardSelection,
-    derive_window,
 )
+from .replay import build_replay_payload
+from .structure import build_structure_payload
 
 REPLAY = "replay"
 LIVE = "live"
 OUTCOME_HORIZON = 20
 DRAWDOWN_TARGET = 0.10
+SHOWCASE_DIRNAME = "showcase"
 SCREEN_LABELS = {
-    "overview": "Overview",
-    "topology": "Topology",
+    "structure": "Structure",
+    "replay": "Replay",
     "validation": "Validation",
     "data": "Data",
 }
 SCREEN_TITLES = {
-    "overview": "Overview",
-    "topology": "Topology",
+    "structure": "Structure",
+    "replay": "Replay",
     "validation": "Validation",
     "data": "Data",
 }
-DISPLAY_DEFAULT_2D = True
-DISPLAY_OPTIONAL_3D = True
+DEFAULT_PRIMARY_METHOD = "tda"
 
 __all__ = [
     "DRAWDOWN_TARGET",
     "DashboardData",
+    "DashboardDataError",
     "LIVE",
     "OUTCOME_HORIZON",
     "PanelCache",
@@ -84,7 +84,13 @@ class DashboardDataError(ValueError):
 
 @dataclass
 class DashboardData:
-    """Loaded, read-only dashboard inputs plus lazy topology caches."""
+    """Loaded, read-only dashboard inputs plus lazy topology/preset caches.
+
+    ``session_dates`` is the authoritative signal calendar (S&P 500 price
+    observations).  ``rows`` is the joined tda table used for score/Mapper
+    windows, while ``price_rows`` and ``industry_rows`` keep the independent
+    observation calendars required by DA01.
+    """
 
     profile: str
     data_dir: Path
@@ -92,6 +98,8 @@ class DashboardData:
     session_dates: tuple[str, ...]
     rows: tuple[dict[str, Any], ...]
     snapshot_id: str | None
+    price_rows: tuple[dict[str, Any], ...] = ()
+    industry_rows: tuple[dict[str, Any], ...] = ()
     score_points: tuple[dict[str, Any], ...] = ()
     evaluation_reports: tuple[dict[str, Any], ...] = ()
     evaluation_runs: tuple[dict[str, Any], ...] = ()
@@ -104,6 +112,13 @@ class DashboardData:
     demo: bool = False
     data_signature: str = ""
     _topology_cache: dict[str, dict[str, Any]] = field(default_factory=dict, repr=False)
+    _presets_cache: dict[str, Any] | None = field(default=None, repr=False)
+
+    def __post_init__(self) -> None:
+        if not self.price_rows:
+            self.price_rows = self.rows
+        if not self.industry_rows:
+            self.industry_rows = self.rows
 
     @property
     def date_index(self) -> dict[str, int]:
@@ -111,11 +126,19 @@ class DashboardData:
 
     @property
     def row_by_date(self) -> dict[str, dict[str, Any]]:
-        return dict(zip(self.session_dates, self.rows, strict=True))
+        return {str(row.get("date")): row for row in self.rows if row.get("date")}
+
+    @property
+    def price_by_date(self) -> dict[str, dict[str, Any]]:
+        return {str(row.get("date")): row for row in self.price_rows if row.get("date")}
+
+    @property
+    def industry_by_date(self) -> dict[str, dict[str, Any]]:
+        return {str(row.get("date")): row for row in self.industry_rows if row.get("date")}
 
     @property
     def score_by_date(self) -> dict[str, dict[str, Any]]:
-        return {str(point.get("date")): point for point in self.score_points}
+        return {str(point.get("date")): point for point in self.score_points if point.get("date")}
 
     def selected_date(self, selection: DashboardSelection) -> str:
         if selection.date is not None:
@@ -128,26 +151,50 @@ class DashboardData:
             raise DashboardDataError("dashboard has no sessions for the selected profile")
         return self.session_dates[-1]
 
+    def primary_report(self) -> dict[str, Any] | None:
+        return dict(self.evaluation_reports[0]) if self.evaluation_reports else None
 
-def _business_days(start: date, end: date) -> list[date]:
-    values: list[date] = []
-    current = start
-    while current <= end:
-        if current.weekday() < 5:
-            values.append(current)
-        current += __import__("datetime").timedelta(days=1)
-    return values
+    def primary_method(self) -> str:
+        report = self.primary_report() or {}
+        return str(report.get("primary_method") or DEFAULT_PRIMARY_METHOD)
+
+    def primary_metrics(self) -> dict[str, Any]:
+        report = self.primary_report()
+        if report is None:
+            return {}
+        method = str(report.get("primary_method") or DEFAULT_PRIMARY_METHOD)
+        metrics = (report.get("metrics") or {}).get(method)
+        return dict(metrics) if isinstance(metrics, Mapping) else {}
+
+    def primary_policy(self) -> dict[str, Any] | None:
+        report = self.primary_report()
+        if report is None:
+            return None
+        method = str(report.get("primary_method") or DEFAULT_PRIMARY_METHOD)
+        policy = (report.get("policies") or {}).get(method)
+        return dict(policy) if isinstance(policy, Mapping) else None
 
 
+# --------------------------------------------------------------------------- #
+# Loading helpers
+# --------------------------------------------------------------------------- #
 def _demo_rows() -> list[dict[str, Any]]:
     tables = demo_tables()
     tda = tables.get(NORMALIZED_TABLE_NAMES[2]) if len(NORMALIZED_TABLE_NAMES) > 2 else None
     if tda is None:
         raise DashboardDataError("demo generator does not expose tda_daily")
-    rows: list[dict[str, Any]] = []
-    for row in tda:
-        rows.append({str(key): row[key] for key in row})
-    return rows
+    return [{str(key): row[key] for key in row} for row in tda]
+
+
+def _load_optional_table(data_dir: Path, table: str) -> tuple[dict[str, Any], ...]:
+    path = data_dir / "normalized" / f"{table}.csv"
+    if not path.is_file():
+        return ()
+    try:
+        with path.open(encoding="utf-8", newline="") as handle:
+            return tuple(dict(row) for row in csv.DictReader(handle))
+    except OSError:
+        return ()
 
 
 def _score_file_candidates(data_dir: Path) -> list[Path]:
@@ -218,6 +265,7 @@ def _evaluation_run_summaries(reports: Sequence[Mapping[str, Any]]) -> tuple[dic
             "historical_evidence": bool((report.get("evidence") or {}).get("historical_evidence")),
             "periods": report.get("periods"),
             "methods": report.get("methods"),
+            "primary_method": report.get("primary_method"),
             "config_hash": report.get("config_hash"),
             "package_version": report.get("package_version"),
         }
@@ -306,7 +354,9 @@ def _snapshot_manifests(root: Path) -> tuple[dict[str, Any], ...]:
     return tuple(manifests)
 
 
-def _revisions_from_snapshots(manifests: Sequence[Mapping[str, Any]]) -> tuple[dict[str, Any], ...]:
+def _revisions_from_snapshots(
+    manifests: Sequence[Mapping[str, Any]],
+) -> tuple[dict[str, Any], ...]:
     revisions: list[dict[str, Any]] = []
     for manifest in manifests:
         for revision in manifest.get("revisions") or ():
@@ -320,31 +370,22 @@ def _data_signature(**parts: Any) -> str:
     return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
 
 
-def load_dashboard_data(profile: str = "demo", data_dir: Path | str | None = None) -> DashboardData:
-    """Load the local dashboard inputs for a profile (offline, deterministic)."""
-    resolved = load_profile(profile, data_dir=Path(data_dir) if data_dir is not None else None)
-    if resolved.profile == "demo":
-        rows = tuple(_demo_rows())
-        dates = tuple(str(row.get("date")) for row in rows)
-        signature = _data_signature(
-            profile="demo", rows=len(rows), end=dates[-1] if dates else None
-        )
-        return DashboardData(
-            profile="demo",
-            data_dir=Path(resolved.data_dir),
-            active_data_dir=Path(resolved.data_dir),
-            session_dates=dates,
-            rows=rows,
-            snapshot_id=None,
-            demo=True,
-            data_signature=signature,
-        )
-
-    root = Path(resolved.data_dir)
-    active = resolve_active_data_dir(root)
-    rows = tuple(load_daily_rows(active))
-    dates = tuple(str(row.get("date")) for row in rows)
+def _build_dataset(
+    *,
+    profile: str,
+    root: Path,
+    active: Path,
+    demo: bool,
+) -> DashboardData:
+    rows = tuple(dict(row) for row in load_daily_rows(active))
+    price_rows = _load_optional_table(active, "sp500_daily") or rows
+    industry_rows = _load_optional_table(active, "industries_daily") or rows
+    dates = tuple(str(row.get("date")) for row in price_rows if row.get("date"))
+    if not dates:
+        dates = tuple(str(row.get("date")) for row in rows if row.get("date"))
     import_manifest = _load_import_manifest(active)
+    synthetic_fixture = bool(import_manifest.get("synthetic"))
+    demo = demo or synthetic_fixture
     snapshot_id = active_snapshot_id(root) or (
         str(import_manifest.get("snapshot_id") or "") or None
     )
@@ -354,6 +395,8 @@ def load_dashboard_data(profile: str = "demo", data_dir: Path | str | None = Non
         profile=profile,
         snapshot=snapshot_id,
         row_count=len(rows),
+        price_count=len(price_rows),
+        industry_count=len(industry_rows),
         end=dates[-1] if dates else None,
         reports=len(evaluation_reports),
     )
@@ -364,6 +407,8 @@ def load_dashboard_data(profile: str = "demo", data_dir: Path | str | None = Non
         session_dates=dates,
         rows=rows,
         snapshot_id=snapshot_id,
+        price_rows=tuple(dict(row) for row in price_rows),
+        industry_rows=tuple(dict(row) for row in industry_rows),
         score_points=_load_score_points(active),
         evaluation_reports=evaluation_reports,
         evaluation_runs=_evaluation_run_summaries(evaluation_reports),
@@ -373,270 +418,59 @@ def load_dashboard_data(profile: str = "demo", data_dir: Path | str | None = Non
         sources=_source_summaries(active, import_manifest),
         revisions=_revisions_from_snapshots(manifests),
         snapshots=tuple(manifest.get("snapshot_id") for manifest in manifests),
+        demo=demo,
         data_signature=signature,
     )
 
 
-# --------------------------------------------------------------------------- #
-# Shared helpers
-# --------------------------------------------------------------------------- #
-def session_dates(data: DashboardData) -> tuple[str, ...]:
-    return data.session_dates
+def _showcase_dir() -> Path | None:
+    candidate = REPOSITORY_ROOT / SHOWCASE_DIRNAME
+    if (candidate / "normalized" / "tda_daily.csv").is_file():
+        return candidate
+    return None
 
 
-def _score_value(data: DashboardData, selected: str) -> tuple[float | None, str]:
-    point = data.score_by_date.get(selected)
-    if point is None:
-        return None, "no precomputed TDA score for this session"
-    state = str(point.get("state") or "")
-    if state != "scored":
-        return None, f"score state is {state or 'unknown'}"
-    raw = point.get("score")
-    if raw in (None, ""):
-        return None, "score value is unavailable"
-    try:
-        value = float(raw)
-    except (TypeError, ValueError):
-        return None, "score value is not numeric"
-    if not math.isfinite(value):
-        return None, "score value is not finite"
-    return value, "scored"
+def load_dashboard_data(profile: str = "demo", data_dir: Path | str | None = None) -> DashboardData:
+    """Load the local dashboard inputs for a profile (offline, deterministic).
 
+    The public ``demo`` profile defaults to the committed synthetic showcase
+    fixture (5,673 sessions) so the topology window and the demonstration presets
+    are populated without flags.  If the showcase is not available (for example
+    an installed wheel without the repository checkout) the small bundled
+    synthetic generator is used as a fallback.
+    """
 
-def _close(row: Mapping[str, Any]) -> float | None:
-    raw = row.get("sp500_close")
-    try:
-        value = float(raw)
-    except (TypeError, ValueError):
-        return None
-    return value if math.isfinite(value) else None
-
-
-def _horizon_rows(data: DashboardData, selected: str) -> tuple[dict[str, Any], ...]:
-    index = data.date_index.get(selected)
-    if index is None:
-        return ()
-    return tuple(data.rows[index + 1 : index + 1 + OUTCOME_HORIZON])
-
-
-def _outcome(data: DashboardData, selected: str, origin_close: float | None) -> dict[str, Any]:
-    horizon = _horizon_rows(data, selected)
-    pending = len(horizon) < OUTCOME_HORIZON
-    breach_date: str | None = None
-    breach_close: float | None = None
-    if origin_close is not None:
-        for row in horizon:
-            close = _close(row)
-            if close is not None and close <= origin_close * (1.0 - DRAWDOWN_TARGET):
-                breach_date = str(row.get("date"))
-                breach_close = close
-                break
-    target = None if pending else (1 if breach_date is not None else 0)
-    return {
-        "horizon_sessions": len(horizon),
-        "required_sessions": OUTCOME_HORIZON,
-        "pending": pending,
-        "target": target,
-        "breach_date": breach_date,
-        "breach_close": breach_close,
-        "dates": [str(row.get("date")) for row in horizon],
-        "closes": [_close(row) for row in horizon],
-    }
-
-
-def _policy_for(report: Mapping[str, Any] | None, method: str = "tda") -> dict[str, Any] | None:
-    if not isinstance(report, Mapping):
-        return None
-    policies = report.get("policies") or {}
-    policy = policies.get(method)
-    return dict(policy) if isinstance(policy, Mapping) else None
-
-
-def _selected_report(data: DashboardData, selection: DashboardSelection) -> dict[str, Any] | None:
-    if not data.evaluation_reports:
-        return None
-    if selection.run is not None:
-        for report in data.evaluation_reports:
-            if str(report.get("run_id")) == str(selection.run):
-                return dict(report)
-        raise DashboardDataError(f"unknown evaluation run {selection.run!r}")
-    return dict(data.evaluation_reports[0])
-
-
-def _score_status(score: float | None, policy: Mapping[str, Any] | None) -> dict[str, Any]:
-    if score is None:
-        return {"state": "unavailable", "cutoff": None, "policy_hash": None}
-    if policy is None:
-        return {"state": "no_frozen_policy", "cutoff": None, "policy_hash": None}
-    raw_cutoff = policy.get("cutoff")
-    try:
-        cutoff = float(raw_cutoff)
-    except (TypeError, ValueError):
-        return {"state": "no_frozen_policy", "cutoff": None, "policy_hash": None}
-    state = "above" if score >= cutoff else "below"
-    return {
-        "state": state,
-        "cutoff": cutoff,
-        "policy_hash": policy.get("policy_hash"),
-        "method": policy.get("method", "tda"),
-        "percentile": policy.get("percentile"),
-    }
-
-
-def _score_history(data: DashboardData, *, limit: int = 120) -> list[dict[str, Any]]:
-    """Recent scored sessions for the Overview timeline (deterministic order)."""
-
-    history: list[dict[str, Any]] = []
-    for session in data.session_dates[-limit:]:
-        point = data.score_by_date.get(session)
-        if not point or str(point.get("state") or "") != "scored":
-            continue
-        raw = point.get("score")
-        try:
-            value = float(raw)
-        except (TypeError, ValueError):
-            continue
-        if not math.isfinite(value):
-            continue
-        history.append({"date": session, "score": value})
-    return history
+    resolved = load_profile(profile, data_dir=Path(data_dir) if data_dir is not None else None)
+    if resolved.profile == "demo" and data_dir is None:
+        showcase = _showcase_dir()
+        if showcase is not None:
+            return _build_dataset(profile="demo", root=showcase, active=showcase, demo=True)
+        rows = tuple(_demo_rows())
+        dates = tuple(str(row.get("date")) for row in rows)
+        return DashboardData(
+            profile="demo",
+            data_dir=Path(resolved.data_dir),
+            active_data_dir=Path(resolved.data_dir),
+            session_dates=dates,
+            rows=rows,
+            price_rows=rows,
+            industry_rows=rows,
+            snapshot_id=None,
+            demo=True,
+            data_signature=_data_signature(
+                profile="demo", rows=len(rows), end=dates[-1] if dates else None
+            ),
+        )
+    root = Path(resolved.data_dir)
+    active = resolve_active_data_dir(root)
+    return _build_dataset(
+        profile=str(resolved.profile), root=root, active=active, demo=resolved.profile == "demo"
+    )
 
 
 # --------------------------------------------------------------------------- #
 # Screen payloads
 # --------------------------------------------------------------------------- #
-def _overview_payload(
-    data: DashboardData, selection: DashboardSelection, selected: str
-) -> dict[str, Any]:
-    row = data.row_by_date[selected]
-    close = _close(row)
-    score, reason = _score_value(data, selected)
-    report = _selected_report(data, selection)
-    policy = _policy_for(report)
-    horizon = _outcome(data, selected, close)
-    mode = str(selection.mode)
-    return {
-        "screen": "overview",
-        "title": SCREEN_TITLES["overview"],
-        "mode": mode,
-        "date": selected,
-        "source_date": selected,
-        "row": {
-            "date": selected,
-            "sp500_close": close,
-            "vix_close": row.get("vix_close"),
-        },
-        "score": {
-            "value": score,
-            "percentile_units": score,
-            "state": "scored" if score is not None else "unavailable",
-            "reason": reason,
-            "cutoff_status": _score_status(score, policy),
-        },
-        "score_history": _score_history(data),
-        "data_source": "synthetic demo" if data.demo else "private research",
-        "snapshot_id": data.snapshot_id,
-        "horizon": {
-            "sessions": horizon["horizon_sessions"],
-            "required": horizon["required_sessions"],
-            "pending": horizon["pending"],
-            "pending_labels": horizon["pending"],
-            "target": horizon["target"],
-        },
-        "evidence": {
-            "wording": (report or {}).get("evidence", {}).get("wording") if report else None,
-            "historical_evidence": bool(
-                (report or {}).get("evidence", {}).get("historical_evidence")
-            )
-            if report
-            else False,
-            "run_id": (report or {}).get("run_id"),
-        },
-        "replay": {
-            "blind": mode == REPLAY and not selection.reveal,
-            "reveal_available": mode == REPLAY,
-            "revealed": bool(mode == REPLAY and selection.reveal),
-        },
-        "accessible_summary": alternative_text(
-            f"Overview for session {selected}",
-            description=(
-                f"Selected session overview; score {score if score is not None else 'unavailable'}"
-            ),
-        ),
-    }
-
-
-def _topology_payload(
-    data: DashboardData, selection: DashboardSelection, selected: str
-) -> dict[str, Any]:
-    window = derive_window(data.session_dates, selected, DEFAULT_WINDOW_SESSIONS)
-    base: dict[str, Any] = {
-        "screen": "topology",
-        "title": SCREEN_TITLES["topology"],
-        "mode": str(selection.mode),
-        "date": selected,
-        "window": list(window),
-        "window_sessions": len(window),
-        "required_sessions": DEFAULT_WINDOW_SESSIONS,
-        "available": len(window) == DEFAULT_WINDOW_SESSIONS,
-        "display": {
-            "default_projection": "2d",
-            "optional_3d": DISPLAY_OPTIONAL_3D,
-            "default_2d": DISPLAY_DEFAULT_2D,
-        },
-        "member": selection.member,
-        "snapshot_id": data.snapshot_id,
-    }
-    if not base["available"]:
-        base["reason"] = (
-            f"needs {DEFAULT_WINDOW_SESSIONS} sessions, selected window has {len(window)}"
-        )
-        base["outcome"] = None
-        return base
-
-    cache_key = f"topology:{selected}"
-    payload = data._topology_cache.get(cache_key)
-    if payload is None:
-        from topomarket.analysis import industry_explorer_payload
-
-        payload = industry_explorer_payload(list(data.rows), as_of=selected)
-        data._topology_cache[cache_key] = payload
-    base["cloud"] = payload.get("cloud")
-    base["mapper"] = payload.get("mapper")
-    nodes = (payload.get("mapper") or {}).get("nodes") or ()
-    selected_node = None
-    if selection.member:
-        for node in nodes:
-            members = node.get("members") or ()
-            if selection.member in members or selection.member in (
-                node.get("member_columns") or ()
-            ):
-                selected_node = dict(node)
-                break
-    if selected_node is None and nodes:
-        selected_node = dict(nodes[0])
-    base["selected_node"] = selected_node
-    base["member_inspector"] = {
-        "member": selection.member,
-        "node_id": (selected_node or {}).get("id"),
-        "members": list((selected_node or {}).get("members") or ()),
-        "member_correlations": (selected_node or {}).get("member_correlations") or "Not applicable",
-        "member_volatilities": (selected_node or {}).get("member_volatilities"),
-    }
-    cloud_payload = payload.get("cloud") or {}
-    h1_intervals = cloud_payload.get("h1") or []
-    base["accessible_summary"] = alternative_text(
-        f"Topology window {window[0]} to {window[-1]}",
-        description=f"{len(h1_intervals)} H1 interval(s) for the selected window",
-    )
-    if bool(selection.mode == REPLAY and selection.reveal):
-        close = _close(data.row_by_date[selected])
-        base["outcome"] = _outcome(data, selected, close)
-    else:
-        base["outcome"] = None
-    return base
-
-
 def _validation_payload(data: DashboardData, selection: DashboardSelection) -> dict[str, Any]:
     base: dict[str, Any] = {
         "screen": "validation",
@@ -645,35 +479,44 @@ def _validation_payload(data: DashboardData, selection: DashboardSelection) -> d
         "selected_run_id": selection.run,
         "snapshot_id": data.snapshot_id,
     }
-    report = _selected_report(data, selection)
+    report = data.primary_report()
+    if selection.run is not None:
+        for candidate in data.evaluation_reports:
+            if str(candidate.get("run_id")) == str(selection.run):
+                report = dict(candidate)
+                break
+        else:
+            raise DashboardDataError(f"unknown evaluation run {selection.run!r}")
     if report is None:
-        base["available"] = False
-        base["empty_state"] = (
-            "No frozen evaluation run is available for this data directory. "
-            "Run `topomarket evaluate --report-out reports/evaluation.json` first."
+        base.update(
+            {
+                "available": False,
+                "empty_state": (
+                    "No frozen evaluation run is available for this data directory. "
+                    "Run `topomarket evaluate --report-out reports/evaluation.json` first."
+                ),
+                "export_table": {"columns": [], "rows": []},
+                "metrics": {},
+                "evidence": {},
+            }
         )
-        base["export_table"] = {"columns": [], "rows": []}
         return base
-    base["available"] = True
-    base["run_id"] = report.get("run_id")
-    base["evidence"] = report.get("evidence")
-    base["periods"] = report.get("periods")
-    base["bootstrap"] = report.get("bootstrap")
-    base["policies"] = report.get("policies")
-    base["calibrations"] = report.get("calibrations")
-    base["config_hash"] = report.get("config_hash")
-    base["seed"] = report.get("seed")
-    base["episode_count"] = report.get("episode_count")
-    base["resolved_episode_count"] = report.get("resolved_episode_count")
-    base["censored_episodes"] = report.get("censored_episodes")
-    base["purged_validation_sessions"] = report.get("purged_validation_sessions")
-    metrics = report.get("metrics") or {}
-    base["metrics"] = {method: dict(value) for method, value in metrics.items()}
+    metrics = {
+        method: dict(value)
+        for method, value in (report.get("metrics") or {}).items()
+        if isinstance(value, Mapping)
+    }
+    primary = str(report.get("primary_method") or DEFAULT_PRIMARY_METHOD)
+    primary_metrics = metrics.get(primary) or {}
+    evidence = dict(report.get("evidence") or {})
+    limitations = list(evidence.get("limitations") or ())
     examples = report.get("examples") or {}
     drilldown: dict[str, Any] = {}
     table_rows: list[list[Any]] = []
     columns = ["kind", "method", "date", "episode_onset", "lead_sessions"]
     for method, payload in examples.items():
+        if not isinstance(payload, Mapping):
+            continue
         matched = list(payload.get("matched") or ())
         missed = list(payload.get("missed") or ())
         false_alerts = list(payload.get("false_alerts") or ())
@@ -696,124 +539,81 @@ def _validation_payload(data: DashboardData, selection: DashboardSelection) -> d
             table_rows.append(["missed", method, None, entry.get("episode_onset"), None])
         for date_value in false_alerts:
             table_rows.append(["false_alert", method, date_value, None, None])
-    base["drilldown"] = drilldown
-    base["export_table"] = {"columns": columns, "rows": table_rows}
-    base["table_alternative"] = table_alternative(
-        "Evaluation alerts and episodes",
-        columns=columns,
-        rows=[tuple(row) for row in table_rows],
+    base.update(
+        {
+            "available": True,
+            "run_id": report.get("run_id"),
+            "evidence": evidence,
+            "wording": evidence.get("wording"),
+            "historical_evidence": bool(evidence.get("historical_evidence")),
+            "limitations": limitations,
+            "periods": report.get("periods"),
+            "bootstrap": report.get("bootstrap"),
+            "policies": report.get("policies"),
+            "calibrations": report.get("calibrations"),
+            "config_hash": report.get("config_hash"),
+            "package_version": report.get("package_version"),
+            "seed": report.get("seed"),
+            "primary_method": primary,
+            "comparator_method": report.get("comparator_method"),
+            "methods": list(metrics),
+            "label_counts": report.get("label_counts"),
+            "episode_count": report.get("episode_count"),
+            "resolved_episode_count": report.get("resolved_episode_count"),
+            "censored_episodes": report.get("censored_episodes"),
+            "purged_validation_sessions": report.get("purged_validation_sessions"),
+            "metrics": metrics,
+            "primary_metrics": primary_metrics,
+            "sample_size": {
+                "episode_count": primary_metrics.get("episode_count"),
+                "eligible_sessions": primary_metrics.get("eligible_sessions"),
+                "matched_count": primary_metrics.get("matched_count"),
+                "label_counts": report.get("label_counts"),
+            },
+            "false_alert_rate": primary_metrics.get("false_alerts_per_year"),
+            "average_precision": primary_metrics.get("average_precision"),
+            "percentile_note": "The score percentile is a comparative score; the forecast is an "
+            "experiment and is not a trading recommendation.",
+            "drilldown": drilldown,
+            "export_table": {"columns": columns, "rows": table_rows},
+            "table_alternative": _evaluation_table(columns, table_rows),
+        }
     )
     return base
 
 
+def _evaluation_table(columns: Sequence[str], rows: Sequence[Sequence[Any]]) -> str:
+    lines = [", ".join(str(column) for column in columns)]
+    for row in rows:
+        lines.append(", ".join("" if value is None else str(value) for value in row))
+    return "\n".join(lines)
+
+
 def _data_payload(data: DashboardData, selection: DashboardSelection) -> dict[str, Any]:
-    status = data.refresh_status or {}
-    sources = [dict(source) for source in data.sources]
-    status_sources = status.get("sources") or {}
-    for source in sources:
-        source_status = status_sources.get(source.get("source_id"), {})
-        source["last_attempt_at"] = source_status.get("last_attempt_at")
-        source["last_success_at"] = source_status.get("last_success_at")
-        source["attempt_outcome"] = source_status.get("outcome")
-        source["attempt_error"] = source_status.get("error")
-    failures = [
-        source
-        for source in sources
-        if source.get("attempt_outcome") in {"failed", "optional_failed"}
-    ]
-    schema_tables = data.normalized_schema.get("tables") or {}
-    coverage = {}
-    for name in NORMALIZED_TABLE_NAMES:
-        table_payload = schema_tables.get(name) or {}
-        rows = (data.import_manifest.get("normalized_row_counts") or {}).get(name)
-        coverage[name] = {
-            "row_count": rows,
-            "columns": list((table_payload.get("columns") or ())[:0])
-            or list(table_payload.get("columns") or ()),
-            "units": table_payload.get("units"),
-        }
-    return {
-        "screen": "data",
-        "title": SCREEN_TITLES["data"],
-        "profile": data.profile,
-        "data_dir": str(data.data_dir),
-        "active_data_dir": str(data.active_data_dir),
-        "active_snapshot_id": data.snapshot_id,
-        "snapshots": list(data.snapshots),
-        "snapshot_id": data.snapshot_id,
-        "sources": sources,
-        "failures": failures,
-        "revisions": [dict(value) for value in data.revisions[:100]],
-        "revision_count": len(data.revisions),
-        "refresh": {
-            "updated_at_utc": status.get("updated_at_utc"),
-            "published": status.get("published"),
-            "error": status.get("error"),
-            "warnings": list(status.get("warnings") or ()),
-        },
-        "schema": {
-            "schema_version": data.normalized_schema.get("schema_version"),
-            "tables": {
-                name: {
-                    "columns": list(table_payload.get("columns") or ()),
-                    "units": table_payload.get("units"),
-                }
-                for name, table_payload in schema_tables.items()
-            },
-        },
-        "coverage": coverage,
-        "import_manifest": {
-            "source_ids": list(data.import_manifest.get("source_ids") or ()),
-            "row_counts": data.import_manifest.get("row_counts") or {},
-            "normalized_row_counts": data.import_manifest.get("normalized_row_counts") or {},
-            "latest_data_date": data.import_manifest.get("latest_data_date"),
-        },
-        "selected_date": selection.date,
-        "table_alternative": table_alternative(
-            "Data sources and refresh state",
-            columns=[
-                "source",
-                "rows",
-                "first",
-                "last",
-                "last_attempt",
-                "last_success",
-                "outcome",
-            ],
-            rows=[
-                (
-                    source.get("source_id"),
-                    source.get("row_count"),
-                    source.get("first_observation"),
-                    source.get("last_observation"),
-                    source.get("last_attempt_at"),
-                    source.get("last_success_at"),
-                    source.get("attempt_outcome"),
-                )
-                for source in sources
-            ],
-        ),
-        "alert_marker": alert_marker("warning", "refresh attention")
-        if failures
-        else alert_marker("success", "sources healthy"),
-    }
+    payload = build_calendar_status(data)
+    payload["selected_date"] = selection.date
+    payload["screen"] = "data"
+    payload["title"] = SCREEN_TITLES["data"]
+    return payload
 
 
 def build_screen_payloads(
     data: DashboardData, selection: DashboardSelection
 ) -> dict[str, dict[str, Any]]:
     """Build all four screen payloads for a selection."""
+
     if not isinstance(data, DashboardData):
         raise DashboardDataError("build_screen_payloads requires DashboardData")
     if not isinstance(selection, DashboardSelection):
         raise DashboardDataError("build_screen_payloads requires DashboardSelection")
     selected = data.selected_date(selection)
     payloads = {
-        "overview": _overview_payload(data, selection, selected),
-        "topology": _topology_payload(data, selection, selected),
+        "structure": build_structure_payload(data, selection),
+        "replay": build_replay_payload(data, selection),
         "validation": _validation_payload(data, selection),
         "data": _data_payload(data, selection),
     }
+    payloads["structure"]["selected"] = selected
     for screen in SCREENS:
         payloads.setdefault(screen, {"screen": screen, "title": SCREEN_TITLES[screen]})
     return payloads
@@ -828,7 +628,6 @@ class PanelCache:
     def __init__(self, data: DashboardData) -> None:
         self.data = data
         self._payload_cache: dict[tuple[Any, ...], dict[str, dict[str, Any]]] = {}
-        self._topology_cache: dict[str, dict[str, Any]] = {}
         self.hits = 0
         self.misses = 0
 
@@ -840,6 +639,9 @@ class PanelCache:
             bool(selection.reveal),
             selection.member,
             selection.run,
+            str(selection.network_view),
+            selection.edge,
+            self.data.data_signature,
         )
 
     def get(self, selection: DashboardSelection) -> dict[str, dict[str, Any]]:
@@ -856,7 +658,12 @@ class PanelCache:
 
     def invalidate(self) -> None:
         self._payload_cache.clear()
-        self._topology_cache.clear()
+        self.data._topology_cache.clear()
+        self.data._presets_cache = None
+
+
+def session_dates(data: DashboardData) -> tuple[str, ...]:
+    return data.session_dates
 
 
 __all__ = [

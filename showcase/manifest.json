@@ -12,8 +12,8 @@
   "hashes": {
     "normalized/tda_daily.csv": "07e71c8ea2022e096534f9406647d3697f94138b3d345973c65b58575cdd2f65",
     "scores.csv": "43eb3ed7d0f6e8905fcd8ac8de0300759a267650ab3394947cc6da44785fb95d",
-    "scores.csv.meta.json": "e252ced683f6c8406c1ab5ab359f469c608a303b07e166022260e79d560ef9c2",
-    "reports/evaluation-showcase.json": "47160a19d02f09a2cf9ab8a0e5985069131b6e21da7fb161a388e4d227eb6547",
+    "scores.csv.meta.json": "f16e9112a21856ccbadf58d21ce76e85c56fc58dfb0008cc7981fb147f66b8e3",
+    "reports/evaluation-showcase.json": "9a676712f2462b5c979ade85441d218099dfc8e26029f70e007c2ab3d4ec4c9f",
     "import_manifest.json": "10d3a53bb939e89ad1e3e0ce4d65a58cc751ef27f321c671e416c33b5c3828e4",
     "parser_reports.json": "6cec2d8251dc817684a01fe9120b082cd845b1eb63cd567045ac3444f6a087f5",
     "normalized/schemas.json": "15504e7d5ea766903a66ab0e3641f34b4dc70401250d7a6c59604a1383307109"

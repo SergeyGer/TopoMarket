@@ -15,17 +15,6 @@
       "metric": "euclidean",
       "algorithm_version": "tda-v1"
     },
-    "config_hash": "b3ef6026ace7e758d8ca05bf6df16189472670ea716bf8f54a827625e10c175d",
-    "window_sessions": 60,
-    "embedding_dimension": 3,
-    "lag": 2,
-    "max_homology_dimension": 1,
-    "homology_coeff_field": 2,
-    "min_interval": 1e-08,
-    "normalization": "robust",
-    "reference_window": 252,
-    "score_scale": 100.0,
-    "metric": "euclidean",
-    "algorithm_version": "tda-v1"
+    "config_hash": "b88c1e95e4a35038d52fd71afe2fe8fe9a268b7329a3d28092c4b657bf24e351"
   }
 }

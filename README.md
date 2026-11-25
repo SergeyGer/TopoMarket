@@ -11,6 +11,12 @@ within the next 20 index sessions**. The application ships with a credential-fre
 and a private-research profile; a working dashboard and a positive forecasting result are separate
 release decisions.
 
+**Live demo:** <https://topomarket-juhbvrgk2k67pnr6qbpfmc.streamlit.app/> ·
+**Local one-command demo:** `streamlit run app.py` (bundled synthetic showcase, no key) ·
+**Demo video:** coming in the v1.0 release (production assets under `docs/video/`).
+
+![TopoMarket social preview](docs/assets/social_preview.png)
+
 ## Status
 
 | Step | Scope | State |
@@ -21,8 +27,14 @@ release decisions.
 | 4 | Persistent homology: delay embeddings, H0/H1, midrank scores, frozen configurations (A4) | **Delivered** |
 | 5 | Industry explorer: 60×12 cloud and Mapper graph (A5) | **Delivered** |
 | 6 | Chronological evaluation: labels, events, alert policy, uncertainty, private ledger (A6) | **Delivered** |
-| 7 | Interactive dashboard: four screens, global date selection, accessibility (A7) | Planned |
+| 7 | Interactive dashboard: four screens, global date selection, accessibility (A7) | **Delivered** |
 | 8 | Package and rehearse the GitHub release (A8) | **Delivered** |
+| 9 | Upgrade: authoritative replay date, independent calendars, corrected evaluation, Structure/Replay experience, Community Cloud packaging (v0.9.0) | **Delivered** |
+| 10 | Demo video, frozen presets, hosted release and final v1.0 publication | **In progress** |
+
+The v1.0 upgrade plan, defects closed and the build sequence live in
+[docs/UPGRADE.md](docs/UPGRADE.md); the tracked work is GitHub milestone *Upgrade v1.0* and
+epic [#22](https://github.com/SergeyGer/TopoMarket/issues/22).
 
 Detailed acceptance criteria live in the GitHub Issues and milestones for each step; the technical reference is the [project Wiki](https://github.com/SergeyGer/TopoMarket/wiki).
 
@@ -36,8 +48,10 @@ cd TopoMarket
 python -m venv .venv
 source .venv/bin/activate        # Windows: .venv\Scripts\activate
 python -m pip install --upgrade pip
-pip install -e ".[dev]"
+pip install -e ".[dev,ui]"
 ```
+
+`.[ui]` adds Streamlit and the chart renderer; the CLI and the analysis package work without them.
 
 Run the deterministic synthetic demo (no network, no credentials, no private data):
 
@@ -45,8 +59,11 @@ Run the deterministic synthetic demo (no network, no credentials, no private dat
 topomarket demo
 topomarket demo --json
 
-# Streamlit shell (synthetic demo profile)
-streamlit run app.py -- --profile demo
+# Streamlit application: the public synthetic showcase, no flags needed
+streamlit run app.py
+
+# Local private research profile (user-supplied data outside the repository)
+streamlit run app.py -- --profile private --data-dir /path/to/data
 ```
 
 CLI reference:
@@ -72,7 +89,8 @@ python -m build
 python -m twine check dist/*
 ```
 
-The repository ships a deterministic dependency lock (`requirements.lock`), a release workflow
+The repository ships a deterministic development lock (`requirements.lock`), an effective Streamlit
+Community Cloud definition (`requirements.txt`, pinned, Python 3.12), a release workflow
 (`.github/workflows/release.yml`) that runs the public suite with a retained JUnit report, builds and
 validates sdist/wheel artifacts (including packaged JSON resources and a private-input guard) and a
 synthetic public walkthrough. `CHANGELOG.md` records each step; releases are tagged `v0.x.0` with no
@@ -80,32 +98,44 @@ release dates in repository content. The committed `showcase/` fixture is fully 
 reviewer launch the dashboard, follow a replay and inspect an alert without any key. See
 [docs/RELEASING.md](docs/RELEASING.md) and [docs/WALKTHROUGH.md](docs/WALKTHROUGH.md).
 
-## Interactive dashboard (Step 7)
+## Structure and Replay experience (v1.0)
 
 ```bash
 pip install -e ".[ui]"
-streamlit run app.py -- --profile demo
+streamlit run app.py                      # public synthetic showcase (5,673 sessions)
 streamlit run app.py -- --profile private --data-dir /path/to/data
 ```
 
-Four screens share one persistent selection: **Overview** (latest/replay session, score percentile,
-frozen cutoff status, 20-session horizon and pending labels), **Topology** (60-session industry
-cloud/PCA, persistence barcode, Mapper graph with linked member inspector, optional 3D view),
-**Validation** (frozen evaluation runs, metrics, bootstrap uncertainty, evidence status, drill-down
-and CSV export) and **Data** (import preview, active snapshot, refresh attempts/failures,
-revisions, schema/units/coverage). Replay is blind by default: "Reveal next 20 sessions" unlocks
-only the outcome layer for the current selection and can be hidden again; it never changes scores,
-cutoffs or features. Validation runs are discovered from `reports/evaluation*.json` written by
-`topomarket evaluate --report-out`.
+The release opens directly on **Structure** with a preselected, warmed-up synthetic scene. Four
+screens share one authoritative selected session:
 
-The pure dashboard layer (`topomarket.ui.dashboard`, `topomarket.ui.panels`,
-`topomarket.ui.performance`) is Streamlit-free and fully tested offline; `app.py` falls back to a
-plain-text four-screen summary when Streamlit is not installed. Accessibility: neutral canvas, teal
-market line, amber benchmark, shape+text alert marks, labelled inputs, table alternatives, reduced
-motion, keyboard equivalents (Alt+Arrow/PageUp/PageDown/R/B/M) and 2D-default/optional-3D views.
-Cached date-change p95 is measured against the 500 ms limit and cached demo startup against 5 s
-(environment/build metadata is recorded in the benchmark payload). See
-[docs/DASHBOARD.md](docs/DASHBOARD.md).
+- **Structure** - the 12-industry Pearson-correlation network (fixed node positions, trailing 60
+  valid returns, fixed `r >= 0.80` cutoff, `n/66` pair count, node-degree inspector), a Mapper view
+  of the same window (groups placed by volatility lens band, node area = membership, edge width =
+  shared portfolios, member inspector), the shared S&P 500 / VIX / score timeline (separate aligned
+  panels, shared cursor, frozen threshold, alert markers, VIX gaps stay gaps) and the score
+  explanation (56-point Takens window with dimension 3 / lag 2, 2-D display-coordinate scatter,
+  H1 birth-death diagram with the longest finite lifetime highlighted, industry PCA scatter).
+- **Replay** - blind by default. The date is applied before any payload is built; history and
+  features are sliced at the cutoff, and "Reveal next 20 sessions" adds only the outcome layer
+  (origin close, 10% boundary, lowest close, first breach, maximum decline, pending state). Hiding
+  removes the payload again and changing the session resets the reveal state.
+- **Validation** - frozen evaluation runs with corrected metrics: episode recall with numerator and
+  denominator, false alerts per year, average precision over the complete eligible scored series,
+  common eligible dates, bootstrap intervals, limitations, evidence wording
+  (`Experimental market anomaly` unless the documented criteria hold) and CSV export.
+- **Data** - independent S&P 500 price, VIX and industry-return calendars with observation ranges,
+  gaps and stale-map marking, source coverage, last successful refresh, revisions, errors, and a
+  private-only validated refresh action. The public demo is read-only.
+
+Four deterministic demonstration presets are available in the sidebar (quiet period, stress
+transition, matched warning, missed/late warning); each is bound to a verified date and the
+`synthetic` fixture id. The interface keeps a neutral canvas, teal market series and amber
+threshold/alerts, distinguishes signals by symbol and text, stacks at mobile width, exposes table
+equivalents and keyboard controls, honours reduced motion, and reuses fixed graph positions across
+date changes. Cached date-change p95 is measured against the 500 ms budget by
+`topomarket.ui.performance`; the cold public startup is measured separately. See
+[docs/WALKTHROUGH.md](docs/WALKTHROUGH.md) and [docs/DASHBOARD.md](docs/DASHBOARD.md).
 
 ## Chronological evaluation (Step 6)
 
@@ -327,7 +357,8 @@ pytest -q
 
 The private-seed tests skip automatically when their environment variables are
 not set, so the same `pytest -q` command is safe on a clean checkout and in
-public CI.
+public CI. The v1.0 acceptance evidence (A01-A07) is tracked in
+[docs/ACCEPTANCE_v0.9.md](docs/ACCEPTANCE_v0.9.md) and in the release notes.
 
 ### Private tests
 
@@ -385,7 +416,12 @@ of tracked files is part of CI.
 
 ## Quality and security
 
-- CI runs linting, compilation and tests on Python 3.11 and 3.12.
+- CI runs linting, compilation and tests on Python 3.11 and 3.12, plus a Python 3.12 Cloud
+  dependency smoke job that installs `requirements.txt`, imports the app, runs the plain demo and
+  checks the Streamlit entrypoint health endpoint.
+- The third-party license audit (`docs/DEPENDENCY_LICENSES.md`) covers every dependency in
+  `pyproject.toml`, `requirements.lock` and `requirements.txt`: 0 GPL/AGPL packages, so the MIT
+  license stays valid. Re-run `scripts/audit_dependency_licenses.py` offline.
 - Security workflows: dependency audit (`pip-audit`), static analysis (`bandit`), secret scanning
   (`detect-secrets`) and CodeQL.
 - `main` is protected: changes arrive through pull requests with green checks and are squash-merged
@@ -404,9 +440,19 @@ third-party providers and is **not** redistributed by this repository:
 - Kenneth R. French Data Library 12 Industry Portfolios
 - Office of Financial Research Financial Stress Index
 
+The public app, README examples, screenshots, the GitHub social preview and the demo video use the
+committed synthetic `showcase/` fixture only (seed 4242, snapshot `showcase-synthetic`); genuine
+market data is never committed, uploaded to the hosted app or shown in published material.
 Provider terms must be reviewed before publishing genuine market data, screenshots or derived
 products. See [NOTICE.md](NOTICE.md) for attribution and usage notes.
 
+## Hosted release
+
+The Streamlit Community Cloud app deploys from `main` with the root `app.py` entrypoint and the
+pinned `requirements.txt` definition on Python 3.12. Deployment identity, smoke checks and the
+rollback rule are recorded in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
+
 ## License
 
-MIT - see [LICENSE](LICENSE).
+MIT - see [LICENSE](LICENSE). Third-party dependency licenses are audited in
+[docs/DEPENDENCY_LICENSES.md](docs/DEPENDENCY_LICENSES.md).

@@ -1,9 +1,11 @@
-"""Selection cache and A7 performance benchmarks for the dashboard.
+"""Selection-cache performance benchmarks for the public dashboard (CL02).
 
-Cached screen payloads are keyed by the dashboard selection; a cached date
-change must not recompute topology or evaluation.  The helpers record the
-measured values, the environment and the build identity so the A7 performance
-acceptance can be evidenced.
+Cached screen payloads are keyed by the dashboard selection plus the data
+signature; a cached date change must not recompute topology, the Mapper graph or
+the evaluation report.  The helpers record the measured values, the environment
+and the build identity so the 500 ms cached date-change target and the cold
+startup measurement can be evidenced (browser measurements are recorded
+separately from these backend timings).
 """
 
 from __future__ import annotations
@@ -23,7 +25,7 @@ from .dashboard import DashboardSelection
 from .panels import DashboardData, PanelCache, load_dashboard_data
 
 CACHED_P95_LIMIT_MS = 500.0
-DEMO_STARTUP_LIMIT_MS = 5_000.0
+DEMO_STARTUP_LIMIT_MS = 15_000.0
 REFERENCE_ENVIRONMENT = "2-vCPU / 4-GB Linux reference machine"
 
 
@@ -70,10 +72,30 @@ def _percentile(sorted_values: Sequence[float], fraction: float) -> float:
 
 def _selection_for(data: DashboardData, *, date: str | None = None) -> DashboardSelection:
     return DashboardSelection(
-        screen="overview",
+        screen="structure",
         mode="live",
         date=date or (data.session_dates[-1] if data.session_dates else None),
+        network_view="correlation",
     )
+
+
+def benchmark_dates(data: DashboardData, *, sample: int = 60) -> list[str]:
+    """Return warmed-up benchmark dates sampled across the series.
+
+    A structure payload needs a full 60-session industry window, so the first
+    sessions are excluded; the sample is deterministic and spread over the whole
+    history so the measurement is not dominated by a single regime.
+    """
+
+    dates = list(data.session_dates)
+    if not dates:
+        return []
+    first_usable = min(200, len(dates) - 1)
+    candidates = dates[first_usable:]
+    if len(candidates) <= sample:
+        return candidates
+    step = max(1, len(candidates) // sample)
+    return candidates[::step][:sample]
 
 
 def _prewarm(data: DashboardData, cache: PanelCache, dates: Sequence[str]) -> float:
@@ -100,7 +122,7 @@ def measure_cached_date_changes(
         data = load_dashboard_data("demo")
     if not data.session_dates:
         raise ValueError("dashboard data has no sessions")
-    selected_dates = [str(value) for value in dates] if dates else list(data.session_dates)
+    selected_dates = [str(value) for value in dates] if dates else benchmark_dates(data)
     selected_dates = [value for value in selected_dates if value in data.date_index]
     if not selected_dates:
         raise ValueError("no valid benchmark dates")

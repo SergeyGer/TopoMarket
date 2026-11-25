@@ -26,7 +26,7 @@ from enum import Enum
 from typing import Any
 
 #: The four dashboard screens.  Values are lower-case, stable identifiers.
-SCREENS: tuple[str, ...] = ("overview", "topology", "validation", "data")
+SCREENS: tuple[str, ...] = ("structure", "replay", "validation", "data")
 
 #: Replay reveals a future outcome only when explicitly requested.
 MODES: tuple[str, ...] = ("live", "replay")
@@ -42,6 +42,11 @@ BROWSE_MODE = MODES[0]
 
 DEFAULT_SCREEN = SCREENS[0]
 DEFAULT_MODE = MODES[0]
+
+#: The Structure screen offers two complementary network views (UI02).
+NETWORK_VIEWS: tuple[str, ...] = ("correlation", "mapper")
+DEFAULT_NETWORK_VIEW = NETWORK_VIEWS[0]
+NETWORK_VIEW_NAMES = NETWORK_VIEWS
 
 #: A topology/industry dashboard window is the trailing 60 sessions.
 DEFAULT_WINDOW_SESSIONS = 60
@@ -62,18 +67,27 @@ _MODE_ALIASES = {
 }
 
 _SCREEN_ALIASES = {
-    "overview": "overview",
-    "overview_screen": "overview",
+    "structure": "structure",
+    "structure_screen": "structure",
+    "map": "structure",
+    "network": "structure",
+    "markets": "structure",
+    "market": "structure",
+    "market_screen": "structure",
+    "overview": "structure",
+    "overview_screen": "structure",
+    "topology": "structure",
+    "tda": "structure",
+    "topology_screen": "structure",
+    "replay": "replay",
+    "replay_screen": "replay",
+    "history": "replay",
+    "retrospective": "replay",
     "data": "data",
     "data_status": "data",
     "data_screen": "data",
-    "status": "overview",
-    "markets": "topology",
-    "market": "topology",
-    "market_screen": "topology",
-    "topology": "topology",
-    "tda": "topology",
-    "topology_screen": "topology",
+    "sources": "data",
+    "status": "data",
     "evaluation": "validation",
     "evaluate": "validation",
     "alerts": "validation",
@@ -172,6 +186,19 @@ def _normalise_mode(value: Any) -> _AliasString:
             f"Unknown dashboard mode {value!r}; expected one of: {expected}"
         ) from None
     return _replay_mode() if canonical == "replay" else _live_mode()
+
+
+def _normalise_network_view(value: Any) -> _AliasString:
+    """Return the canonical Structure network view (correlation or mapper)."""
+
+    if value is None or value is _UNSET:
+        return _AliasString(DEFAULT_NETWORK_VIEW, NETWORK_VIEWS)
+    text = str(value).strip().lower().replace("-", "_").replace(" ", "_")
+    if text in {"correlation", "correlations", "network", "edges", "corr"}:
+        return _AliasString("correlation", NETWORK_VIEWS)
+    if text in {"mapper", "groups", "topological", "graph"}:
+        return _AliasString("mapper", NETWORK_VIEWS)
+    raise DashboardSelectionError(f"unknown network view {value!r}; expected correlation or mapper")
 
 
 def _normalise_date(value: Any) -> str | None:
@@ -358,6 +385,8 @@ class DashboardSelection:
     reveal: bool = False
     member: str | None = None
     run: str | None = None
+    network_view: str = DEFAULT_NETWORK_VIEW
+    edge: str | None = None
     # Private loaded context.  It is a dataclass field (compare=False) so the
     # standard-library ``dataclasses.replace`` copies it instead of dropping it.
     _loaded: _LoadedContext | None = field(default=None, repr=False, compare=False)
@@ -371,6 +400,8 @@ class DashboardSelection:
         member: str | None = _UNSET,
         run: str | None = _UNSET,
         *args: Any,
+        network_view: Any = _UNSET,
+        edge: str | None = _UNSET,
         **unknown: Any,
     ) -> None:
         if args:
@@ -386,6 +417,8 @@ class DashboardSelection:
             "reveal": False if reveal is _UNSET else reveal,
             "member": None if member is _UNSET else member,
             "run": None if run is _UNSET else run,
+            "network_view": DEFAULT_NETWORK_VIEW if network_view is _UNSET else network_view,
+            "edge": None if edge is _UNSET else edge,
         }
 
         loaded = unknown.pop("_loaded", None)
@@ -431,6 +464,12 @@ class DashboardSelection:
             "selected_run": "run",
             "run_id": "run",
             "evaluation_run": "run",
+            "graph_view": "network_view",
+            "network": "network_view",
+            "view_mode": "network_view",
+            "display_mode": "network_view",
+            "selected_edge": "edge",
+            "mapper_edge": "edge",
             "show_reveal": "reveal",
             "is_revealed": "reveal",
             "revealed": "reveal",
@@ -491,6 +530,8 @@ class DashboardSelection:
         reveal_value = _normalise_bool("reveal", values["reveal"])
         member_value = _normalise_optional_text("member", values["member"])
         run_value = _normalise_optional_text("run", values["run"])
+        network_view_value = _normalise_network_view(values["network_view"])
+        edge_value = _normalise_optional_text("edge", values["edge"])
 
         if blind_values:
             blind = _normalise_bool("blind", blind_values[-1])
@@ -518,6 +559,8 @@ class DashboardSelection:
         object.__setattr__(self, "reveal", reveal_value)
         object.__setattr__(self, "member", member_value)
         object.__setattr__(self, "run", run_value)
+        object.__setattr__(self, "network_view", network_view_value)
+        object.__setattr__(self, "edge", edge_value)
         context = _LoadedContext(
             session_dates=session_values,
             members=member_values,
@@ -646,6 +689,22 @@ class DashboardSelection:
         return self.run
 
     @property
+    def network_view_name(self) -> str:
+        return str(self.network_view)
+
+    @property
+    def selected_edge(self) -> str | None:
+        return self.edge
+
+    @property
+    def is_correlation_view(self) -> bool:
+        return str(self.network_view) == "correlation"
+
+    @property
+    def is_mapper_view(self) -> bool:
+        return str(self.network_view) == "mapper"
+
+    @property
     def session_dates(self) -> tuple[str, ...]:
         return getattr(self, "_session_dates", ())
 
@@ -749,6 +808,8 @@ class DashboardSelection:
             "reveal": self.reveal,
             "member": self.member,
             "run": self.run,
+            "network_view": self.network_view,
+            "edge": self.edge,
         }
         if include_context:
             payload["window_size"] = self.window_size
@@ -893,6 +954,17 @@ class DashboardSelection:
 
     select_run = with_run
 
+    def with_network_view(self, view: Any) -> DashboardSelection:
+        return self.replace(network_view=view)
+
+    select_network_view = with_network_view
+    with_view = with_network_view
+
+    def with_edge(self, edge: str | None) -> DashboardSelection:
+        return self.replace(edge=edge)
+
+    select_edge = with_edge
+
     def with_reveal(self, reveal: bool = True) -> DashboardSelection:
         return self.replace(reveal=_normalise_bool("reveal", reveal))
 
@@ -1020,8 +1092,8 @@ def window_for_selection(
 class DashboardScreen(str, Enum):
     """Enumeration form of :data:`SCREENS` for embedders that prefer enums."""
 
-    OVERVIEW = "overview"
-    TOPOLOGY = "topology"
+    STRUCTURE = "structure"
+    REPLAY = "replay"
     VALIDATION = "validation"
     DATA = "data"
 
