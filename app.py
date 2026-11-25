@@ -422,25 +422,39 @@ def _apply_widgets(
                 pass
 
     presets = build_presets(data)
+    blind = str(getattr(selection, "mode", "live")).lower() in {
+        "replay",
+        "historical",
+    } and not bool(getattr(selection, "reveal", False))
     if presets.get("available"):
         _call(sidebar, "markdown", "**Demo presets**")
         for record in presets["presets"]:
+            preset_label = (
+                record.get("blind_label") or record["label"]
+                if blind
+                else record.get("review_label") or record["label"]
+            )
+            preset_description = (
+                record.get("blind_description") or record["description"]
+                if blind
+                else record.get("review_description") or record["description"]
+            )
             if not record["verified"]:
-                _call(sidebar, "caption", f"{record['label']}: {record['reason']}")
+                _call(sidebar, "caption", f"{preset_label}: {record['reason']}")
                 continue
             if _call(
                 sidebar,
                 "button",
-                f"{record['label']} · {record['date']}",
+                f"{preset_label} · {record['date']}",
                 key=f"tm_preset_{record['preset_id']}",
-                help=record["description"],
+                help=preset_description,
             ):
                 selection = (
                     selection.with_date(record["date"])
                     .replace(mode=record["mode"])
                     .replace(screen="structure")
                 )
-            if record.get("teaching"):
+            if record.get("teaching") and not blind:
                 _call(
                     sidebar,
                     "caption",
@@ -624,6 +638,14 @@ def render_dashboard(
 # --------------------------------------------------------------------------- #
 # Screen renderers
 # --------------------------------------------------------------------------- #
+def blind_structure_state(selection: DashboardSelection) -> bool:
+    """Blind mode for the Structure timeline: Replay without a reveal."""
+
+    return str(getattr(selection, "mode", "live")).lower() in {"replay", "historical"} and not bool(
+        getattr(selection, "reveal", False)
+    )
+
+
 def render_structure_screen(
     ui: Any, data: DashboardData, selection: DashboardSelection, payload: Mapping[str, Any]
 ) -> None:
@@ -637,12 +659,20 @@ def render_structure_screen(
         None,
     )
     if active_preset and active_preset.get("teaching"):
-        _call(
-            ui,
-            "warning",
-            "Teaching example (late warning): shown for demonstration only and not part of the "
-            "frozen evaluation.",
-        )
+        if blind_structure_state(selection):
+            _call(
+                ui,
+                "caption",
+                "Guided demonstration example. Reveal the outcome to review its "
+                "retrospective label.",
+            )
+        else:
+            _call(
+                ui,
+                "warning",
+                "Teaching example (late warning): shown for demonstration only and not part of "
+                "the frozen evaluation.",
+            )
     map_obs = payload.get("map_observation") or {}
     if map_obs.get("stale"):
         _call(
@@ -841,7 +871,16 @@ def render_replay_screen(
         )
     alert = payload.get("alert") or {}
     if alert.get("is_alert"):
-        _call(ui, "markdown", f"**Alert status:** {alert.get('label')} ({alert.get('status')})")
+        if alert.get("retrospective"):
+            _call(
+                ui,
+                "markdown",
+                f"**Review alert classification (retrospective):** {alert.get('label')}",
+            )
+        else:
+            _call(ui, "markdown", f"**Alert state:** {alert.get('label')}")
+    elif payload.get("blind"):
+        _call(ui, "caption", "No alert recorded on the selected session.")
     _render_figure(
         ui,
         lambda: charts.replay_figure(payload),

@@ -191,3 +191,46 @@ def test_streamlit_preset_date_persists_across_screen_switch() -> None:
         "Outcome" in markdown
         or "boundary" in " ".join(item.value for item in app_test.caption).lower()
     )
+
+
+@pytest.mark.skipif(
+    importlib.util.find_spec("streamlit") is None,
+    reason="Streamlit is an optional dependency",
+)
+def test_streamlit_blind_replay_is_neutral_about_outcomes() -> None:
+    """F02: blind Replay must not show retrospective preset names or classifications."""
+
+    from streamlit.testing.v1 import AppTest
+
+    app_test = AppTest.from_file(str(APP_PATH), default_timeout=120).run()
+    assert not list(app_test.exception)
+    sidebar_text = (
+        " ".join(
+            str(item.value)
+            for item in [
+                *app_test.sidebar.markdown,
+                *app_test.sidebar.caption,
+            ]
+        )
+        + " "
+        + " ".join(button.label for button in app_test.sidebar.button)
+    )
+    assert "Guided alert example" in sidebar_text
+    assert "Late warning" not in sidebar_text
+
+    app_test.button(key="tm_preset_matched_warning").click().run()
+    assert not list(app_test.exception)
+    app_test.selectbox(key="tm_screen_label").select("Replay").run()
+    assert not list(app_test.exception)
+    page_text = " ".join(
+        str(item.value)
+        for item in [
+            *app_test.markdown,
+            *app_test.caption,
+            *app_test.info,
+            *app_test.warning,
+        ]
+    )
+    for forbidden in ("Late warning", "matched warning", "post_onset", "episode_onset"):
+        assert forbidden not in page_text
+    assert "Alert recorded" in page_text or "No alert recorded" in page_text

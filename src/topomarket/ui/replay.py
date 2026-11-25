@@ -17,6 +17,16 @@ import math
 from collections.abc import Mapping
 from typing import Any
 
+from topomarket.analysis.asof import (
+    alert_markers as asof_alert_markers,
+)
+from topomarket.analysis.asof import (
+    alert_state as asof_alert_state,
+)
+from topomarket.analysis.asof import (
+    frozen_policy,
+)
+
 from .calendars import map_observation_date
 
 REPLAY = "replay"
@@ -55,58 +65,8 @@ def _report(data: Any) -> dict[str, Any] | None:
     return dict(reports[0]) if reports else None
 
 
-def _primary_metrics(data: Any) -> dict[str, Any]:
-    report = _report(data)
-    if report is None:
-        return {}
-    method = report.get("primary_method") or PRIMARY_METHOD
-    metrics = (report.get("metrics") or {}).get(method) or {}
-    return dict(metrics) if isinstance(metrics, Mapping) else {}
-
-
 def _policy_cutoff(data: Any) -> float | None:
-    report = _report(data)
-    if report is None:
-        return None
-    method = report.get("primary_method") or PRIMARY_METHOD
-    policy = (report.get("policies") or {}).get(method)
-    if not isinstance(policy, Mapping):
-        return None
-    return _float(policy.get("cutoff"))
-
-
-def _alert_status(data: Any, selected: str) -> dict[str, Any]:
-    metrics = _primary_metrics(data)
-    alerts = {str(value) for value in metrics.get("alerts") or ()}
-    matched_entries = {
-        str(entry.get("alert_date")): dict(entry)
-        for entry in metrics.get("matched") or ()
-        if entry.get("alert_date")
-    }
-    post_onset = {str(value) for value in metrics.get("post_onset_alerts") or ()}
-    false_alerts = {str(value) for value in metrics.get("false_alerts") or ()}
-    pending = {str(value) for value in metrics.get("pending_alerts") or ()}
-    if selected not in alerts:
-        return {"is_alert": False, "status": None, "matched": None}
-    if selected in matched_entries:
-        return {
-            "is_alert": True,
-            "status": "matched",
-            "matched": matched_entries[selected],
-            "label": "Warning matched a breach episode",
-        }
-    if selected in post_onset:
-        return {
-            "is_alert": True,
-            "status": "late",
-            "matched": None,
-            "label": "Late alert (after onset)",
-        }
-    if selected in false_alerts:
-        return {"is_alert": True, "status": "false", "matched": None, "label": "Mature false alert"}
-    if selected in pending:
-        return {"is_alert": True, "status": "pending", "matched": None, "label": "Pending alert"}
-    return {"is_alert": True, "status": "alert", "matched": None, "label": "Alert"}
+    return _float(frozen_policy(data).get("cutoff"))
 
 
 def build_outcome(data: Any, selected: str) -> dict[str, Any] | None:
@@ -211,24 +171,6 @@ def _price_history(data: Any, selected: str, limit: int = HISTORY_SESSIONS) -> d
     }
 
 
-def _alert_markers(data: Any, selected: str) -> list[dict[str, Any]]:
-    metrics = _primary_metrics(data)
-    markers: list[dict[str, Any]] = []
-    for alert_date in sorted(str(value) for value in metrics.get("alerts") or ()):
-        if alert_date > selected:
-            continue
-        status = _alert_status(data, alert_date)
-        markers.append(
-            {
-                "date": alert_date,
-                "status": status.get("status"),
-                "label": status.get("label"),
-                "selected": alert_date == selected,
-            }
-        )
-    return markers
-
-
 def build_replay_payload(data: Any, selection: Any) -> dict[str, Any]:
     """Build the Replay-screen payload for one authoritative session."""
 
@@ -238,7 +180,7 @@ def build_replay_payload(data: Any, selection: Any) -> dict[str, Any]:
     blind = mode == REPLAY and not reveal
     score = _score_point(data, selected)
     cutoff = _policy_cutoff(data)
-    alert = _alert_status(data, selected)
+    alert = asof_alert_state(data, selected, blinded=blind)
     report = _report(data) or {}
     evidence = report.get("evidence") or {}
     map_info = map_observation_date(data, selected)
@@ -272,16 +214,20 @@ def build_replay_payload(data: Any, selection: Any) -> dict[str, Any]:
             ),
         },
         "alert": alert,
-        "alert_markers": _alert_markers(data, selected),
+        "alert_markers": asof_alert_markers(data, selected, blinded=blind),
         "score_history": score_history,
         "price_history": history,
         "outcome_horizon": OUTCOME_HORIZON,
         "drawdown_target": DRAWDOWN_TARGET,
-        "evidence": {
-            "wording": evidence.get("wording"),
-            "historical_evidence": bool(evidence.get("historical_evidence")),
-            "limitations": list(evidence.get("limitations") or ()),
-        },
+        "evidence": (
+            {"wording": evidence.get("wording"), "blind": True}
+            if blind
+            else {
+                "wording": evidence.get("wording"),
+                "historical_evidence": bool(evidence.get("historical_evidence")),
+                "limitations": list(evidence.get("limitations") or ()),
+            }
+        ),
         "map_observation": map_info,
         "synthetic": bool(getattr(data, "demo", False)),
         "snapshot_id": getattr(data, "snapshot_id", None),
@@ -314,7 +260,7 @@ def _replay_summary(
         if score.get("value") is None
         else f"Comparative score percentile {score['value']:.1f}."
     )
-    parts.append(f"Alert status: {alert.get('status') or 'no alert on this session'}.")
+    parts.append(f"Alert state: {alert.get('label') or 'No alert recorded'}.")
     if blind:
         parts.append("Blind mode: the outcome horizon is hidden until reveal is requested.")
     elif outcome is None:

@@ -30,6 +30,7 @@ from typing import Any
 
 import numpy as np
 
+from topomarket.analysis.asof import alert_markers as asof_alert_markers
 from topomarket.analysis.industries import industry_explorer_payload
 from topomarket.analysis.network import (
     DEFAULT_CORRELATION_CUTOFF,
@@ -83,15 +84,6 @@ def _policy_cutoff(data: Any) -> float | None:
         return None
 
 
-def _primary_metrics(data: Any) -> dict[str, Any]:
-    report = _report(data)
-    if report is None:
-        return {}
-    method = report.get("primary_method") or PRIMARY_METHOD
-    metrics = (report.get("metrics") or {}).get(method) or {}
-    return dict(metrics) if isinstance(metrics, Mapping) else {}
-
-
 def _score_point(data: Any, selected: str) -> dict[str, Any]:
     point = (getattr(data, "score_by_date", {}) or {}).get(selected) or {}
     raw = point.get("score")
@@ -138,8 +130,13 @@ def _trailing_dates(rows: Sequence[Mapping[str, Any]], selected: str, limit: int
 # --------------------------------------------------------------------------- #
 # Shared timeline (UI03)
 # --------------------------------------------------------------------------- #
-def build_timeline(data: Any, selected: str) -> dict[str, Any]:
-    """Build the three aligned panels for the selected session."""
+def build_timeline(data: Any, selected: str, *, blinded: bool = False) -> dict[str, Any]:
+    """Build the three aligned panels for the selected session.
+
+    ``blinded`` keeps the alert markers neutral (F02): the timeline must not
+    reveal retrospective classifications before the visitor enters the review
+    flow.
+    """
 
     price_rows = _price_rows(data)
     price_by_date = {str(row.get("date")): row for row in price_rows if row.get("date")}
@@ -164,7 +161,7 @@ def build_timeline(data: Any, selected: str) -> dict[str, Any]:
             value = None
         score_values.append(value if value is not None and math.isfinite(value) else None)
     cutoff = _policy_cutoff(data)
-    alerts = _timeline_alerts(data, selected)
+    alerts = _timeline_alerts(data, selected, blinded=blinded)
     return {
         "available": bool(dates),
         "selected": selected,
@@ -205,44 +202,10 @@ def build_timeline(data: Any, selected: str) -> dict[str, Any]:
     }
 
 
-def _timeline_alerts(data: Any, selected: str) -> list[dict[str, Any]]:
-    metrics = _primary_metrics(data)
-    if not metrics:
-        return []
-    matched = {
-        str(entry.get("alert_date"))
-        for entry in metrics.get("matched") or ()
-        if entry.get("alert_date")
-    }
-    post_onset = {str(value) for value in metrics.get("post_onset_alerts") or ()}
-    false_alerts = {str(value) for value in metrics.get("false_alerts") or ()}
-    pending = {str(value) for value in metrics.get("pending_alerts") or ()}
-    markers: list[dict[str, Any]] = []
-    for alert_date in sorted(str(value) for value in metrics.get("alerts") or ()):
-        if alert_date > selected:
-            continue
-        if alert_date in matched:
-            status = "matched"
-        elif alert_date in post_onset:
-            status = "late"
-        elif alert_date in false_alerts:
-            status = "false"
-        elif alert_date in pending:
-            status = "pending"
-        else:
-            status = "alert"
-        markers.append({"date": alert_date, "status": status, "symbol": _alert_symbol(status)})
-    return markers
+def _timeline_alerts(data: Any, selected: str, *, blinded: bool) -> list[dict[str, Any]]:
+    """Causally available alert markers (neutral in blind mode)."""
 
-
-def _alert_symbol(status: str) -> str:
-    return {
-        "matched": "*",
-        "late": "v",
-        "false": "x",
-        "pending": "o",
-        "alert": "^",
-    }.get(status, "^")
+    return asof_alert_markers(data, selected, blinded=blinded)
 
 
 # --------------------------------------------------------------------------- #
@@ -713,7 +676,11 @@ def build_structure_payload(
         # Mapper window until the visitor switches views.
         mapper = _empty_mapper_view(map_date, "Switch to the Mapper view to build the groups.")
         mapper["deferred"] = True
-    timeline = build_timeline(data, selected)
+    blind = str(getattr(selection, "mode", "live")).lower() in {
+        "replay",
+        "historical",
+    } and not bool(getattr(selection, "reveal", False))
+    timeline = build_timeline(data, selected, blinded=blind)
     selected_is_alert = any(
         marker.get("date") == selected for marker in timeline.get("alert_markers") or ()
     )

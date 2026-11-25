@@ -19,7 +19,11 @@
       "fixture_id": "showcase-synthetic",
       "verified": true,
       "reason": null,
-      "teaching": false
+      "teaching": false,
+      "blind_label": "Quiet period",
+      "review_label": "Quiet period",
+      "blind_description": "Few industry pairs move together and the score is below the frozen threshold.",
+      "review_description": "Few industry pairs move together and the score is below the frozen threshold."
     },
     {
       "preset_id": "stress_transition",
@@ -34,7 +38,11 @@
       "fixture_id": "showcase-synthetic",
       "verified": true,
       "reason": null,
-      "teaching": false
+      "teaching": false,
+      "blind_label": "Stress transition",
+      "review_label": "Stress transition",
+      "blind_description": "More industries begin moving together as the market turns.",
+      "review_description": "More industries begin moving together as the market turns."
     },
     {
       "preset_id": "matched_warning",
@@ -49,7 +57,11 @@
       "fixture_id": "showcase-synthetic",
       "verified": true,
       "reason": null,
-      "teaching": true
+      "teaching": true,
+      "blind_label": "Guided alert example",
+      "review_label": "Late warning (teaching example)",
+      "blind_description": "A labelled demonstration example; its retrospective outcome is hidden in blind mode.",
+      "review_description": "A late alert used as a labelled teaching example; it is not part of the frozen evaluation."
     },
     {
       "preset_id": "missed_warning",
@@ -64,7 +76,11 @@
       "fixture_id": "showcase-synthetic",
       "verified": true,
       "reason": null,
-      "teaching": false
+      "teaching": false,
+      "blind_label": "Review example",
+      "review_label": "Missed or late warning",
+      "blind_description": "A second demonstration example; its retrospective outcome is hidden in blind mode.",
+      "review_description": "A decline the indicator missed or flagged only after the onset."
     }
   ]
 }
