@@ -36,6 +36,124 @@
       "valid_replicates": 1000
     }
   },
+  "calibration_comparison": {
+    "baseline": {
+      "common_eligible_dates": 3306,
+      "config_hash": "32484c1897a2d702bab73d3e43867c27404184fcc42a51dde72ac28095cdeefc",
+      "package_version": "1.0.0",
+      "policy_hashes": {
+        "realized_vol": "a972915ca965289531af3591b919440d955341306871406919c30bf394b7df0f",
+        "tda": "7861d94beffb163cea5046f3e7e8d52a3dc1cd8fd595f64d1fa16365f9a7cf59",
+        "vix": "3fe0a17153c78253a97e228478a78891614e2abc8129fca9aa389739c119d4b4"
+      },
+      "report_version": "1.0",
+      "schema_version": 1,
+      "snapshot_id": "showcase-synthetic"
+    },
+    "methods": {
+      "realized_vol": {
+        "calibration": {
+          "after": {
+            "cutoff": 0.10727190502348415,
+            "episode_recall": 1.0,
+            "false_alerts_per_year": 0.21658788139235066,
+            "matched_count": 1,
+            "percentile": 99.0
+          },
+          "before": {
+            "cutoff": 0.10727190502348415,
+            "episode_recall": 0.0,
+            "false_alerts_per_year": 0.21658788139235066,
+            "matched_count": 0,
+            "percentile": 99.0
+          }
+        },
+        "holdout": {
+          "after": {
+            "average_precision": 0.05564805768380985,
+            "episode_recall": 0.0,
+            "false_alerts_per_year": 0.22867513611615245,
+            "matched_count": 0
+          },
+          "before": {
+            "average_precision": 0.05564805768380985,
+            "episode_recall": 0.0,
+            "false_alerts_per_year": 0.22867513611615245,
+            "matched_count": 0
+          }
+        },
+        "policy_changed": false
+      },
+      "tda": {
+        "calibration": {
+          "after": {
+            "cutoff": 100.0,
+            "episode_recall": 0.0,
+            "false_alerts_per_year": 0.649763644177052,
+            "matched_count": 0,
+            "percentile": 99.0
+          },
+          "before": {
+            "cutoff": 100.0,
+            "episode_recall": 0.0,
+            "false_alerts_per_year": 0.649763644177052,
+            "matched_count": 0,
+            "percentile": 99.0
+          }
+        },
+        "holdout": {
+          "after": {
+            "average_precision": 0.015397765713962076,
+            "episode_recall": 0.0,
+            "false_alerts_per_year": 0.9147005444646098,
+            "matched_count": 0
+          },
+          "before": {
+            "average_precision": 0.015397765713962076,
+            "episode_recall": 0.0,
+            "false_alerts_per_year": 0.9147005444646098,
+            "matched_count": 0
+          }
+        },
+        "policy_changed": false
+      },
+      "vix": {
+        "calibration": {
+          "after": {
+            "cutoff": 23.018437719999998,
+            "episode_recall": 1.0,
+            "false_alerts_per_year": 0.4331757627847013,
+            "matched_count": 1,
+            "percentile": 99.0
+          },
+          "before": {
+            "cutoff": 23.018437719999998,
+            "episode_recall": 0.0,
+            "false_alerts_per_year": 0.4331757627847013,
+            "matched_count": 0,
+            "percentile": 99.0
+          }
+        },
+        "holdout": {
+          "after": {
+            "average_precision": 0.1186566970639782,
+            "episode_recall": 0.3333333333333333,
+            "false_alerts_per_year": 0.5335753176043557,
+            "matched_count": 1
+          },
+          "before": {
+            "average_precision": 0.1186566970639782,
+            "episode_recall": 0.3333333333333333,
+            "false_alerts_per_year": 0.5335753176043557,
+            "matched_count": 1
+          }
+        },
+        "policy_changed": false
+      }
+    },
+    "same_eligible_dates": true
+  },
+  "calibration_version": "F01-corrected-v1",
   "calibrations": {
     "realized_vol": {
       "calibrated": true,
@@ -45,10 +163,10 @@
           "constrained": true,
           "cutoff": 0.08423791679496195,
           "episode_count": 1,
-          "episode_recall": 0.0,
+          "episode_recall": 1.0,
           "false_alerts_per_year": 3.24881822088526,
           "false_count": 30,
-          "matched_count": 0,
+          "matched_count": 1,
           "percentile": 85.0,
           "selected": false
         },
@@ -56,10 +174,10 @@
           "constrained": true,
           "cutoff": 0.08820450546454504,
           "episode_count": 1,
-          "episode_recall": 0.0,
+          "episode_recall": 1.0,
           "false_alerts_per_year": 2.1658788139235066,
           "false_count": 20,
-          "matched_count": 0,
+          "matched_count": 1,
           "percentile": 90.0,
           "selected": false
         },
@@ -67,10 +185,10 @@
           "constrained": false,
           "cutoff": 0.09085478390478866,
           "episode_count": 1,
-          "episode_recall": 0.0,
+          "episode_recall": 1.0,
           "false_alerts_per_year": 1.62440911044263,
           "false_count": 15,
-          "matched_count": 0,
+          "matched_count": 1,
           "percentile": 92.5,
           "selected": false
         },
@@ -78,10 +196,10 @@
           "constrained": false,
           "cutoff": 0.09398374335076493,
           "episode_count": 1,
-          "episode_recall": 0.0,
+          "episode_recall": 1.0,
           "false_alerts_per_year": 1.1912333476579287,
           "false_count": 11,
-          "matched_count": 0,
+          "matched_count": 1,
           "percentile": 95.0,
           "selected": false
         },
@@ -89,10 +207,10 @@
           "constrained": false,
           "cutoff": 0.09792022640517428,
           "episode_count": 1,
-          "episode_recall": 0.0,
+          "episode_recall": 1.0,
           "false_alerts_per_year": 0.974645466265578,
           "false_count": 9,
-          "matched_count": 0,
+          "matched_count": 1,
           "percentile": 97.5,
           "selected": false
         },
@@ -100,10 +218,10 @@
           "constrained": false,
           "cutoff": 0.10727190502348415,
           "episode_count": 1,
-          "episode_recall": 0.0,
+          "episode_recall": 1.0,
           "false_alerts_per_year": 0.21658788139235066,
           "false_count": 2,
-          "matched_count": 0,
+          "matched_count": 1,
           "percentile": 99.0,
           "selected": true
         }
@@ -112,7 +230,7 @@
       "cutoff": 0.10727190502348415,
       "eligible_sessions": 2327,
       "eligible_years": 9.234126984126984,
-      "episode_recall": 0.0,
+      "episode_recall": 1.0,
       "false_alerts_per_year": 0.21658788139235066,
       "method": "realized_vol",
       "percentile": 99.0,
@@ -121,10 +239,10 @@
         "constrained": false,
         "cutoff": 0.10727190502348415,
         "episode_count": 1,
-        "episode_recall": 0.0,
+        "episode_recall": 1.0,
         "false_alerts_per_year": 0.21658788139235066,
         "false_count": 2,
-        "matched_count": 0,
+        "matched_count": 1,
         "percentile": 99.0,
         "selected": true
       },
@@ -237,10 +355,10 @@
           "constrained": true,
           "cutoff": 18.6481085,
           "episode_count": 1,
-          "episode_recall": 0.0,
+          "episode_recall": 1.0,
           "false_alerts_per_year": 8.555221314997851,
           "false_count": 79,
-          "matched_count": 0,
+          "matched_count": 1,
           "percentile": 85.0,
           "selected": false
         },
@@ -248,10 +366,10 @@
           "constrained": true,
           "cutoff": 19.4360958,
           "episode_count": 1,
-          "episode_recall": 0.0,
+          "episode_recall": 1.0,
           "false_alerts_per_year": 7.363987967339923,
           "false_count": 68,
-          "matched_count": 0,
+          "matched_count": 1,
           "percentile": 90.0,
           "selected": false
         },
@@ -259,10 +377,10 @@
           "constrained": true,
           "cutoff": 19.9322763,
           "episode_count": 1,
-          "episode_recall": 0.0,
+          "episode_recall": 1.0,
           "false_alerts_per_year": 6.172754619681994,
           "false_count": 57,
-          "matched_count": 0,
+          "matched_count": 1,
           "percentile": 92.5,
           "selected": false
         },
@@ -281,10 +399,10 @@
           "constrained": true,
           "cutoff": 21.570871399999998,
           "episode_count": 1,
-          "episode_recall": 0.0,
+          "episode_recall": 1.0,
           "false_alerts_per_year": 2.599054576708208,
           "false_count": 24,
-          "matched_count": 0,
+          "matched_count": 1,
           "percentile": 97.5,
           "selected": false
         },
@@ -292,10 +410,10 @@
           "constrained": false,
           "cutoff": 23.018437719999998,
           "episode_count": 1,
-          "episode_recall": 0.0,
+          "episode_recall": 1.0,
           "false_alerts_per_year": 0.4331757627847013,
           "false_count": 4,
-          "matched_count": 0,
+          "matched_count": 1,
           "percentile": 99.0,
           "selected": true
         }
@@ -304,7 +422,7 @@
       "cutoff": 23.018437719999998,
       "eligible_sessions": 2327,
       "eligible_years": 9.234126984126984,
-      "episode_recall": 0.0,
+      "episode_recall": 1.0,
       "false_alerts_per_year": 0.4331757627847013,
       "method": "vix",
       "percentile": 99.0,
@@ -313,10 +431,10 @@
         "constrained": false,
         "cutoff": 23.018437719999998,
         "episode_count": 1,
-        "episode_recall": 0.0,
+        "episode_recall": 1.0,
         "false_alerts_per_year": 0.4331757627847013,
         "false_count": 4,
-        "matched_count": 0,
+        "matched_count": 1,
         "percentile": 99.0,
         "selected": true
       },
@@ -957,10 +1075,38 @@
     }
   },
   "primary_method": "tda",
+  "provenance": {
+    "calibration_hashes": {
+      "realized_vol": "dec671ca920a4b6bacaa70448bb61640d61e881caefc18b8630c0796b13a074d",
+      "tda": "96867593ce9ced2cab54df870876c232fa2570347dba17896cc12c9ff8df73e9",
+      "vix": "5ea7495704a48cca3a3d47e8e9370de93da38261045fb80d0f09258d6b294377"
+    },
+    "calibration_version": "F01-corrected-v1",
+    "code_revision": "c7884259b196",
+    "config_hash": "32484c1897a2d702bab73d3e43867c27404184fcc42a51dde72ac28095cdeefc",
+    "label_contract": {
+      "credit_rule": "label_positive_and_breach_owned",
+      "horizon_sessions": 20,
+      "test_start": "2014-01-01",
+      "threshold": 0.1,
+      "validation_end": "2013-12-31",
+      "validation_start": "2005-01-01"
+    },
+    "package_version": "1.0.0",
+    "policy_hashes": {
+      "realized_vol": "a972915ca965289531af3591b919440d955341306871406919c30bf394b7df0f",
+      "tda": "7861d94beffb163cea5046f3e7e8d52a3dc1cd8fd595f64d1fa16365f9a7cf59",
+      "vix": "3fe0a17153c78253a97e228478a78891614e2abc8129fca9aa389739c119d4b4"
+    },
+    "report_version": "1.1",
+    "seed": 42,
+    "snapshot_id": "showcase-synthetic"
+  },
   "purged_validation_sessions": 20,
+  "report_version": "1.1",
   "resolved_episode_count": 4,
   "row_count": 5673,
-  "schema_version": 1,
+  "schema_version": 2,
   "seed": 42,
   "silent_policies": {},
   "snapshot_id": "showcase-synthetic"

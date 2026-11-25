@@ -925,25 +925,111 @@ def render_validation_screen(
         f"{sample.get('eligible_sessions')} · false alerts/year "
         f"{'n/a' if rate is None else f'{float(rate):.2f}'}",
     )
-    metrics = payload.get("metrics") or {}
-    if metrics:
+    evidence_table = list(payload.get("evidence_table") or ())
+    primary_method = str(payload.get("primary_method") or "")
+    primary_row = next(
+        (row for row in evidence_table if row.get("method") == primary_method),
+        evidence_table[0] if evidence_table else {},
+    )
+    if primary_row:
+        metric_columns = _call(ui, "columns", 4) or []
+        recall_text = "n/a"
+        if (
+            primary_row.get("recall_numerator") is not None
+            and primary_row.get("recall_denominator") is not None
+        ):
+            recall_text = f"{primary_row['recall_numerator']}/{primary_row['recall_denominator']}"
+        precision = primary_row.get("average_precision")
+        false_rate = primary_row.get("false_alerts_per_year")
+        lead = primary_row.get("median_lead_sessions")
+        cards = (
+            ("Primary method", "TDA score" if primary_method == "tda" else primary_method or "n/a"),
+            ("Holdout recall", recall_text),
+            ("Average precision", "n/a" if precision is None else f"{float(precision):.3f}"),
+            ("False alerts / year", "n/a" if false_rate is None else f"{float(false_rate):.2f}"),
+        )
+        for position, (label, value) in enumerate(cards):
+            target = metric_columns[position] if position < len(metric_columns) else ui
+            _call(target, "metric", label, value)
+        prevalence = primary_row.get("event_prevalence")
         _call(
             ui,
-            "dataframe",
-            [
-                {
-                    "method": method,
-                    "episode recall": value.get("episode_recall"),
-                    "matched episodes": value.get("matched_count"),
-                    "average precision": value.get("average_precision"),
-                    "false alerts/year": value.get("false_alerts_per_year"),
-                    "median lead (sessions)": value.get("median_lead_sessions"),
-                    "eligible sessions": value.get("eligible_sessions"),
-                    "alerts": len(value.get("alerts") or ()),
-                }
-                for method, value in metrics.items()
-            ],
+            "caption",
+            "Event prevalence "
+            f"{prevalence if prevalence is not None else 'n/a'} · "
+            f"median lead {lead if lead is not None else 'n/a'} session(s) · "
+            f"alerts {primary_row.get('alerts')} · eligible sessions "
+            f"{primary_row.get('eligible_sessions')}. Recall shows matched/eligible episodes.",
         )
+    if evidence_table:
+        _render_figure(
+            ui,
+            lambda: charts.evidence_comparison_figure(payload),
+            cache_key=f"evidence:{payload.get('run_id')}:{payload.get('snapshot_id')}",
+            caption=(
+                "Three-method comparison on the common eligible dates; the dashed line is the "
+                "event prevalence. Average precision is computed over the complete daily series."
+            ),
+            alt_text=(
+                "Bar charts comparing episode recall, average precision and false alerts per "
+                "year for the TDA score, VIX level and realized volatility, with "
+                "matched/eligible labels."
+            ),
+        )
+    comparison = payload.get("calibration_comparison") or {}
+    with _expander(ui, "Method details, intervals and limitations") as details:
+        if evidence_table:
+            _call(details, "dataframe", evidence_table)
+        if comparison.get("methods"):
+            _call(
+                details,
+                "markdown",
+                "**Calibration before/after (v1.0 baseline -> F01-corrected v1.1).** "
+                f"Same eligible dates: {comparison.get('same_eligible_dates')}. "
+                "The holdout suffix is never used to fit the policy.",
+            )
+            _call(
+                details,
+                "dataframe",
+                [
+                    {
+                        "method": method,
+                        "v1.0 validation recall": block["calibration"]["before"].get(
+                            "episode_recall"
+                        ),
+                        "v1.1 validation recall": block["calibration"]["after"].get(
+                            "episode_recall"
+                        ),
+                        "v1.1 matched/eligible": (
+                            f"{block['calibration']['after'].get('matched_count')}/"
+                            f"{block['calibration']['after'].get('episode_count')}"
+                        ),
+                        "holdout AP v1.0": block["holdout"]["before"].get("average_precision"),
+                        "holdout AP v1.1": block["holdout"]["after"].get("average_precision"),
+                        "policy changed": block.get("policy_changed"),
+                    }
+                    for method, block in (comparison.get("methods") or {}).items()
+                ],
+            )
+        bootstrap = payload.get("bootstrap") or {}
+        if bootstrap:
+            _call(
+                details,
+                "dataframe",
+                [
+                    {
+                        "interval": key,
+                        "mean": value.get("mean"),
+                        "lower 95%": value.get("lower"),
+                        "upper 95%": value.get("upper"),
+                        "valid replicates": value.get("valid_replicates"),
+                        "total replicates": value.get("total_replicates"),
+                    }
+                    for key, value in bootstrap.items()
+                ],
+            )
+        for limitation in evidence.get("limitations") or ():
+            _call(details, "markdown", f"- {limitation}")
     limitations = evidence.get("limitations") or ()
     if limitations:
         _call(ui, "markdown", "**Limitations**")

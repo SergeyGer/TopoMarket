@@ -94,6 +94,18 @@ The specification's order is binding; a later package starts only when the previ
       evidence, video build report and acceptance pack (`docs/ACCEPTANCE_v1.1.md`) published; v1.0
       artifacts retained.
 
+## Progress log
+
+- **WP-A (in review, #43)** - calibration recall corrected (`calibration_version
+  F01-corrected-v1`) with a regression test proving non-zero recall wins over fewer false alerts;
+  reports versioned (`report_version 1.1`, `schema_version 2`) with provenance (`code_revision`,
+  package, snapshot, config, seed, label contract, calibration/policy hashes) and a
+  `calibration_comparison` block against the retained v1.0 baseline; the synthetic showcase and
+  presets are regenerated (holdout metrics and policies unchanged; validation recall now non-zero
+  for VIX/realized volatility); the Validation screen shows large evidence cards, a three-method
+  comparison chart and a before/after calibration table; `docs/reports/evaluation-v1.0-baseline.json`
+  is retained. Corrected private report still needs the owner's seed path (not present here).
+
 ## Reporting
 
 After each build step: what landed, remaining steps, failures/limitations, and expected actions from

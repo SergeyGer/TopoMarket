@@ -923,23 +923,21 @@ def calibrate_method(
             session_tuple,
             labels=labels,
         )
-        # NOTE(EV01 follow-up): ``AlertMatch`` exposes ``episode_onset`` /
-        # ``episode.start_date``, not ``episode_start``.  This legacy lookup
-        # therefore always resolves to the string "None", so the calibration
-        # recall reported below has always been 0 and the preference rule only
-        # ranked candidates by their false-alert counts.  Correcting it moves
-        # the frozen validation cutoffs (and with them the holdout policies),
-        # which EV01 requires us to preserve while a qualified candidate
-        # exists, so the correction is tracked as a follow-up rather than
-        # folded into this change.
-        matched_starts = {
-            str(getattr(pair, "episode_start", None) or pair.get("episode_start"))
-            for pair in matching.matches
-        }
+        # Count unique eligible validation onsets, one credit per episode.
+        # ``AlertMatch`` exposes the episode onset as ``episode.start_date`` /
+        # ``onset_date``; a previous lookup used a non-existent
+        # ``episode_start`` field, which kept every candidate recall at 0 and
+        # ranked by false-alert count alone (F01, issue #37).  The corrected
+        # calibration is versioned on the report; v1.0 reports stay as the
+        # retained baseline for before/after comparison.
         episode_count = len(validation_episodes)
-        matched_count = len(
-            matched_starts & {str(getattr(ep, "start_date", "")) for ep in validation_episodes}
-        )
+        eligible_onsets = {
+            str(episode.start_date) for episode in validation_episodes if episode.start_date
+        }
+        matched_onsets = {
+            str(pair.onset_date) for pair in matching.matches if pair.onset_date is not None
+        }
+        matched_count = len(matched_onsets & eligible_onsets)
         recall = matched_count / episode_count if episode_count else None
         false_count = len(matching.false_mature_alerts)
         false_rate = false_count / eligible_years if eligible_years else None

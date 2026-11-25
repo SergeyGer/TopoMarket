@@ -106,26 +106,49 @@ exits with status `2`.
   0/3 with average precision 0.0154, VIX recall 1/3 with average precision 0.1187, realized
   volatility recall 0/3 with average precision 0.0556, and `"Experimental market anomaly"`.
 
-## Known calibration defect (deferred)
+## F01 correction: calibration recall (v1.1)
 
-The EV01 audit discovered one further defect outside the corrected matching/reporting path:
-`alerts.calibrate_method` reads `pair.episode_start` from an `AlertMatch`, but that attribute does
-not exist (the match exposes `episode_onset` / `episode.start_date`). As a result the calibration
-`matched_count` and calibration episode recall are always `0`, so the documented preference rule
-"maximum episode recall, then fewer false alerts, then the higher cutoff" was effectively dead code
-and the frozen cutoffs were selected on the false-alert count only.
+The v1.0 audit found one integrity defect outside the corrected matching/reporting path:
+`alerts.calibrate_method` read `pair.episode_start` from an `AlertMatch`, but that attribute does not
+exist (the match exposes `episode_onset` / `episode.start_date`). The calibration `matched_count`
+and calibration episode recall were therefore always `0`, and the documented preference rule
+"maximum episode recall, then fewer false alerts, then the higher cutoff" was effectively dead code:
+frozen cutoffs were selected on the false-alert count only.
 
-Fixing the attribute name moves the frozen validation cutoffs and the holdout numbers. On the local
-private seed the qualified candidates become TDA 97.5th, VIX 95th and realized-volatility 85th
-percentiles (from 99.0 for all three); the paired holdout TDA result changes from the credited
-1/9 episode to 0/9 because the alert set changes with the lower threshold. The EV01 requirement says
-to preserve the frozen validation cutoffs and holdout reporting, so this fix is **intentionally
-deferred**: v0.9.0 keeps calibration selection byte-identical to the previous release (99th
-percentile cutoffs and policies; the policy hash strings also bind the topology config hash, which
-v0.9.0 updates, so only the hash strings change). The defect is tracked as a follow-up
-recalibration review; a future release may fix the recall computation, re-freeze the cutoffs and
-regenerate the reports with the corrected selection evidence.
+v1.1 fixes this with `calibration_version = "F01-corrected-v1"`:
 
-Verification of the deferred item: `python -m topomarket evaluate` with the fix applied produces the
-option-A report recorded during the audit (private cutoffs 97.5 / 95.0 / 85.0, holdout TDA 0/9);
-the adopted option-B report is the one quoted above.
+- Recall counts **unique matched episode onsets**, one credit per episode, using the canonical
+  `AlertMatch.onset_date` / `episode.start_date` accessor.
+- The documented ordering, silent-policy behaviour, validation/holdout boundaries, purging,
+  cooldown, labels and benchmark contracts are unchanged.
+- Reports are now versioned (`report_version = "1.1"`, `schema_version = 2`) and carry
+  provenance (`code_revision`, package version, snapshot, config hash, seed, label contract,
+  calibration and policy hashes) plus a `calibration_comparison` block comparing the retained v1.0
+  baseline with the corrected run on identical eligible dates.
+
+Public synthetic regeneration (`scripts/build_showcase.py`, seed 4242): the corrected validation
+recall is **1.0 for VIX and realized volatility** (v1.0 reported 0.0 for every method), while TDA
+stays 0.0. Because all three frozen percentiles remain the 99th percentile, **holdout metrics and
+policy hashes are unchanged**: TDA 0/3 recall, average precision 0.0154; VIX 1/3 recall, AP 0.1187;
+realized volatility 0/3 recall, AP 0.0556; common eligible sessions 3,306. The v1.0 report is
+retained verbatim at `docs/reports/evaluation-v1.0-baseline.json` for comparison, and the Validation
+screen shows the before/after calibration table.
+
+### Private reference report (owner action)
+
+The private seed is not present in the public repository or this build environment, so the corrected
+private report cannot be regenerated here. The v1.0 private reference (9,250 rows, 28 episodes,
+9 evaluable held-out episodes, 3,185 common eligible sessions, TDA recall 1/9, 13 false alerts
+= 1.03/year, AP 0.0494, frozen 99th-percentile policies) remains the documented baseline. To produce
+the corrected private report locally (result stays outside Git):
+
+```bash
+TOPOMARKET_SEED_DIR=/path/to/seed topomarket evaluate \
+  --profile private --data-dir /path/to/data \\
+  --report-out /path/to/private/reports/evaluation-v1.1.json --json
+```
+
+Record the report digest, policy hashes and before/after calibration comparison (the report contains
+both) in the local acceptance notes; do not commit private values. If the corrected selection moves
+the private cutoffs (the audit expected TDA/VIX/volatility 97.5/95/85 instead of 99/99/99 and TDA
+holdout 0/9), publish only the documented summary after reviewing redistribution rights.

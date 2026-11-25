@@ -553,10 +553,43 @@ def _validation_payload(data: DashboardData, selection: DashboardSelection) -> d
             table_rows.append(["missed", method, None, entry.get("episode_onset"), None])
         for date_value in false_alerts:
             table_rows.append(["false_alert", method, date_value, None, None])
+    method_order = [
+        method
+        for method in (str(report.get("primary_method") or ""), *metrics)
+        if method in metrics
+    ]
+    seen: set[str] = set()
+    ordered_methods = [
+        method for method in method_order if not (method in seen or seen.add(method))
+    ]
+    evidence_table = [
+        {
+            "method": method,
+            "recall_numerator": metrics[method].get("matched_count"),
+            "recall_denominator": metrics[method].get("episode_count"),
+            "episode_recall": metrics[method].get("episode_recall"),
+            "average_precision": metrics[method].get("average_precision"),
+            "event_prevalence": metrics[method].get("event_prevalence"),
+            "false_count": metrics[method].get("false_alert_count"),
+            "false_alerts_per_year": metrics[method].get("false_alerts_per_year"),
+            "median_lead_sessions": metrics[method].get("median_lead_sessions"),
+            "alerts": len(metrics[method].get("alerts") or ()),
+            "eligible_sessions": metrics[method].get("eligible_sessions"),
+        }
+        for method in ordered_methods
+    ]
+    provenance = dict(report.get("provenance") or {})
+    comparison = report.get("calibration_comparison")
     base.update(
         {
             "available": True,
             "run_id": report.get("run_id"),
+            "report_version": report.get("report_version"),
+            "calibration_version": report.get("calibration_version"),
+            "schema_version": report.get("schema_version"),
+            "provenance": provenance,
+            "calibration_comparison": comparison,
+            "evidence_table": evidence_table,
             "evidence": evidence,
             "wording": evidence.get("wording"),
             "historical_evidence": bool(evidence.get("historical_evidence")),

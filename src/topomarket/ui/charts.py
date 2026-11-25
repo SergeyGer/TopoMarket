@@ -780,3 +780,107 @@ __all__ = [
     "takens_figure",
     "timeline_figure",
 ]
+
+
+def evidence_comparison_figure(panel: Mapping[str, Any]) -> Figure:
+    """Comparison chart of recall, average precision and false-alert rate (A3)."""
+
+    rows = list(panel.get("evidence_table") or ())
+    if not rows:
+        rows = [
+            {
+                "method": method,
+                "episode_recall": value.get("episode_recall"),
+                "average_precision": value.get("average_precision"),
+                "false_alerts_per_year": value.get("false_alerts_per_year"),
+            }
+            for method, value in (panel.get("metrics") or {}).items()
+        ]
+    labels = [_method_label(str(row.get("method"))) for row in rows]
+    recalls = [float(row.get("episode_recall") or 0.0) for row in rows]
+    precisions = [
+        float(row["average_precision"]) if row.get("average_precision") is not None else 0.0
+        for row in rows
+    ]
+    false_rates = [
+        float(row["false_alerts_per_year"]) if row.get("false_alerts_per_year") is not None else 0.0
+        for row in rows
+    ]
+    prevalence = next(
+        (row.get("event_prevalence") for row in rows if row.get("event_prevalence") is not None),
+        None,
+    )
+    colors = ["#0f766e", "#b45309", "#475569"][: len(rows)]
+    figure = plt.figure(figsize=(10.4, 3.9), facecolor=CANVAS)
+    grid = figure.add_gridspec(1, 3, width_ratios=(1.15, 1.15, 0.9), wspace=0.42)
+    axes = [figure.add_subplot(grid[0, index]) for index in range(3)]
+    for axis in axes:
+        axis.set_facecolor(CANVAS)
+        axis.grid(axis="y", color=GRID, linewidth=0.7)
+        axis.set_axisbelow(True)
+        for spine in axis.spines.values():
+            spine.set_color(BORDER)
+    positions = list(range(len(rows)))
+    axes[0].bar(positions, recalls, color=colors, width=0.55)
+    axes[0].set_xticks(positions, labels)
+    axes[0].set_ylim(0.0, 1.0)
+    axes[0].set_title("Episode recall (matched / eligible)", fontsize=10.5, color=INK)
+    axes[0].set_ylabel("recall", fontsize=9, color=MUTED)
+    for index, row in enumerate(rows):
+        numerator = row.get("recall_numerator")
+        denominator = row.get("recall_denominator")
+        if numerator is not None and denominator is not None:
+            axes[0].text(
+                index,
+                min(0.98, recalls[index] + 0.05),
+                f"{numerator}/{denominator}",
+                ha="center",
+                va="bottom",
+                fontsize=9,
+                color=INK,
+                fontweight="semibold",
+            )
+    axes[1].bar(positions, precisions, color=colors, width=0.55)
+    axes[1].set_xticks(positions, labels)
+    axes[1].set_title("Average precision (complete daily series)", fontsize=10.5, color=INK)
+    for index, value in enumerate(precisions):
+        axes[1].text(
+            index,
+            value + 0.01,
+            f"{value:.3f}",
+            ha="center",
+            va="bottom",
+            fontsize=9,
+            color=INK,
+        )
+    if prevalence is not None:
+        axes[1].axhline(
+            float(prevalence),
+            color=ALERT,
+            linewidth=1.1,
+            linestyle="--",
+            label=f"event prevalence {float(prevalence):.3f}",
+        )
+        axes[1].legend(loc="upper right", fontsize=8, frameon=False)
+    axes[2].barh(positions, false_rates, color=colors, height=0.5)
+    axes[2].set_yticks(positions, labels)
+    axes[2].set_ylim(-0.6, len(rows) - 0.4)
+    axes[2].invert_yaxis()
+    axes[2].set_title("False alerts per year", fontsize=10.5, color=INK)
+    for index, value in enumerate(false_rates):
+        axes[2].text(value + 0.02, index, f"{value:.2f}", va="center", fontsize=9, color=INK)
+    figure.suptitle(
+        "Three-method warning evidence · synthetic holdout · experimental market anomaly",
+        fontsize=11,
+        color=INK,
+        y=0.995,
+    )
+    return figure
+
+
+def _method_label(method: str) -> str:
+    return {
+        "tda": "TDA score",
+        "vix": "VIX level",
+        "realized_vol": "Realized volatility",
+    }.get(method, method.replace("_", " ").title())
