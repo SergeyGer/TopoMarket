@@ -1,0 +1,50 @@
+{
+  "url": "https://topomarket-juhbvrgk2k67pnr6qbpfmc.streamlit.app/",
+  "anonymous": true,
+  "browser": "Playwright Chromium headless",
+  "measured_at_utc": "2026-11-25T17:50:40Z",
+  "cold_start_ms": 7587.9,
+  "default_boot": {
+    "title_present": true,
+    "synthetic_label_present": true,
+    "release_identity_visible": true,
+    "landing_plotly_present": true,
+    "landing_metrics": true
+  },
+  "comparison": {
+    "heading": true,
+    "honest_statement": true,
+    "edge_counts": true
+  },
+  "guided_tour": {
+    "step_caption": true,
+    "stress_state": true
+  },
+  "replay": {
+    "blind_hint": true,
+    "neutral_alert": true,
+    "revealed": true,
+    "origin_visible": true,
+    "lowest_visible": true
+  },
+  "validation": {
+    "wording_present": true,
+    "evidence_cards": true,
+    "comparison_chart": true,
+    "false_alert_rate_present": true
+  },
+  "data": {
+    "calendars_present": true,
+    "read_only_public": true
+  },
+  "mobile": {
+    "no_horizontal_overflow": true,
+    "synthetic_label_present": true,
+    "landing_heading": true
+  },
+  "session_isolation": {
+    "session_a_guided_applied": true,
+    "session_b_default_unchanged": true,
+    "isolated": true
+  }
+}

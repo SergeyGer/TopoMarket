@@ -72,13 +72,18 @@ reference stays as a baseline.
 
 ## WP-D - New 60-second film
 
-- Recorded from the public v1.1 release after anonymous smoke checks, synthetic data only: stable
+- Master 60.000 s H.264 High 1920x1080 30 fps AAC 48 kHz stereo, -16.15 LUFS / -4.34 dBTP, 12 reviewed
+  SRT cues; recorded from the v1.1.0 build after the public deployment passed anonymous smoke checks,
+  synthetic data only (local identical-build capture; hosted re-record path `--app-url` documented),
+  stable
   16:9 composition, visible interaction highlights, chronological comparison/regime contrast, direct
   Finance selection, actual alert explanation, blind state then actual reveal, large evidence
   metrics, English narration and reviewed SRT plus captioned playback variant, and a final static
   five-second GitHub card. Production report with hashes and verified claims is in
   `docs/video/production_notes.md` and `docs/video/build_report.json`; assets are attached to the
-  v1.1.0 release (MP4, SRT, captioned MP4, narration WAV, editable source).
+  v1.1.0 release (MP4, SRT, captioned MP4, narration WAV, editable source). Master hash
+  `eb79c0fcef28b5ab01c9b7b8ff4c4286740d8be78e88bfad7f2dc440286dd48e`; captions hash and claim
+  table in `docs/video/build_report.json`.
 - Claims are verified against the regenerated v1.1 report: TDA holdout recall 0/3, AP 0.0154, false
   alerts 0.91/year; VIX 1/3, AP 0.1187; realized volatility 0/3, AP 0.0556; the narrated late example
   states that the next twenty sessions did not reach the ten-percent target.

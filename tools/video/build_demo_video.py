@@ -69,15 +69,14 @@ NARRATION = [
     (
         "replay",
         39.0,
-        "Now test the warning without hindsight. Reveal the next twenty sessions and see "
-        "whether the index fell ten percent. The decline had already begun; the next twenty "
-        "sessions did not reach the ten percent target.",
+        "Now test the warning without hindsight. Reveal the next twenty sessions. The decline "
+        "had already begun, and the next twenty sessions did not reach the ten percent target.",
         0,
     ),
     (
         "evidence",
         50.0,
-        "Forecasting remains experimental. Compare the results with simpler benchmarks.",
+        "Forecasting remains experimental; compare it with the simpler benchmarks.",
         0,
     ),
     ("end", 55.0, "Explore the code and the live demo on GitHub.", 0),
@@ -98,8 +97,6 @@ SCENES = [
         9.0,
         1.0,
         [
-            ("checkbox", "Compare two windows"),
-            ("sleep", 1.6),
             ("text", "Inspectors and advanced controls"),
             ("select_option", ("Industry member", "money")),
             ("radio", "Mapper groups"),
@@ -123,12 +120,14 @@ SCENES = [
         11.0,
         2.0,
         [
+            ("button_regex", r"Guided alert example"),
+            ("sleep", 1.4),
             ("select_option", ("Screen", "Replay")),
-            ("sleep", 2.0),
+            ("sleep", 1.6),
             ("button_regex", r"Reveal next 20 sessions"),
-            ("sleep", 0.8),
-            ("scroll_fraction", 0.10),
-            ("sleep", 2.6),
+            ("sleep", 1.2),
+            ("scroll_align", "Origin close"),
+            ("sleep", 2.2),
         ],
     ),
     (
@@ -137,8 +136,8 @@ SCENES = [
         2.0,
         [
             ("select_option", ("Screen", "Validation")),
-            ("scroll_fraction", 0.26),
-            ("sleep", 2.0),
+            ("scroll_align", "Experimental market anomaly"),
+            ("sleep", 2.4),
         ],
     ),
 ]
@@ -172,7 +171,7 @@ def prepare_tts() -> dict[str, dict]:
         mp3 = tts_dir / f"{name}.mp3"
         wav = tts_dir / f"{name}.wav"
         chosen = None
-        for attempt_rate in (rate, rate + 5, rate + 10, rate + 15):
+        for attempt_rate in (rate, rate + 5, rate + 10, rate + 15, rate + 20, rate + 25):
             run(
                 [
                     str(EDGE_TTS),
@@ -263,24 +262,29 @@ def _act(fn, events, label, attempts=3):
     )
 
 
-def _scene_setup(root, page, actions, events, scene_name):
-    keyboard = getattr(getattr(root, "page", None), "keyboard", None) or page.keyboard
+def _scene_setup(root_getter, page, actions, events, scene_name):
     for kind, payload in actions:
         try:
+            root = root_getter()
+            keyboard = page.keyboard
             if kind == "sleep":
                 time.sleep(float(payload))
             elif kind == "checkbox":
                 loc = root.get_by_role("checkbox", name=payload)
-                loc.first.click(timeout=10000)
+                try:
+                    loc.first.check(force=True, timeout=25000)
+                except Exception:  # noqa: BLE001 - label overlay variant
+                    root.get_by_text(payload, exact=True).first.click(force=True, timeout=25000)
+                page.wait_for_timeout(1500)
                 events.append(
                     {"t": round(time.perf_counter() - t0, 3), "click": True, "label": kind}
                 )
                 page.wait_for_timeout(600)
             elif kind == "button_regex":
                 loc = root.get_by_role("button", name=re.compile(payload)).first
-                loc.scroll_into_view_if_needed(timeout=8000)
+                loc.scroll_into_view_if_needed(timeout=25000)
                 box = loc.bounding_box()
-                loc.click(timeout=8000)
+                loc.click(force=True, timeout=25000)
                 if box:
                     events.append(
                         {
@@ -292,22 +296,31 @@ def _scene_setup(root, page, actions, events, scene_name):
                     )
                 page.wait_for_timeout(500)
             elif kind == "text":
-                root.get_by_text(payload, exact=True).first.click(timeout=8000)
-                page.wait_for_timeout(700)
+                root.get_by_text(payload, exact=True).first.click(force=True, timeout=25000)
+                page.wait_for_timeout(1600)
             elif kind == "radio":
-                root.get_by_text(payload, exact=True).first.click(timeout=8000)
-                page.wait_for_timeout(900)
+                try:
+                    root.get_by_role("radio", name=payload, exact=True).check(
+                        force=True, timeout=20000
+                    )
+                except Exception:  # noqa: BLE001 - label overlay variant
+                    root.get_by_text(payload, exact=True).first.click(force=True, timeout=25000)
+                page.wait_for_timeout(2400)
             elif kind == "select_option":
                 label, option = payload
-                root.get_by_role("combobox", name=label, exact=True).click(timeout=8000)
+                root.get_by_role("combobox", name=label, exact=True).click(
+                    force=True, timeout=25000
+                )
                 page.wait_for_timeout(700)
-                root.get_by_role("option", name=option, exact=True).click(timeout=8000)
+                root.get_by_role("option", name=option, exact=True).click(force=True, timeout=25000)
                 events.append(
                     {"t": round(time.perf_counter() - t0, 3), "click": True, "label": kind}
                 )
                 page.wait_for_timeout(900)
             elif kind == "select_edge":
-                root.get_by_role("combobox", name=payload, exact=True).click(timeout=10000)
+                root.get_by_role("combobox", name=payload, exact=True).click(
+                    force=True, timeout=25000
+                )
                 page.wait_for_timeout(800)
                 keyboard.press("ArrowDown")
                 keyboard.press("Enter")
@@ -414,7 +427,6 @@ def capture_app(app_url: str | None) -> dict:
                         }"""
                     )
                     page.wait_for_timeout(1500)
-                    root = frame
                 else:
                     page.wait_for_selector("h1:has-text('TopoMarket research')", timeout=240000)
                     page.wait_for_timeout(2500)
@@ -425,12 +437,29 @@ def capture_app(app_url: str | None) -> dict:
                             "{visibility: hidden !important;}"
                         )
                     )
-                    root = page
                 lead = time.perf_counter() - page_created
+                effective_skip = round(max(skip_seconds, lead + 1.2), 3)
                 t0 = time.perf_counter()
                 events: list[dict] = []
-                _scene_setup(root, page, actions, events, name)
-                remaining = (scene_seconds + skip_seconds) - (time.perf_counter() - t0)
+
+                def current_root(page=page, hosted=hosted):
+                    if not hosted:
+                        return page
+                    for _ in range(60):
+                        for candidate in page.frames:
+                            if "~/+/" in (candidate.url or ""):
+                                try:
+                                    candidate.wait_for_selector(
+                                        "h1:has-text('TopoMarket research')", timeout=5000
+                                    )
+                                    return candidate
+                                except Exception:  # noqa: BLE001 - still reloading
+                                    pass
+                        page.wait_for_timeout(500)
+                    raise RuntimeError("hosted app frame not found")
+
+                _scene_setup(current_root, page, actions, events, name)
+                remaining = scene_seconds + 1.6 - (time.perf_counter() - t0)
                 if remaining > 0.2:
                     time.sleep(remaining)
                 video = page.video
@@ -441,7 +470,7 @@ def capture_app(app_url: str | None) -> dict:
                         "name": name,
                         "webm": str(video.path()),
                         "lead": round(lead, 3),
-                        "skip": skip_seconds,
+                        "skip": effective_skip,
                         "duration": scene_seconds,
                         "events": events,
                     }
@@ -470,7 +499,7 @@ def capture_app(app_url: str | None) -> dict:
     return result
 
 
-def _drawbox_filters(events, scene_seconds, skip_seconds=0.0):
+def _drawbox_filters(events, scene_seconds, event_offset=0.0):
     filters = [
         f"fps={FPS}",
         f"scale={WIDTH}:{HEIGHT}",
@@ -481,7 +510,7 @@ def _drawbox_filters(events, scene_seconds, skip_seconds=0.0):
     for event in events:
         if "x" not in event:
             continue
-        start = max(0.0, event["t"] - float(skip_seconds) - 0.15)
+        start = max(0.0, event["t"] - float(event_offset) - 0.15)
         end = start + 0.6
         x = max(0, event["x"] - 34)
         y = max(0, event["y"] - 34)
@@ -549,10 +578,11 @@ def build_segments(capture: dict) -> dict:
     parts = [opening_mp4]
     for scene in capture["scenes"]:
         target = seg / f"{scene['name']}.mp4"
+        trim_start = float(scene.get("skip", 0.0))
+        event_offset = max(0.0, trim_start - float(scene.get("lead", 0.0)))
         filters = _drawbox_filters(
-            scene.get("events") or (), float(scene["duration"]), float(scene.get("skip", 0.0))
+            scene.get("events") or (), float(scene["duration"]), event_offset
         )
-        trim_start = scene["lead"] + float(scene.get("skip", 0.0))
         run(
             [
                 FFMPEG,

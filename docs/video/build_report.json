@@ -1,25 +1,30 @@
 {
-  "schema_version": 1,
-  "release": "v1.0.0",
-  "recorded_release_identity": "1.0.0 (sidebar label in footage)",
+  "schema_version": 2,
+  "release": "v1.1.0",
+  "recorded_release_identity": "v1.1.0 (local build of the same commit as the public deployment)",
   "master": {
     "file": "TopoMarket_demo_60s.mp4",
-    "sha256": "a1175d0b20ff0e8bc3e21a8d806ab7470353bdea0a4678786208e70a83490b1a",
-    "size_bytes": 5585443
+    "sha256": "eb79c0fcef28b5ab01c9b7b8ff4c4286740d8be78e88bfad7f2dc440286dd48e",
+    "size_bytes": 6479582
   },
   "captions": {
     "file": "TopoMarket_demo_60s.srt",
-    "sha256": "988a6ddbc1b8dfa3f6248661282825ba1852d35ded2433a3c6a64be8b009bafe",
-    "cues": 11,
-    "review": "TopoMarket, Mapper and S&P 500 spellings verified; cues clear of the alert label and end-card URL"
+    "sha256": "a18b0353ae3236cd62e190ba2490a566f1d3b798f4df03e925b5c41f09b2b3e3",
+    "cues": 12,
+    "review": "TopoMarket, Mapper and S&P 500 spellings verified; cues clear of the end-card URL; captioned playback variant attached"
+  },
+  "captioned_playback": {
+    "file": "TopoMarket_demo_60s_captioned.mp4",
+    "sha256": "85c3d8c35353d0d644acc84c032bd6ecb67595352ba1c61b1c1738e930af9a15",
+    "note": "reviewed SRT burned in for social channels"
   },
   "narration_master": {
-    "file": "narration.wav",
-    "sha256": "3968657bb431b0c0b9cfcf25bb99b9ac6a951152c84e4ee85e7ac887835740ad"
+    "file": "TopoMarket_demo_60s_narration.wav",
+    "sha256": "044509b4a48c9ef0c7d7cb9c697a19f418458330e50a27eac7d05c24d139fe11"
   },
   "production_source": {
     "file": "TopoMarket_demo_production_source.zip",
-    "sha256": "92a43357a6dc48eaa4de7203975f0807e82f09788592b7bdc2cf7d2d97538409"
+    "sha256": "05f0a61fb77d747fbeed5b8676904c357bd9364b3572717792d5171aac11bc1b"
   },
   "video": {
     "codec": "h264",
@@ -28,20 +33,20 @@
     "height": 1080,
     "pix_fmt": "yuv420p",
     "frame_rate": "30/1",
-    "bit_rate": "610429"
+    "bit_rate": "721103"
   },
   "audio": {
     "codec": "aac",
     "profile": "LC",
     "sample_rate": 48000,
     "channels": 2,
-    "bit_rate": "133825"
+    "bit_rate": "133789"
   },
   "duration_seconds": 60.0,
   "loudness": {
     "measured_integrated_lufs": -16.15,
-    "measured_true_peak_dbtp": -4.4,
-    "measured_lra": 5.7,
+    "measured_true_peak_dbtp": -4.34,
+    "measured_lra": 6.1,
     "target": {
       "integrated_lufs": -16.0,
       "true_peak_dbtp": -1.5
@@ -49,62 +54,63 @@
     "method": "two-pass loudnorm, linear=true"
   },
   "timing": {
-    "opening_s": 6.5,
-    "app_s": 48.5,
+    "opening_s": 6.0,
+    "app_s": 49.0,
     "end_s": 5.0
+  },
+  "verified_claims": {
+    "quiet_window": "2020-08-18: 14 of 66 pairs at r >= 0.80 (window 2020-05-27..2020-08-18)",
+    "stress_window": "2020-02-24: 56 of 66 pairs at r >= 0.80 (window 2019-12-03..2020-02-24)",
+    "comparison": "window A 2020-02-24 = 56/66 (84.8%), window B 2020-08-18 = 14/66 (21.2%), delta -42 pairs; mean off-diagonal correlation 0.867 vs 0.725; honest regime contrast (no chronological emergence claim)",
+    "alert_example": "2025-03-10 labeled late-warning teaching example outside the frozen evaluation; comparative score percentile 100.0, frozen threshold 100.0",
+    "replay_outcome": "2025-03-10 origin close 305.998293, 10% boundary 275.3984637, 20 sessions, lowest close 299.830407 on 2025-03-14, max decline 2.02%, no 10% breach; narration states the target was not reached",
+    "validation": "Experimental market anomaly; TDA recall 0/3, AP 0.0154, false alerts 0.91/year; VIX 1/3, AP 0.1187; realized volatility 0/3, AP 0.0556; synthetic label visible"
   },
   "scenes": [
     {
-      "name": "structure",
-      "duration_s": 9.5,
-      "trim_skip_s": 1.8,
-      "recording": "page@e2387d19e0a3e66903fe71622becaad0.webm",
-      "recording_sha256": "09ba8dd60d6eb8741ce08de00b6304b11599e9ee3ea290f00fbb3fccaf84b928",
+      "name": "comparison",
+      "duration_s": 12.0,
+      "trim_skip_s": 7.572,
+      "recording": "page@baef79f491f0dbdb4e256e1da8f74625.webm",
+      "recording_sha256": "a42ed6573c4f9127c2af53352e514eabc9c3639b8e11387d143dd2b9c534e6da",
       "actions": [
         {
-          "t": 0.148,
-          "x": 118,
-          "y": 765,
-          "label": "button_regex"
-        },
-        {
-          "t": 4.771,
-          "x": 130,
-          "y": 821,
-          "label": "button_regex"
+          "t": 1.564,
+          "click": true,
+          "label": "checkbox"
         }
       ]
     },
     {
-      "name": "mapper",
-      "duration_s": 11.0,
-      "trim_skip_s": 1.0,
-      "recording": "page@d057087d86539d886bd544f5479f7533.webm",
-      "recording_sha256": "4153e9d037082bdd0cd9775668da1e05e14e3e6f1e64b24a1cab8cf7609ae0c2",
+      "name": "explore",
+      "duration_s": 9.0,
+      "trim_skip_s": 5.457,
+      "recording": "page@e6a7db73edd1fe5362caea3e49c188a2.webm",
+      "recording_sha256": "ad2de8bf540bd676b01045840f155df039fc13b15f9ffc70a3d708762b7f87f4",
       "actions": [
         {
-          "t": 1.724,
+          "t": 2.509,
           "click": true,
           "label": "select_option"
         },
         {
-          "t": 6.824,
+          "t": 8.159,
           "click": true,
           "label": "select_edge"
         }
       ]
     },
     {
-      "name": "alert",
+      "name": "explain",
       "duration_s": 12.0,
-      "trim_skip_s": 1.0,
-      "recording": "page@1f2a6d2af8d341f1d1b49bb87410eada.webm",
-      "recording_sha256": "7572a0c078432253a84900c7842e04ee167cd2325002df92906bea2e6c9b1892",
+      "trim_skip_s": 5.905,
+      "recording": "page@e979322140e8381533c1627149e8c7d5.webm",
+      "recording_sha256": "0ca65d8af044a711834aa3417209810af5eec962e31a387508021a50ce4aeef0",
       "actions": [
         {
-          "t": 0.147,
-          "x": 150,
-          "y": 884,
+          "t": 0.104,
+          "x": 144,
+          "y": 762,
           "label": "button_regex"
         }
       ]
@@ -112,38 +118,38 @@
     {
       "name": "replay",
       "duration_s": 11.0,
-      "trim_skip_s": 3.2,
-      "recording": "page@371442c40dc0b2385c80b800faa9dd65.webm",
-      "recording_sha256": "5dbb2108a42abf774222b86f06bb1054fb0d1cd9aadf147928ceb5d818a0d5f9",
+      "trim_skip_s": 5.589,
+      "recording": "page@57248fe61d94078752dc5bc942ba7858.webm",
+      "recording_sha256": "40e39451990f860ad84ed50929e3b1384c7178ba1955a3a583fc1cf31eb155eb",
       "actions": [
         {
-          "t": 0.202,
-          "x": 150,
-          "y": 884,
+          "t": 0.128,
+          "x": 144,
+          "y": 762,
           "label": "button_regex"
         },
         {
-          "t": 1.612,
+          "t": 2.874,
           "click": true,
           "label": "select_option"
         },
         {
-          "t": 4.828,
+          "t": 5.46,
           "x": 115,
-          "y": 1060,
+          "y": 857,
           "label": "button_regex"
         }
       ]
     },
     {
-      "name": "validation",
+      "name": "evidence",
       "duration_s": 5.0,
-      "trim_skip_s": 3.4,
-      "recording": "page@8a27686c441573cd0dbf205d49dc743c.webm",
-      "recording_sha256": "f86578767fd8cfb69767b3145ab5e1d0afb2f720d0d6696915a57c83fd9f0147",
+      "trim_skip_s": 5.901,
+      "recording": "page@dbc65d90bb241ab50362489f4f0f2310.webm",
+      "recording_sha256": "9edf8555b5ac1ba0cb040a16b2826dababb968c7825d5b977ab6b4bdaa4274b9",
       "actions": [
         {
-          "t": 0.917,
+          "t": 0.868,
           "click": true,
           "label": "select_option"
         }
@@ -160,7 +166,8 @@
     "fixture_id": "showcase-synthetic",
     "synthetic": true,
     "seed": 4242,
-    "hosted_app": "https://topomarket-juhbvrgk2k67pnr6qbpfmc.streamlit.app/",
-    "hosted_anonymous_access_at_capture": "pending (redirected to login); recorded from the local v1.0.0 release candidate instead"
+    "hosted_url": "https://topomarket-juhbvrgk2k67pnr6qbpfmc.streamlit.app/",
+    "hosted_verification": "docs/measurements/hosted_evidence_v1.1.json",
+    "capture_note": "Recorded from the identical local v1.1.0 build; hosted signed-out verification passed on the deployed public app. Hosted-iframe interaction capture was not used for the final cut because widget timing made the scripted captures unreliable; re-record with build_demo_video.py --app-url <public URL> any time."
   }
 }
