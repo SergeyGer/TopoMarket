@@ -609,8 +609,8 @@ def _as_mapping(value: Any) -> Mapping[str, Any] | None:
         if callable(method):
             try:
                 converted = method()
-            except Exception:  # noqa: BLE001 - fall through to attribute access
-                continue
+            except Exception:  # noqa: BLE001 - fall back to attribute access
+                converted = None
             if isinstance(converted, Mapping):
                 return converted
     if value is not None:
