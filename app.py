@@ -116,13 +116,7 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
 # Selection / session state
 # --------------------------------------------------------------------------- #
 def _loaded_context(data: DashboardData) -> dict[str, Any]:
-    members: list[str] = []
-    for row in data.rows:
-        for key in row:
-            if key.startswith("ind_") and key.endswith("_return"):
-                code = key[len("ind_") : -len("_return")]
-                if code not in members:
-                    members.append(code)
+    members = list(getattr(data, "members", ()) or ())
     return {
         "session_dates": list(data.session_dates),
         "members": members,
@@ -278,20 +272,65 @@ def _synthetic_label(ui: Any, data: DashboardData, selection: DashboardSelection
         _call(ui, "caption", f"Private research profile · selected session {selection.date or '—'}")
 
 
+CHART_CACHE_KEY = "tm_chart_cache"
+CHART_CACHE_LIMIT = 120
+
+
+def _chart_cache(ui: Any) -> dict[str, bytes] | None:
+    """Return the per-session rendered-chart cache (works with Streamlit proxies)."""
+
+    state = getattr(ui, "session_state", None)
+    if state is None:
+        return None
+    try:
+        store = state.get(CHART_CACHE_KEY)
+    except Exception:  # pragma: no cover - defensive for session-state proxies
+        return None
+    if not isinstance(store, dict):
+        store = {}
+        try:
+            state[CHART_CACHE_KEY] = store
+        except Exception:  # pragma: no cover - read-only session state
+            return None
+    return store
+
+
 def _render_figure(
     ui: Any,
-    figure: Any,
+    figure_factory: Any,
     *,
     caption: str,
     alt_text: str,
+    cache_key: str | None = None,
 ) -> None:
-    """Render a chart with a textual alternative (UI04)."""
+    """Render a chart with a textual alternative, caching the rendered PNG bytes.
 
+    The chart preparation is the expensive part of a date change; caching the PNG
+    bytes per payload identity keeps a cached navigation at the Streamlit rerun
+    floor (CL02) without changing the rendered image.
+    """
+
+    store = _chart_cache(ui) if cache_key is not None else None
+    if store is not None and cache_key in store:
+        # Cache hit: do not build the matplotlib figure at all.
+        _call(ui, "image", store[cache_key])
+        _call(ui, "caption", alt_text)
+        if caption:
+            _call(ui, "caption", caption)
+        return
+    figure = figure_factory() if callable(figure_factory) else figure_factory
     image = getattr(ui, "pyplot", None)
     if image is not None:
         image(figure)
     else:  # pragma: no cover - fake UI objects in tests
         _call(ui, "caption", f"[chart: {alt_text}]")
+    if store is not None and cache_key is not None:
+        try:
+            store[cache_key] = charts.figure_png_bytes(figure)
+            while len(store) > CHART_CACHE_LIMIT:
+                store.pop(next(iter(store)))
+        except Exception:  # pragma: no cover - cache failures must not break rendering
+            pass
     _call(ui, "caption", alt_text)
     if caption:
         _call(ui, "caption", caption)
@@ -469,6 +508,9 @@ def _apply_widgets(
             except Exception as error:  # noqa: BLE001 - readable UI error
                 _call(ui, "warning", f"Unknown keyboard command {command!r}: {error}")
     options["presets"] = presets
+    # Render the date caption after every date-changing control so it always
+    # reflects the effective selection in the same rerun.
+    _call(sidebar, "caption", f"Selected session: {selection.date}")
     return selection, options
 
 
@@ -556,7 +598,7 @@ def render_dashboard(
     selection, _options = _apply_widgets(ui, data, selection)
     _persist_selection(ui.session_state, selection)
     if cache is not None:
-        payloads = cache.get(selection)
+        payloads = cache.get(selection, screens=(selection.screen,))
     screens = {name: payloads.get(name) or {} for name in SCREEN_ORDER}
     if selection.screen == "structure":
         render_structure_screen(ui, data, selection, screens["structure"])
@@ -607,16 +649,20 @@ def render_structure_screen(
     score = payload.get("score") or {}
     if str(selection.network_view) == "mapper":
         _call(ui, "subheader", "Mapper groups")
-        figure = charts.mapper_figure(
-            mapper,
-            selected_node_id=mapper.get("selected_node_id"),
-            selected_edge_id=(mapper.get("selected_edge") or {}).get("edge_id"),
-        )
         _render_figure(
             ui,
-            figure,
+            lambda: charts.mapper_figure(
+                mapper,
+                selected_node_id=mapper.get("selected_node_id"),
+                selected_edge_id=(mapper.get("selected_edge") or {}).get("edge_id"),
+            ),
             caption=str(mapper.get("position_rule") or ""),
             alt_text=str(mapper.get("table_alternative") or "Mapper groups")[:4000],
+            cache_key=(
+                f"mapper:{map_obs.get('date') or selection.date}:"
+                f"{mapper.get('selected_node_id')}:"
+                f"{(mapper.get('selected_edge') or {}).get('edge_id')}"
+            ),
         )
         selected_edge = mapper.get("selected_edge") or None
         if selected_edge:
@@ -646,12 +692,12 @@ def render_structure_screen(
             _call(table_area, "text", str(mapper.get("table_alternative") or ""))
     else:
         _call(ui, "subheader", "Industry correlation network")
-        figure = charts.correlation_network_figure(network, selected_code=selection.member)
         _render_figure(
             ui,
-            figure,
+            lambda: charts.correlation_network_figure(network, selected_code=selection.member),
             caption=str(network.get("summary") or ""),
             alt_text=str(network.get("summary") or "Correlation network"),
+            cache_key=(f"network:{(network.get('window') or {}).get('end')}:{selection.member}"),
         )
         inspector = payload.get("member_inspector") or {}
         if selection.member and inspector.get("pairs"):
@@ -685,7 +731,8 @@ def render_structure_screen(
     timeline = payload.get("timeline") or {}
     _render_figure(
         ui,
-        charts.timeline_figure(timeline),
+        lambda: charts.timeline_figure(timeline),
+        cache_key=f"timeline:{selection.date}",
         caption=str(timeline.get("legend") or ""),
         alt_text=(
             f"Aligned S&P 500, VIX and score panels for the trailing "
@@ -708,28 +755,37 @@ def render_structure_screen(
             with columns[0]:
                 _render_figure(
                     ui,
-                    charts.takens_figure(explanation),
+                    lambda: charts.takens_figure(explanation),
                     caption=str(explanation.get("display_note") or ""),
                     alt_text="2-D display-coordinate scatter of the 56-point price embedding.",
+                    cache_key=f"takens:{selection.date}",
                 )
             with columns[1]:
                 _render_figure(
                     ui,
-                    charts.h1_figure(explanation),
+                    lambda: charts.h1_figure(explanation),
                     caption="H1 birth-death diagram with the diagonal reference and longest "
                     "finite lifetime highlighted.",
                     alt_text="H1 birth-death diagram; longest finite lifetime in amber.",
+                    cache_key=f"h1:{selection.date}",
                 )
         else:  # pragma: no cover - fake UI without columns
-            _render_figure(ui, charts.takens_figure(explanation), caption="", alt_text="Takens")
+            _render_figure(
+                ui,
+                lambda: charts.takens_figure(explanation),
+                caption="",
+                alt_text="Takens",
+                cache_key=f"takens:{selection.date}",
+            )
         if explanation.get("industry_pca"):
             columns = _call(ui, "columns", 2) or []
             target = columns[0] if columns else ui
             _render_figure(
                 target,
-                charts.pca_figure(explanation),
+                lambda: charts.pca_figure(explanation),
                 caption="Industry PCA display coordinates; each point is one session.",
                 alt_text="Industry PCA scatter, one point per session, map date highlighted.",
+                cache_key=f"pca:{map_obs.get('date') or selection.date}",
             )
     else:
         _call(ui, "caption", explanation.get("reason") or "No score explanation for this session.")
@@ -781,9 +837,10 @@ def render_replay_screen(
         _call(ui, "markdown", f"**Alert status:** {alert.get('label')} ({alert.get('status')})")
     _render_figure(
         ui,
-        charts.replay_figure(payload),
+        lambda: charts.replay_figure(payload),
         caption=str(payload.get("legend") or ""),
         alt_text=str(payload.get("accessible_summary") or "Replay chart"),
+        cache_key=f"replay:{selection.date}:{bool(selection.reveal)}",
     )
     if payload.get("blind"):
         _call(
@@ -1060,6 +1117,47 @@ def plain_text_dashboard(
 # --------------------------------------------------------------------------- #
 # Shell entry point
 # --------------------------------------------------------------------------- #
+def _data_stamp(profile: str, data_dir: Path | None) -> tuple[Any, ...]:
+    """Return a cheap change stamp for the dashboard data cache.
+
+    The stamp covers the committed showcase manifest/score files for the demo
+    profile and the active-snapshot state/score files for a private profile, so a
+    refresh or a new snapshot reloads the dashboard while ordinary reruns reuse
+    the loaded data.
+    """
+
+    stamps: list[Any] = [profile, str(data_dir) if data_dir is not None else ""]
+    candidates: list[Path] = []
+    if data_dir is not None:
+        candidates.extend(
+            [
+                Path(data_dir) / "scores.csv",
+                Path(data_dir) / "import_manifest.json",
+                Path(data_dir) / "state" / "active_snapshot.json",
+            ]
+        )
+    else:
+        from topomarket.profiles import REPOSITORY_ROOT
+
+        showcase = REPOSITORY_ROOT / "showcase"
+        candidates.extend(
+            [
+                showcase / "manifest.json",
+                showcase / "scores.csv",
+                showcase / "reports" / "evaluation-showcase.json",
+                showcase / "presets.json",
+            ]
+        )
+    for candidate in candidates:
+        try:
+            stat = candidate.stat()
+        except OSError:
+            stamps.append((str(candidate), None))
+        else:
+            stamps.append((str(candidate), stat.st_mtime_ns, stat.st_size))
+    return tuple(stamps)
+
+
 def _in_streamlit_runtime(streamlit_module: Any | None = None) -> bool:
     """Return whether the real Streamlit script runner is active."""
 
@@ -1077,21 +1175,39 @@ def run_shell(args: argparse.Namespace, streamlit_module: Any | None = None) -> 
 
     ui = streamlit_module if streamlit_module is not None else st
     try:
-        data = load_dashboard_data(profile=args.profile, data_dir=args.data_dir)
+        runtime = ui is not None and _in_streamlit_runtime(ui)
+        if runtime:
+            stamp = _data_stamp(args.profile, args.data_dir)
+            cached = ui.session_state.get("tm_dashboard_data")
+            cached_stamp = ui.session_state.get("tm_dashboard_data_stamp")
+            if isinstance(cached, DashboardData) and cached_stamp == stamp:
+                data = cached
+            else:
+                data = load_dashboard_data(profile=args.profile, data_dir=args.data_dir)
+                ui.session_state["tm_dashboard_data"] = data
+                ui.session_state["tm_dashboard_data_stamp"] = stamp
+                ui.session_state.pop("tm_panel_cache", None)
+                ui.session_state.pop(CHART_CACHE_KEY, None)
+        else:
+            data = load_dashboard_data(profile=args.profile, data_dir=args.data_dir)
     except (OSError, ValueError, DashboardDataError) as exc:
         if ui is not None and _in_streamlit_runtime(ui):
             ui.error(f"Could not load dashboard data: {exc}")
         else:
             print(f"error: {exc}", file=sys.stderr)
         return 2
-    cache = PanelCache(data)
     if ui is None or not _in_streamlit_runtime(ui):
+        cache = PanelCache(data)
         selection = default_selection(data)
         print(plain_text_dashboard(data, selection, cache.get(selection)))
         return 0
     state = ui.session_state
+    cache = state.get("tm_panel_cache")
+    if not isinstance(cache, PanelCache) or cache.data.data_signature != data.data_signature:
+        cache = PanelCache(data)
+        state["tm_panel_cache"] = cache
     selection = selection_from_state(state, data)
-    payloads = cache.get(selection)
+    payloads = cache.get_screen(selection)
     selection = render_dashboard(data, selection, payloads, ui, cache=cache)
     _persist_selection(state, selection)
     return 0

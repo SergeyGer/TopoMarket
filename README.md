@@ -34,8 +34,9 @@ release decisions.
 | 10 | Demo video, frozen presets, hosted release and final v1.0 publication | Video and presets **delivered** (v0.9.2); hosted verification pending owner sharing setting |
 
 The v1.0 upgrade plan, defects closed and the build sequence live in
-[docs/UPGRADE.md](docs/UPGRADE.md); the tracked work is GitHub milestone *Upgrade v1.0* and
-epic [#22](https://github.com/SergeyGer/TopoMarket/issues/22).
+[docs/UPGRADE.md](docs/UPGRADE.md); the acceptance-evidence matrix (A01-A07) is in
+[docs/ACCEPTANCE_v1.0.md](docs/ACCEPTANCE_v1.0.md); the tracked work is GitHub milestone
+*Upgrade v1.0* and epic [#22](https://github.com/SergeyGer/TopoMarket/issues/22).
 
 Detailed acceptance criteria live in the GitHub Issues and milestones for each step; the technical reference is the [project Wiki](https://github.com/SergeyGer/TopoMarket/wiki).
 
@@ -447,6 +448,8 @@ of tracked files is part of CI.
 - CI runs linting, compilation and tests on Python 3.11 and 3.12, plus a Python 3.12 Cloud
   dependency smoke job that installs `requirements.txt`, imports the app, runs the plain demo and
   checks the Streamlit entrypoint health endpoint.
+- Browser acceptance evidence (functional checks, session isolation, mobile and keyboard focus) is in
+  `docs/measurements/`; the final acceptance matrix is `docs/ACCEPTANCE_v1.0.md`.
 - The third-party license audit (`docs/DEPENDENCY_LICENSES.md`) covers every dependency in
   `pyproject.toml`, `requirements.lock` and `requirements.txt`: 0 GPL/AGPL packages, so the MIT
   license stays valid. Re-run `scripts/audit_dependency_licenses.py` offline.

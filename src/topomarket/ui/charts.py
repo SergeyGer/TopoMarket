@@ -82,12 +82,18 @@ def _empty_figure(message: str) -> Figure:
     return figure
 
 
-def _save_png_bytes(figure: Figure) -> bytes:
+def _save_png_bytes(figure: Figure, *, dpi: int = DPI) -> bytes:
     """Render a figure to PNG bytes (used by the video pipeline and tests)."""
 
     buffer = io.BytesIO()
-    figure.savefig(buffer, format="png", dpi=DPI, facecolor=figure.get_facecolor())
+    figure.savefig(buffer, format="png", dpi=dpi, facecolor=figure.get_facecolor())
     return buffer.getvalue()
+
+
+def figure_png_bytes(figure: Figure, *, dpi: int = DPI) -> bytes:
+    """Render a figure to deterministic PNG bytes (used by the shell image cache)."""
+
+    return _save_png_bytes(figure, dpi=dpi)
 
 
 # --------------------------------------------------------------------------- #
