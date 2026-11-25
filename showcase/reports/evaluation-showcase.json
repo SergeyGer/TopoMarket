@@ -2,21 +2,21 @@
   "bootstrap": {
     "comparator_episode_recall": {
       "lower": 0.0,
-      "mean": 0.33350767085076705,
+      "mean": 0.0,
       "total_replicates": 1000,
-      "upper": 1.0,
+      "upper": 0.0,
       "valid_replicates": 956
     },
     "comparator_false_alerts_per_year": {
       "lower": 0.0,
-      "mean": 0.15288009514351902,
+      "mean": 0.22939663551742878,
       "total_replicates": 1000,
-      "upper": 0.2579324462640737,
+      "upper": 0.38239757207890746,
       "valid_replicates": 1000
     },
     "episode_recall_gain": {
-      "lower": -1.0,
-      "mean": -0.33350767085076705,
+      "lower": 0.0,
+      "mean": 0.0,
       "total_replicates": 1000,
       "upper": 0.0,
       "valid_replicates": 956
@@ -39,7 +39,7 @@
   "calibrations": {
     "realized_vol": {
       "calibrated": true,
-      "calibration_hash": "39cffc202a3ef3d073fcd5161db4ae5ffd712274f8eae21a395a9a625bb07c62",
+      "calibration_hash": "cb6315a7f995b99b5279b755c6d811e8e240f9d3829ae7bbfc1d3bbb8d347bea",
       "candidates": [
         {
           "constrained": true,
@@ -108,7 +108,7 @@
           "selected": true
         }
       ],
-      "config_hash": "e43cfc0ea16302963f161b8686fd8761bd979934f1d53f8b00136d0e9655ad5a",
+      "config_hash": "b88c1e95e4a35038d52fd71afe2fe8fe9a268b7329a3d28092c4b657bf24e351",
       "cutoff": 0.10727190502348415,
       "eligible_sessions": 2327,
       "eligible_years": 9.234126984126984,
@@ -129,12 +129,13 @@
         "selected": true
       },
       "session_digest": "c1f3ccbc6d6828d193315d8417d763e098753b3b5839305ed9e69a5b1a654c8b",
+      "silent": false,
       "validation_end": "2013-12-31",
       "validation_start": "2005-01-01"
     },
     "tda": {
       "calibrated": true,
-      "calibration_hash": "fb61c0b805eb034a7e422cfaf9140a9de7421dc052b32e15c7e59fefc9a33ee7",
+      "calibration_hash": "1868a9ebf91d9895af657519b009cf5c5d07df7e8a818573a48dfb28986be358",
       "candidates": [
         {
           "constrained": true,
@@ -203,7 +204,7 @@
           "selected": true
         }
       ],
-      "config_hash": "e43cfc0ea16302963f161b8686fd8761bd979934f1d53f8b00136d0e9655ad5a",
+      "config_hash": "b88c1e95e4a35038d52fd71afe2fe8fe9a268b7329a3d28092c4b657bf24e351",
       "cutoff": 100.0,
       "eligible_sessions": 2327,
       "eligible_years": 9.234126984126984,
@@ -224,12 +225,13 @@
         "selected": true
       },
       "session_digest": "c1f3ccbc6d6828d193315d8417d763e098753b3b5839305ed9e69a5b1a654c8b",
+      "silent": false,
       "validation_end": "2013-12-31",
       "validation_start": "2005-01-01"
     },
     "vix": {
       "calibrated": true,
-      "calibration_hash": "12473f2a4c819e5cea99ef902b0af00e1a0f8ce984572b6a51f2c1d019f64c7b",
+      "calibration_hash": "024f5bae0e77a622bbe486fd55e541e522bb34b3859a4acfe8363a567e455f8c",
       "candidates": [
         {
           "constrained": true,
@@ -269,8 +271,8 @@
           "cutoff": 20.609200899999998,
           "episode_count": 1,
           "episode_recall": 0.0,
-          "false_alerts_per_year": 4.440051568543189,
-          "false_count": 41,
+          "false_alerts_per_year": 4.548345509239364,
+          "false_count": 42,
           "matched_count": 0,
           "percentile": 95.0,
           "selected": false
@@ -298,7 +300,7 @@
           "selected": true
         }
       ],
-      "config_hash": "e43cfc0ea16302963f161b8686fd8761bd979934f1d53f8b00136d0e9655ad5a",
+      "config_hash": "b88c1e95e4a35038d52fd71afe2fe8fe9a268b7329a3d28092c4b657bf24e351",
       "cutoff": 23.018437719999998,
       "eligible_sessions": 2327,
       "eligible_years": 9.234126984126984,
@@ -319,26 +321,44 @@
         "selected": true
       },
       "session_digest": "c1f3ccbc6d6828d193315d8417d763e098753b3b5839305ed9e69a5b1a654c8b",
+      "silent": false,
       "validation_end": "2013-12-31",
       "validation_start": "2005-01-01"
     }
   },
   "censored_episodes": [],
+  "common_eligible_dates": {
+    "criteria": "intersection of dates where every compared method has a finite reading, the target label is mature and the session is inside the test period",
+    "end": "2026-09-02",
+    "method_session_counts": {
+      "realized_vol": 3306,
+      "tda": 3306,
+      "vix": 3306
+    },
+    "methods": [
+      "tda",
+      "vix",
+      "realized_vol"
+    ],
+    "session_count": 3306,
+    "start": "2014-01-01"
+  },
   "comparator_method": "realized_vol",
-  "config_hash": "e43cfc0ea16302963f161b8686fd8761bd979934f1d53f8b00136d0e9655ad5a",
+  "config_hash": "b88c1e95e4a35038d52fd71afe2fe8fe9a268b7329a3d28092c4b657bf24e351",
+  "credit_rule": "label_positive_and_breach_owned",
   "data_end": "2026-09-30",
   "data_start": "2005-01-03",
   "episode_count": 4,
   "evidence": {
     "criteria": {
-      "comparator_false_alerts_per_year": 0.15245009074410165,
+      "comparator_false_alerts_per_year": 0.22867513611615245,
       "enough_evaluable_episodes": false,
       "evaluable_episodes": 3,
       "false_alert_rate_within_rule": false,
       "max_false_alerts_per_year": 2.0,
       "min_evaluable_episodes": 5,
       "positive_lower_recall_gain_bound": false,
-      "recall_gain_lower_95": -1.0,
+      "recall_gain_lower_95": 0.0,
       "recall_gain_upper_95": 0.0,
       "recall_gain_valid_replicates": 956,
       "tda_false_alerts_per_year": 0.9147005444646098
@@ -355,15 +375,10 @@
     "realized_vol": {
       "false_alerts": [
         "2016-07-07",
-        "2020-03-24"
+        "2020-03-24",
+        "2022-01-13"
       ],
-      "matched": [
-        {
-          "alert_date": "2022-01-13",
-          "episode_onset": "2022-01-24",
-          "lead_sessions": 7
-        }
-      ],
+      "matched": [],
       "missed": [
         {
           "breach_dates": [
@@ -379,6 +394,17 @@
             "2020-03-17"
           ],
           "episode_onset": "2020-02-25"
+        },
+        {
+          "breach_dates": [
+            "2022-01-24",
+            "2022-01-25",
+            "2022-01-26",
+            "2022-01-28",
+            "2022-02-03",
+            "2022-02-04"
+          ],
+          "episode_onset": "2022-01-24"
         },
         {
           "breach_dates": [
@@ -444,26 +470,37 @@
         "2017-01-04",
         "2017-08-18",
         "2020-03-19",
-        "2024-10-25"
+        "2022-01-12"
       ],
       "matched": [
         {
           "alert_date": "2020-02-20",
           "episode_onset": "2020-02-25",
           "lead_sessions": 3
-        },
-        {
-          "alert_date": "2022-01-12",
-          "episode_onset": "2022-01-24",
-          "lead_sessions": 8
-        },
-        {
-          "alert_date": "2025-02-20",
-          "episode_onset": "2025-03-06",
-          "lead_sessions": 10
         }
       ],
-      "missed": []
+      "missed": [
+        {
+          "breach_dates": [
+            "2022-01-24",
+            "2022-01-25",
+            "2022-01-26",
+            "2022-01-28",
+            "2022-02-03",
+            "2022-02-04"
+          ],
+          "episode_onset": "2022-01-24"
+        },
+        {
+          "breach_dates": [
+            "2025-03-06",
+            "2025-03-07",
+            "2025-03-10",
+            "2025-03-12"
+          ],
+          "episode_onset": "2025-03-06"
+        }
+      ]
     }
   },
   "label_counts": {
@@ -490,19 +527,24 @@
         "2020-03-24",
         "2022-01-13"
       ],
-      "average_precision": 0.5,
+      "average_precision": 0.05564805768380985,
+      "average_precision_positives": 44,
+      "average_precision_reason": null,
+      "average_precision_sessions": 3306,
+      "credit_rule": "label_positive_and_breach_owned",
       "eligible_sessions": 3306,
       "eligible_years": 13.119047619047619,
       "end": "2026-09-02",
       "episode_count": 3,
-      "episode_recall": 0.3333333333333333,
+      "episode_recall": 0.0,
       "event_prevalence": 0.013309134906231096,
-      "false_alert_count": 2,
+      "false_alert_count": 3,
       "false_alerts": [
         "2016-07-07",
-        "2020-03-24"
+        "2020-03-24",
+        "2022-01-13"
       ],
-      "false_alerts_per_year": 0.15245009074410165,
+      "false_alerts_per_year": 0.22867513611615245,
       "losing_examples": [
         {
           "breach_dates": [
@@ -521,6 +563,17 @@
         },
         {
           "breach_dates": [
+            "2022-01-24",
+            "2022-01-25",
+            "2022-01-26",
+            "2022-01-28",
+            "2022-02-03",
+            "2022-02-04"
+          ],
+          "episode_onset": "2022-01-24"
+        },
+        {
+          "breach_dates": [
             "2025-03-06",
             "2025-03-07",
             "2025-03-10",
@@ -529,18 +582,12 @@
           "episode_onset": "2025-03-06"
         }
       ],
-      "matched": [
-        {
-          "alert_date": "2022-01-13",
-          "episode_onset": "2022-01-24",
-          "lead_sessions": 7
-        }
-      ],
-      "matched_count": 1,
-      "max_lead_sessions": 7,
-      "median_lead_sessions": 7.0,
+      "matched": [],
+      "matched_count": 0,
+      "max_lead_sessions": null,
+      "median_lead_sessions": null,
       "method": "realized_vol",
-      "min_lead_sessions": 7,
+      "min_lead_sessions": null,
       "missed_episodes": [
         {
           "breach_dates": [
@@ -559,6 +606,17 @@
         },
         {
           "breach_dates": [
+            "2022-01-24",
+            "2022-01-25",
+            "2022-01-26",
+            "2022-01-28",
+            "2022-02-03",
+            "2022-02-04"
+          ],
+          "episode_onset": "2022-01-24"
+        },
+        {
+          "breach_dates": [
             "2025-03-06",
             "2025-03-07",
             "2025-03-10",
@@ -568,10 +626,11 @@
         }
       ],
       "pending_alerts": [],
-      "policy_hash": "7b1c09fb9e8df312b31780835952266f5fd10375c410e7a4049a1c6df425427a",
+      "policy_hash": "47eb15e1c6c10bd7b28ed13a31903c65237fca93162de5a5f47504ac89a81918",
       "post_onset_alerts": [
         "2020-02-25"
       ],
+      "silent_policy": false,
       "snapshot_id": "showcase-synthetic",
       "start": "2014-01-01"
     },
@@ -608,7 +667,11 @@
         "2025-03-10",
         "2026-08-20"
       ],
-      "average_precision": 0.0,
+      "average_precision": 0.015397765713962076,
+      "average_precision_positives": 44,
+      "average_precision_reason": null,
+      "average_precision_sessions": 3306,
+      "credit_rule": "label_positive_and_breach_owned",
       "eligible_sessions": 3306,
       "eligible_years": 13.119047619047619,
       "end": "2026-09-02",
@@ -712,11 +775,12 @@
         }
       ],
       "pending_alerts": [],
-      "policy_hash": "dba443ff78b76cfeed9e33012e3eee5ca8456a2b23f9e2d1da894d4c69139c21",
+      "policy_hash": "3998b0d0495e02605b079027dfc88dbc1feb4253239a5d419ce985a601ed650b",
       "post_onset_alerts": [
         "2020-03-13",
         "2025-03-10"
       ],
+      "silent_policy": false,
       "snapshot_id": "showcase-synthetic",
       "start": "2014-01-01"
     },
@@ -741,54 +805,93 @@
         "2024-10-25",
         "2025-02-20"
       ],
-      "average_precision": 0.25,
+      "average_precision": 0.1186566970639782,
+      "average_precision_positives": 44,
+      "average_precision_reason": null,
+      "average_precision_sessions": 3306,
+      "credit_rule": "label_positive_and_breach_owned",
       "eligible_sessions": 3306,
       "eligible_years": 13.119047619047619,
       "end": "2026-09-02",
       "episode_count": 3,
-      "episode_recall": 1.0,
+      "episode_recall": 0.3333333333333333,
       "event_prevalence": 0.013309134906231096,
-      "false_alert_count": 5,
+      "false_alert_count": 7,
       "false_alerts": [
         "2016-08-11",
         "2017-01-04",
         "2017-08-18",
         "2020-03-19",
-        "2024-10-25"
+        "2022-01-12",
+        "2024-10-25",
+        "2025-02-20"
       ],
-      "false_alerts_per_year": 0.3811252268602541,
-      "losing_examples": [],
+      "false_alerts_per_year": 0.5335753176043557,
+      "losing_examples": [
+        {
+          "breach_dates": [
+            "2022-01-24",
+            "2022-01-25",
+            "2022-01-26",
+            "2022-01-28",
+            "2022-02-03",
+            "2022-02-04"
+          ],
+          "episode_onset": "2022-01-24"
+        },
+        {
+          "breach_dates": [
+            "2025-03-06",
+            "2025-03-07",
+            "2025-03-10",
+            "2025-03-12"
+          ],
+          "episode_onset": "2025-03-06"
+        }
+      ],
       "matched": [
         {
           "alert_date": "2020-02-20",
           "episode_onset": "2020-02-25",
           "lead_sessions": 3
-        },
-        {
-          "alert_date": "2022-01-12",
-          "episode_onset": "2022-01-24",
-          "lead_sessions": 8
-        },
-        {
-          "alert_date": "2025-02-20",
-          "episode_onset": "2025-03-06",
-          "lead_sessions": 10
         }
       ],
-      "matched_count": 3,
-      "max_lead_sessions": 10,
-      "median_lead_sessions": 8.0,
+      "matched_count": 1,
+      "max_lead_sessions": 3,
+      "median_lead_sessions": 3.0,
       "method": "vix",
       "min_lead_sessions": 3,
-      "missed_episodes": [],
+      "missed_episodes": [
+        {
+          "breach_dates": [
+            "2022-01-24",
+            "2022-01-25",
+            "2022-01-26",
+            "2022-01-28",
+            "2022-02-03",
+            "2022-02-04"
+          ],
+          "episode_onset": "2022-01-24"
+        },
+        {
+          "breach_dates": [
+            "2025-03-06",
+            "2025-03-07",
+            "2025-03-10",
+            "2025-03-12"
+          ],
+          "episode_onset": "2025-03-06"
+        }
+      ],
       "pending_alerts": [],
-      "policy_hash": "9caaca44afadcd7a7266306509743ee0ed0e55859bad9e2cb20a4e81ba8b3d94",
+      "policy_hash": "a13f928147bf98caa6846013c2b1c1980e155c567829f8c75436cedb0576c4c2",
       "post_onset_alerts": [],
+      "silent_policy": false,
       "snapshot_id": "showcase-synthetic",
       "start": "2014-01-01"
     }
   },
-  "package_version": "0.7.0",
+  "package_version": "0.9.0",
   "periods": {
     "development": {
       "end": "2004-12-31",
@@ -806,45 +909,48 @@
   "policies": {
     "realized_vol": {
       "annualization": 252.0,
-      "calibration_hash": "39cffc202a3ef3d073fcd5161db4ae5ffd712274f8eae21a395a9a625bb07c62",
-      "config_hash": "e43cfc0ea16302963f161b8686fd8761bd979934f1d53f8b00136d0e9655ad5a",
+      "calibration_hash": "cb6315a7f995b99b5279b755c6d811e8e240f9d3829ae7bbfc1d3bbb8d347bea",
+      "config_hash": "b88c1e95e4a35038d52fd71afe2fe8fe9a268b7329a3d28092c4b657bf24e351",
       "cooldown_sessions": 20,
       "cutoff": 0.10727190502348415,
       "eligible_years": 9.234126984126984,
       "method": "realized_vol",
       "percentile": 99.0,
-      "policy_hash": "7b1c09fb9e8df312b31780835952266f5fd10375c410e7a4049a1c6df425427a",
+      "policy_hash": "47eb15e1c6c10bd7b28ed13a31903c65237fca93162de5a5f47504ac89a81918",
       "session_digest": "c1f3ccbc6d6828d193315d8417d763e098753b3b5839305ed9e69a5b1a654c8b",
+      "silent": false,
       "validation_end": "2013-12-31",
       "validation_start": "2005-01-01",
       "window_sessions": 20
     },
     "tda": {
       "annualization": 252.0,
-      "calibration_hash": "fb61c0b805eb034a7e422cfaf9140a9de7421dc052b32e15c7e59fefc9a33ee7",
-      "config_hash": "e43cfc0ea16302963f161b8686fd8761bd979934f1d53f8b00136d0e9655ad5a",
+      "calibration_hash": "1868a9ebf91d9895af657519b009cf5c5d07df7e8a818573a48dfb28986be358",
+      "config_hash": "b88c1e95e4a35038d52fd71afe2fe8fe9a268b7329a3d28092c4b657bf24e351",
       "cooldown_sessions": 20,
       "cutoff": 100.0,
       "eligible_years": 9.234126984126984,
       "method": "tda",
       "percentile": 99.0,
-      "policy_hash": "dba443ff78b76cfeed9e33012e3eee5ca8456a2b23f9e2d1da894d4c69139c21",
+      "policy_hash": "3998b0d0495e02605b079027dfc88dbc1feb4253239a5d419ce985a601ed650b",
       "session_digest": "c1f3ccbc6d6828d193315d8417d763e098753b3b5839305ed9e69a5b1a654c8b",
+      "silent": false,
       "validation_end": "2013-12-31",
       "validation_start": "2005-01-01",
       "window_sessions": 20
     },
     "vix": {
       "annualization": 252.0,
-      "calibration_hash": "12473f2a4c819e5cea99ef902b0af00e1a0f8ce984572b6a51f2c1d019f64c7b",
-      "config_hash": "e43cfc0ea16302963f161b8686fd8761bd979934f1d53f8b00136d0e9655ad5a",
+      "calibration_hash": "024f5bae0e77a622bbe486fd55e541e522bb34b3859a4acfe8363a567e455f8c",
+      "config_hash": "b88c1e95e4a35038d52fd71afe2fe8fe9a268b7329a3d28092c4b657bf24e351",
       "cooldown_sessions": 20,
       "cutoff": 23.018437719999998,
       "eligible_years": 9.234126984126984,
       "method": "vix",
       "percentile": 99.0,
-      "policy_hash": "9caaca44afadcd7a7266306509743ee0ed0e55859bad9e2cb20a4e81ba8b3d94",
+      "policy_hash": "a13f928147bf98caa6846013c2b1c1980e155c567829f8c75436cedb0576c4c2",
       "session_digest": "c1f3ccbc6d6828d193315d8417d763e098753b3b5839305ed9e69a5b1a654c8b",
+      "silent": false,
       "validation_end": "2013-12-31",
       "validation_start": "2005-01-01",
       "window_sessions": 20
@@ -856,5 +962,6 @@
   "row_count": 5673,
   "schema_version": 1,
   "seed": 42,
+  "silent_policies": {},
   "snapshot_id": "showcase-synthetic"
 }

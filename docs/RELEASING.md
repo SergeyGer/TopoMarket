@@ -7,7 +7,11 @@ repository content.
 ## Checklist
 
 1. **Version consistency** - `pyproject.toml` and `topomarket.__version__` match; `CHANGELOG.md` has
-   an entry for the version. `topomarket release-check` verifies this.
+   an entry for the version. `topomarket release-check` verifies this. Bump the version and regenerate
+   the versioned frozen artifacts with:
+   ```bash
+   python scripts/bump_version.py 0.9.0   # edits both versions, rebuilds topology.json + showcase
+   ```
 2. **Repository hygiene** - `private_data/`, `.adp-inputs/`, credentials, local data artifacts,
    ledgers and caches are untracked and covered by `.gitignore`; `release-check` fails on tracked
    private inputs or forbidden names.
@@ -15,15 +19,24 @@ repository content.
    `topomarket.topology/topology.json` are included in wheels/sdists and load from the installed
    package (not only from a source checkout). The wheel content check in the release workflow
    asserts this.
-4. **Dependency lock** - regenerate `requirements.lock` in a fresh environment:
+4. **Dependency definitions** - two pinned definitions must agree:
    ```bash
-   python -m venv /tmp/tm-lock
+   # Development lock (runtime UI + development tools), Python 3.12.
+   python3 -m venv /tmp/tm-lock
    /tmp/tm-lock/bin/pip install --upgrade pip
-   /tmp/tm-lock/bin/pip install -e ".[dev]"
-   /tmp/tm-lock/bin/pip freeze --exclude-editable | grep -v '^topomarket' | sort > requirements.lock
+   /tmp/tm-lock/bin/pip install -e ".[dev,ui]"
+   /tmp/tm-lock/bin/pip freeze --exclude-editable | sort > requirements.lock
+
+   # Effective Streamlit Community Cloud definition (runtime UI only).
+   python3 -m venv /tmp/tm-cloud
+   /tmp/tm-cloud/bin/pip install --upgrade pip
+   /tmp/tm-cloud/bin/pip install -e ".[ui]"
+   /tmp/tm-cloud/bin/pip freeze --exclude-editable | sort > requirements.txt
    ```
-   The lock contains pinned runtime and development tools; the optional `[ui]` extra (Streamlit) is
-   installed separately for dashboard runs.
+   Both files are pinned and must agree on every shared package. Then refresh and verify the
+   license audit: `python scripts/refresh_dependency_licenses.py` and
+   `python scripts/audit_dependency_licenses.py`. See [DEPLOYMENT.md](DEPLOYMENT.md) for the hosted
+   release contract.
 5. **Synthetic fixtures** - `topomarket synthetic --seed 42` is byte-deterministic across two runs;
    the committed `showcase/` fixture matches its `manifest.json` hashes.
 6. **Offline public smoke** - `topomarket demo`, `synthetic`, `validate`, `status` and
@@ -37,7 +50,8 @@ repository content.
    public CI.
 10. **Publish** - merge through the protected `main` PR, tag the squash commit
     (`git tag v0.x.0 && git push origin v0.x.0`), publish release notes from `CHANGELOG.md`, close
-    the step issue/milestone and update the Wiki roadmap.
+    the step issue/milestone and update the Wiki roadmap. For releases after v0.9.0 also run the
+    hosted smoke checklist in [DEPLOYMENT.md](DEPLOYMENT.md) and update the README/Wiki links.
 
 ## Commands
 

@@ -5,10 +5,14 @@ The pipeline is deterministic and offline:
 1. labelled origins and breach episodes (``labels`` module);
 2. methods: TDA score, VIX close, 20-session annualized realized volatility;
 3. calibration on 2005-2013 (percentile cutoffs, 20-session cooldown, preference
-   rules), frozen policies with hashes;
-4. evaluation on 2014+ (episode recall, false alerts per year, median lead,
-   average precision, explicit losing/missing/matched examples);
-5. paired moving-block bootstrap (60-session blocks, shared draws);
+   rules), frozen policies with hashes; a method whose candidates all violate the
+   false-alert constraint freezes into a recorded *silent* policy (no alerts);
+4. evaluation on 2014+ on one common set of eligible dates (episode recall with
+   the strict own-label/breach-ownership credit rule, false alerts per year,
+   median lead, average precision over the complete scored daily series, explicit
+   losing/missing/matched examples);
+5. paired moving-block bootstrap (60-session blocks, shared draws on the common
+   eligible dates);
 6. optional controls/ablations (return-shuffled TDA, unscaled TDA);
 7. evidence wording rules and an append-only private ledger.
 
@@ -297,6 +301,7 @@ def _evaluate_method(
     dates: Sequence[str],
     start: str,
     end: str,
+    evaluation_dates: Sequence[str] | None = None,
 ) -> AlertEvaluation:
     alerts = generate_alerts(readings, dates, policy)
     return evaluate_alerts(
@@ -308,6 +313,8 @@ def _evaluate_method(
         start=start,
         end=end,
         policy=policy,
+        readings=readings,
+        evaluation_dates=evaluation_dates,
     )
 
 
@@ -410,7 +417,7 @@ def build_evaluation_report(
             config_hash=config_hash or "unspecified",
         )
         calibrations[method] = calibration
-        if calibration.calibrated:
+        if calibration.calibrated or calibration.silent:
             policies[method] = freeze_policy(calibration)
 
     mature_dates = [
@@ -424,6 +431,29 @@ def build_evaluation_report(
     if test_end < TEST_START:
         raise EvaluationError("no mature labels in the out-of-sample test period")
 
+    # EV01: every compared method is scored on the same sessions - the
+    # intersection of the dates where each method has a finite reading, the
+    # label is mature and the session is inside the out-of-sample test period.
+    mature_label_dates = {date for date in mature_dates}
+    compared_methods = [
+        method for method in METHODS if method in policies and readings_by_method.get(method)
+    ]
+    method_dates: dict[str, set[str]] = {}
+    for method in compared_methods:
+        method_dates[method] = {
+            reading.date
+            for reading in readings_by_method[method]
+            if TEST_START <= reading.date <= test_end and reading.date in mature_label_dates
+        }
+    common_dates: list[str] = []
+    if compared_methods:
+        shared = set(method_dates[compared_methods[0]])
+        for method in compared_methods[1:]:
+            shared &= method_dates[method]
+        common_dates = sorted(shared)
+        if not common_dates:
+            raise EvaluationError("no common eligible evaluation dates across methods")
+
     evaluations: dict[str, AlertEvaluation] = {}
     for method, policy in policies.items():
         evaluations[method] = _evaluate_method(
@@ -435,6 +465,7 @@ def build_evaluation_report(
             dates=dates,
             start=TEST_START,
             end=test_end,
+            evaluation_dates=common_dates,
         )
 
     comparator_method = select_comparator(calibrations)
@@ -449,7 +480,7 @@ def build_evaluation_report(
     bootstrap = _block_bootstrap(
         primary=primary,
         comparator=comparator,
-        dates=dates,
+        dates=common_dates,
         test_start=TEST_START,
         test_end=test_end,
         seed=seed,
@@ -458,17 +489,14 @@ def build_evaluation_report(
 
     purge_sessions = 0
     for calibration in calibrations.values():
-        if calibration.calibrated:
-            validation_sessions = [
-                date for date in dates if VALIDATION_START <= date <= VALIDATION_END
-            ]
-            purge_sessions = max(purge_sessions, 0)
-            if validation_sessions:
-                purge_sessions = max(
-                    purge_sessions,
-                    len(validation_sessions)
-                    - int(round(calibration.eligible_years * ANNUALIZATION)),
-                )
+        if not (calibration.calibrated or calibration.silent):
+            continue
+        validation_sessions = [date for date in dates if VALIDATION_START <= date <= VALIDATION_END]
+        if validation_sessions:
+            purge_sessions = max(
+                purge_sessions,
+                len(validation_sessions) - int(round(calibration.eligible_years * ANNUALIZATION)),
+            )
 
     report: dict[str, Any] = {
         "schema_version": 1,
@@ -492,6 +520,25 @@ def build_evaluation_report(
         "resolved_episode_count": len(resolved_episodes),
         "censored_episodes": censored_episodes,
         "purged_validation_sessions": purge_sessions,
+        "common_eligible_dates": {
+            "start": common_dates[0] if common_dates else None,
+            "end": common_dates[-1] if common_dates else None,
+            "session_count": len(common_dates),
+            "methods": compared_methods,
+            "method_session_counts": {
+                method: len(method_dates.get(method, set())) for method in compared_methods
+            },
+            "criteria": (
+                "intersection of dates where every compared method has a finite reading, "
+                "the target label is mature and the session is inside the test period"
+            ),
+        },
+        "credit_rule": "label_positive_and_breach_owned",
+        "silent_policies": {
+            method: calibration.reason
+            for method, calibration in calibrations.items()
+            if calibration.silent
+        },
         "calibrations": {
             method: calibration.as_dict() for method, calibration in calibrations.items()
         },
@@ -524,6 +571,7 @@ def build_evaluation_report(
             test_end=test_end,
             seed=seed,
             config_hash=config_hash,
+            evaluation_dates=common_dates,
         )
         report["ablations"] = ablations
 
@@ -549,6 +597,7 @@ def _build_ablations(
     test_end: str,
     seed: int,
     config_hash: str | None,
+    evaluation_dates: Sequence[str] | None = None,
 ) -> dict[str, Any]:
     """Compute the two documented control/ablation variants."""
     ablations: dict[str, Any] = {}
@@ -561,7 +610,7 @@ def _build_ablations(
             sessions=dates,
             config_hash=config_hash or "unspecified",
         )
-        if unscaled_calibration.calibrated:
+        if unscaled_calibration.calibrated or unscaled_calibration.silent:
             policy = freeze_policy(unscaled_calibration)
             evaluation = _evaluate_method(
                 method="tda_unscaled",
@@ -572,6 +621,7 @@ def _build_ablations(
                 dates=dates,
                 start=TEST_START,
                 end=test_end,
+                evaluation_dates=evaluation_dates,
             )
             ablations["tda_unscaled"] = {
                 "calibration": unscaled_calibration.as_dict(),
@@ -592,7 +642,7 @@ def _build_ablations(
             sessions=dates,
             config_hash=config_hash or "unspecified",
         )
-        if shuffled_calibration.calibrated:
+        if shuffled_calibration.calibrated or shuffled_calibration.silent:
             policy = freeze_policy(shuffled_calibration)
             evaluation = _evaluate_method(
                 method="tda_shuffled",
@@ -603,6 +653,7 @@ def _build_ablations(
                 dates=dates,
                 start=TEST_START,
                 end=test_end,
+                evaluation_dates=evaluation_dates,
             )
             ablations["tda_shuffled"] = {
                 "calibration": shuffled_calibration.as_dict(),

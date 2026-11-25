@@ -1,322 +1,176 @@
-"""Tests for the Step 7 dashboard data layer and screen payloads."""
+"""Integration tests for the version 1.0 dashboard data layer and screen payloads.
+
+Structure- and Replay-specific contracts are covered in ``test_structure.py`` and
+``test_replay.py``; this module covers data loading, the four-screen payload
+aggregation, the shared cache and the Validation/Data payloads.
+"""
 
 from __future__ import annotations
 
 import csv
 import json
-import math
-from datetime import date, timedelta
 from pathlib import Path
 
-import app
+import pytest
 
-from topomarket.analysis.industries import INDUSTRY_COLUMNS
-from topomarket.ui.dashboard import (
-    DashboardSelection,
-    apply_keyboard_action,
-    toggle_blind,
-    toggle_reveal,
-)
+from topomarket.ui.dashboard import SCREENS, DashboardSelection
 from topomarket.ui.panels import (
-    OUTCOME_HORIZON,
+    SCREEN_LABELS,
+    DashboardDataError,
+    PanelCache,
     build_screen_payloads,
     load_dashboard_data,
 )
 
-
-def _business_days(start: date, end: date) -> list[date]:
-    values: list[date] = []
-    current = start
-    while current <= end:
-        if current.weekday() < 5:
-            values.append(current)
-        current += timedelta(days=1)
-    return values
+SHOWCASE = Path(__file__).resolve().parents[1] / "showcase"
 
 
-def _rows() -> list[dict[str, str]]:
-    days = _business_days(date(2019, 1, 2), date(2020, 12, 31))
-    rows: list[dict[str, str]] = []
-    price = 100.0
-    flags: list[str] = []
-    for index, day in enumerate(days):
-        if day.isoformat() == "2020-03-16":
-            flags.append("crash")
-        if flags and index < len(days):
-            if "crash" in flags and day.isoformat() >= "2020-03-16" and index < len(days):
-                if day <= date(2020, 4, 15):
-                    price *= 0.994
-                else:
-                    price *= 1.0005
-            else:
-                price *= 1.0004
-        else:
-            price *= 1.0004
-        row = {
-            "date": day.isoformat(),
-            "sp500_close": f"{price:.6f}",
-            "sp500_log_return": "" if index == 0 else f"{math.log(price / (price / 1.0004)):.12f}",
-            "vix_close": f"{15.0 + 10.0 * math.sin(index / 13.0):.6f}",
-        }
-        for column_index, column in enumerate(INDUSTRY_COLUMNS):
-            row[column] = f"{0.002 * math.sin((index + column_index) / 9.0):.8f}"
-        rows.append(row)
-    return rows
+@pytest.fixture(scope="module")
+def data():
+    return load_dashboard_data("demo")
 
 
-def _write_data_dir(tmp_path: Path) -> Path:
-    root = tmp_path / "data"
-    normalized = root / "normalized"
-    normalized.mkdir(parents=True)
-    rows = _rows()
-    with (normalized / "tda_daily.csv").open("w", encoding="utf-8", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
-        writer.writeheader()
-        writer.writerows(rows)
-    with (root / "scores.csv").open("w", encoding="utf-8", newline="") as handle:
-        writer = csv.writer(handle)
-        writer.writerow(
-            ["date", "sp500_log_return", "L", "D", "score", "state", "h1_count", "reason"]
-        )
-        for index, row in enumerate(rows):
-            writer.writerow(
-                [
-                    row["date"],
-                    row["sp500_log_return"],
-                    "0.1",
-                    "0.2",
-                    "80.0" if index % 2 else "20.0",
-                    "scored",
-                    "2",
-                    "",
-                ]
-            )
-    report = {
-        "schema_version": 1,
-        "snapshot_id": "snap-test",
-        "seed": 42,
-        "methods": ["tda", "vix"],
-        "primary_method": "tda",
-        "comparator_method": "vix",
-        "periods": {"test": {"start": "2014-01-01", "end": "2020-12-31"}},
-        "config_hash": "cfg-hash",
-        "policies": {
-            "tda": {
-                "method": "tda",
-                "cutoff": 90.0,
-                "percentile": 95.0,
-                "policy_hash": "policy-tda",
-            },
-            "vix": {
-                "method": "vix",
-                "cutoff": 60.0,
-                "percentile": 99.0,
-                "policy_hash": "policy-vix",
-            },
-        },
-        "evidence": {"wording": "Experimental market anomaly", "historical_evidence": False},
-        "metrics": {
-            "tda": {
-                "episode_recall": 0.5,
-                "false_alerts_per_year": 1.0,
-                "average_precision": 0.4,
-                "median_lead_sessions": 10,
-                "alerts": ["2020-03-10", "2020-03-11"],
-            }
-        },
-        "examples": {
-            "tda": {
-                "matched": [
-                    {"alert_date": "2020-03-10", "episode_onset": "2020-03-16", "lead_sessions": 4}
-                ],
-                "missed": [{"episode_onset": "2019-05-01"}],
-                "false_alerts": ["2019-06-01"],
-            }
-        },
-        "bootstrap": {
-            "episode_recall_gain": {"lower": 0.0, "upper": 0.3, "valid_replicates": 1000}
-        },
-        "episode_count": 2,
-        "resolved_episode_count": 2,
-        "censored_episodes": [],
-        "purged_validation_sessions": 20,
-    }
-    reports = root / "reports"
-    reports.mkdir()
-    (reports / "evaluation-test.json").write_text(json.dumps(report), encoding="utf-8")
-    manifest = {
-        "source_ids": ["fred_sp500", "cboe_vix", "french_12_industries"],
-        "row_counts": {"fred_sp500": 10, "cboe_vix": 10, "french_12_industries": 10},
-        "normalized_row_counts": {
-            "sp500_daily": len(rows),
-            "industries_daily": len(rows),
-            "tda_daily": len(rows),
-        },
-        "latest_data_date": rows[-1]["date"],
-    }
-    (root / "import_manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
-    (root / "parser_reports.json").write_text(
-        json.dumps(
-            {
-                "by_source": {
-                    "fred_sp500": {
-                        "row_count": 10,
-                        "first_observation": "2016-01-04",
-                        "last_observation": "2020-12-31",
-                    },
-                    "cboe_vix": {
-                        "row_count": 10,
-                        "first_observation": "1990-01-02",
-                        "last_observation": "2020-12-31",
-                    },
-                    "french_12_industries": {
-                        "row_count": 10,
-                        "first_observation": "1926-07-01",
-                        "last_observation": "2020-12-31",
-                    },
-                }
-            }
-        ),
-        encoding="utf-8",
-    )
-    (root / "normalized" / "schemas.json").write_text(
-        json.dumps({"tables": {"tda_daily": {"columns": ["date", "sp500_close"]}}}),
-        encoding="utf-8",
-    )
-    state = root / "state"
-    state.mkdir()
-    (state / "refresh_status.json").write_text(
-        json.dumps(
-            {
-                "updated_at_utc": "2024-01-01T00:00:00Z",
-                "published": True,
-                "sources": {
-                    "fred_sp500": {
-                        "outcome": "updated",
-                        "last_attempt_at": "2024-01-01T00:00:00Z",
-                        "last_success_at": "2024-01-01T00:00:00Z",
-                    },
-                    "cboe_vix": {
-                        "outcome": "failed",
-                        "last_attempt_at": "2024-01-01T00:00:00Z",
-                        "error": "timeout",
-                    },
-                },
-            }
-        ),
-        encoding="utf-8",
-    )
-    snapshots = root / "snapshots" / "snap-test"
-    snapshots.mkdir(parents=True)
-    (snapshots / "refresh_manifest.json").write_text(
-        json.dumps(
-            {
-                "snapshot_id": "snap-test",
-                "revisions": [
-                    {"date": "2020-03-16", "source_id": "fred_sp500", "field": "sp500_close"}
-                ],
-            }
-        ),
-        encoding="utf-8",
-    )
-    return root
-
-
-def test_load_dashboard_data_private(tmp_path: Path) -> None:
-    root = _write_data_dir(tmp_path)
-    data = load_dashboard_data("private", data_dir=root)
-    assert data.profile == "private"
-    assert len(data.session_dates) > 60
+def test_public_demo_profile_defaults_to_the_showcase_fixture(data) -> None:
+    assert data.profile == "demo"
+    assert data.demo is True
+    assert len(data.session_dates) == 5673
+    assert data.snapshot_id == "showcase-synthetic"
     assert data.score_points
     assert data.evaluation_reports
+    # Showcase is the joined synthetic table, so every calendar is aligned.
+    assert data.price_rows and data.industry_rows
     assert data.sources
-    assert data.revisions
 
 
-def test_screen_payloads_have_expected_shape(tmp_path: Path) -> None:
-    root = _write_data_dir(tmp_path)
-    data = load_dashboard_data("private", data_dir=root)
-    date = "2020-03-16"
-    selection = DashboardSelection(screen="overview", date=date, sessions=data.session_dates)
+def test_private_profile_can_point_at_the_same_synthetic_fixture() -> None:
+    private = load_dashboard_data("private", data_dir=SHOWCASE)
+    assert private.profile == "private"
+    assert len(private.session_dates) == 5673
+    assert private.snapshot_id == "showcase-synthetic"
+
+
+def test_build_screen_payloads_covers_the_four_release_screens(data) -> None:
+    selection = DashboardSelection(screen="structure", mode="replay", date="2020-02-24")
     payloads = build_screen_payloads(data, selection)
-    assert set(payloads) == {"overview", "topology", "validation", "data"}
-    assert payloads["overview"]["date"] == date
-    assert payloads["overview"]["score"]["value"] in {20.0, 80.0}
-    assert payloads["overview"]["score"]["cutoff_status"]["state"] in {"above", "below"}
-    assert payloads["topology"]["available"] is True
-    assert len(payloads["topology"]["window"]) == 60
-    assert payloads["validation"]["available"] is True
-    assert payloads["validation"]["export_table"]["rows"]
-    assert payloads["data"]["sources"]
-    assert payloads["data"]["failures"]
+    assert set(payloads) == set(SCREENS) == {"structure", "replay", "validation", "data"}
+    for screen, payload in payloads.items():
+        assert payload["screen"] == screen
+        assert payload["title"] == SCREEN_LABELS[screen]
+    assert payloads["structure"]["selected"] == "2020-02-24"
+    assert payloads["replay"]["date"] == "2020-02-24"
 
 
-def test_march_2020_replay_blind_reveal_blind(tmp_path: Path) -> None:
-    root = _write_data_dir(tmp_path)
-    data = load_dashboard_data("private", data_dir=root)
-    blind = DashboardSelection(
-        screen="topology", mode="replay", date="2020-03-16", sessions=data.session_dates
-    )
-    blind_payloads = build_screen_payloads(data, blind)
-    assert blind_payloads["topology"]["outcome"] is None
-    assert (
-        blind_payloads["overview"]["score"]["cutoff_status"]
-        == build_screen_payloads(
-            data,
-            DashboardSelection(
-                screen="topology", mode="replay", date="2020-03-16", sessions=data.session_dates
-            ),
-        )["overview"]["score"]["cutoff_status"]
-    )
-
-    revealed = toggle_reveal(blind)
-    revealed_payloads = build_screen_payloads(data, revealed)
-    outcome = revealed_payloads["topology"]["outcome"]
-    assert outcome is not None
-    assert outcome["horizon_sessions"] == OUTCOME_HORIZON
-    assert revealed_payloads["overview"]["score"] == blind_payloads["overview"]["score"]
-
-    hidden_again = toggle_blind(revealed)
-    assert build_screen_payloads(data, hidden_again)["topology"]["outcome"] is None
+def test_selected_date_must_be_a_loaded_session(data) -> None:
+    selection = DashboardSelection(screen="structure", date="1999-01-01")
+    with pytest.raises(DashboardDataError):
+        build_screen_payloads(data, selection)
 
 
-def test_keyboard_actions_change_selection(tmp_path: Path) -> None:
-    root = _write_data_dir(tmp_path)
-    data = load_dashboard_data("private", data_dir=root)
-    selection = DashboardSelection(
-        screen="overview", date=data.session_dates[100], sessions=data.session_dates
-    )
-    state = {
-        "tm_screen": selection.screen,
-        "tm_mode": selection.mode,
-        "tm_date": selection.date,
-        "tm_reveal": False,
-        "tm_member": None,
-        "tm_run": None,
-    }
-    updated = app.apply_action_to_state(state, "next_session", data)
-    assert updated.date == data.session_dates[101]
-    member_updated = apply_keyboard_action("next_member", updated)
-    assert member_updated.member is not None
+def test_validation_payload_reports_sample_size_rate_and_evidence(data) -> None:
+    selection = DashboardSelection(screen="validation", mode="live", date="2020-02-24")
+    validation = build_screen_payloads(data, selection)["validation"]
+    assert validation["available"] is True
+    assert validation["wording"]
+    assert validation["primary_method"] in validation["metrics"]
+    sample = validation["sample_size"]
+    assert sample["episode_count"] is not None
+    assert sample["eligible_sessions"] is not None
+    assert validation["false_alert_rate"] is not None
+    assert "limitations" in validation
+    assert validation["table_alternative"]
+    json.dumps(validation)
 
 
-def test_validation_empty_state_when_no_reports(tmp_path: Path) -> None:
-    root = _write_data_dir(tmp_path)
-    for path in (root / "reports").glob("*"):
-        path.unlink()
-    data = load_dashboard_data("private", data_dir=root)
-    selection = DashboardSelection(screen="validation", sessions=data.session_dates)
-    payload = build_screen_payloads(data, selection)["validation"]
-    assert payload["available"] is False
-    assert "evaluation" in payload["empty_state"].lower()
-    assert payload["export_table"] == {"columns": [], "rows": []}
+def test_validation_payload_exports_alert_evidence(data) -> None:
+    selection = DashboardSelection(screen="validation", mode="live", date="2020-02-24")
+    validation = build_screen_payloads(data, selection)["validation"]
+    table = validation["export_table"]
+    assert table["columns"] == ["kind", "method", "date", "episode_onset", "lead_sessions"]
+    assert isinstance(table["rows"], list)
 
 
-def test_demo_data_loads_without_private_inputs() -> None:
-    data = load_dashboard_data("demo")
-    assert data.demo is True
-    assert data.profile == "demo"
-    selection = DashboardSelection(screen="overview", sessions=data.session_dates)
-    payloads = build_screen_payloads(data, selection)
-    assert payloads["overview"]["date"] == data.session_dates[-1]
-    assert payloads["topology"]["available"] is False
+def test_data_payload_reports_independent_calendars(data) -> None:
+    selection = DashboardSelection(screen="data", mode="live", date="2020-02-24")
+    screen = build_screen_payloads(data, selection)["data"]
+    assert set(screen["calendars"]) == {"price", "vix", "industry"}
+    assert screen["price_calendar_is_signal_calendar"] is True
+    assert screen["refresh_available"] is False  # public demo is read-only
+    assert screen["synthetic"] is True
+    json.dumps(screen)
+
+
+def test_panel_cache_hits_and_invalidates(data) -> None:
+    cache = PanelCache(data)
+    selection = DashboardSelection(screen="structure", mode="replay", date="2020-02-24")
+    first = cache.get(selection)
+    assert cache.misses == 1 and cache.hits == 0
+    second = cache.get(selection)
+    assert second is first
+    assert cache.hits == 1
+    # Network view is part of the cache identity.
+    mapper_selection = selection.with_network_view("mapper")
+    cache.get(mapper_selection)
+    assert cache.misses == 2
+    cache.invalidate()
+    cache.get(selection)
+    assert cache.misses == 3
+
+
+def test_handcrafted_short_data_directory_is_handled_gracefully(tmp_path: Path) -> None:
+    from topomarket.ui.panels import _build_dataset
+
+    rows = []
+    for offset in range(30):
+        rows.append(
+            {
+                "date": f"2024-01-{offset + 1:02d}",
+                "sp500_close": "100.0",
+                "sp500_log_return": "0.001" if offset else "",
+                "vix_close": "15.0",
+                **{
+                    f"ind_{code}_return": "0.001"
+                    for code in (
+                        "nodur",
+                        "durbl",
+                        "manuf",
+                        "enrgy",
+                        "chems",
+                        "buseq",
+                        "telcm",
+                        "utils",
+                        "shops",
+                        "hlth",
+                        "money",
+                        "other",
+                    )
+                },
+            }
+        )
+    normalized = tmp_path / "normalized"
+    normalized.mkdir()
+    header = list(rows[0])
+    with (normalized / "tda_daily.csv").open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=header)
+        writer.writeheader()
+        writer.writerows(rows)
+    short = _build_dataset(profile="private", root=tmp_path, active=tmp_path, demo=False)
+    selection = DashboardSelection(screen="structure", date=short.session_dates[-1])
+    payloads = build_screen_payloads(short, selection)
+    assert payloads["structure"]["network"]["available"] is False
+    assert payloads["structure"]["mapper"]["available"] is False
+    assert payloads["structure"]["mapper"]["reason"]
+    assert payloads["structure"]["explanation"]["available"] is False
+    json.dumps(payloads)
+
+
+def test_fallback_demo_generator_still_works(monkeypatch: pytest.MonkeyPatch) -> None:
+    import topomarket.ui.panels as panels
+
+    monkeypatch.setattr(panels, "_showcase_dir", lambda: None)
+    fallback = load_dashboard_data("demo")
+    assert fallback.demo is True
+    assert len(fallback.session_dates) == 30
+    selection = DashboardSelection(screen="structure", date=fallback.session_dates[-1])
+    payloads = build_screen_payloads(fallback, selection)
+    assert payloads["structure"]["network"]["available"] is False
+    assert payloads["replay"]["blind"] is False

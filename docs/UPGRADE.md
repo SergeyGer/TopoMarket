@@ -115,9 +115,12 @@ The repository owner (not automatable in this checkout):
 
 1. Upload `docs/assets/social_preview.png` in GitHub → Settings → Social preview
    (the file is committed and regenerable with `scripts/build_social_preview.py`).
+   **Done 2026-11-25.**
 2. Create the Streamlit Community Cloud app from the released branch
    (`main`, entrypoint `app.py`) and share the public URL so it can be recorded
-   in the README/release.
+   in the README/release. **Created 2026-11-25:**
+   <https://topomarket-juhbvrgk2k67pnr6qbpfmc.streamlit.app/>; the sharing setting
+   still needs to allow anonymous viewers before the signed-out checks can pass.
 3. Upload/publish the video asset if the selected video host is not GitHub
    Releases, and confirm the final preview/video links after publication.
 
@@ -131,3 +134,12 @@ The repository owner (not automatable in this checkout):
 - Evaluation corrections change the reported holdout numbers; both the public
   synthetic report and the local private report are regenerated and their
   digests recorded so the video and docs quote consistent evidence.
+
+## 10. Status log
+
+| Release | Scope | State |
+| --- | --- | --- |
+| v0.8.3 / PR #36 | upgrade plan, social preview assets, license and data-notice audit, issue #10 closed | delivered |
+| v0.9.0 | build steps 1-2: authoritative replay date, independent calendars, corrected evaluation, Structure/Replay experience, Cloud dependency definition (CL01/CL02 partial) | delivered |
+| v0.9.2 | frozen demonstration presets, captioned demo video, SRT and editable production files | planned |
+| v1.0.0 | hosted verification, README/Wiki links, final tagged release | planned |

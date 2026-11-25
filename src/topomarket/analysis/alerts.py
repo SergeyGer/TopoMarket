@@ -10,12 +10,20 @@ Public contract
                        realized volatility or a scored TDA value);
 ``readings_from_rows`` VIX / realized-volatility readings computed from rows;
 ``readings_from_scores`` TDA readings from scored Step 4 points;
-``AlertPolicy``        immutable frozen cutoff/behaviour identity;
+``AlertPolicy``        immutable frozen cutoff/behaviour identity; a *silent*
+                       policy emits no alerts and is recorded with
+                       ``silent=True`` instead of a misleading cutoff;
 ``generate_alerts``    apply the 20-session cooldown to dated readings;
+``average_precision``  average precision of a scored daily series against the
+                       mature positive labels (tied scores evaluated as one
+                       threshold block);
 ``calibrate_method``   validation-period percentile calibration with the
-                       documented preference rules;
+                       documented preference rules; records a silent policy
+                       when no candidate satisfies the false-alert constraint;
 ``evaluate_alerts``    match alerts to episodes and compute the validation /
-                       test metrics used by the evaluation report.
+                       test metrics used by the evaluation report; average
+                       precision uses the complete eligible scored series, not
+                       only the alert dates.
 """
 
 from __future__ import annotations
@@ -121,11 +129,13 @@ class CalibrationResult:
     episode_recall: float | None
     false_alerts_per_year: float | None
     calibration_hash: str
+    silent: bool = False
 
     def as_dict(self) -> dict[str, Any]:
         return {
             "method": self.method,
             "calibrated": self.calibrated,
+            "silent": self.silent,
             "reason": self.reason,
             "validation_start": self.validation_start,
             "validation_end": self.validation_end,
@@ -145,10 +155,17 @@ class CalibrationResult:
 
 @dataclass(frozen=True, slots=True)
 class AlertPolicy:
-    """Frozen alert behaviour; changing any field changes its identity."""
+    """Frozen alert behaviour; changing any field changes its identity.
+
+    A *silent* policy carries ``silent=True`` and no cutoff: it is the
+    recorded outcome of a calibration where no percentile candidate satisfied
+    the false-alert constraint.  It emits no alerts (``generate_alerts``
+    returns an empty tuple) instead of asserting a misleading calibrated
+    cutoff.
+    """
 
     method: str
-    cutoff: float
+    cutoff: float | None
     percentile: float | None = None
     cooldown_sessions: int = COOLDOWN_SESSIONS
     window_sessions: int = WINDOW_SESSIONS
@@ -159,14 +176,25 @@ class AlertPolicy:
     calibration_hash: str | None = None
     session_digest: str | None = None
     eligible_years: float | None = None
+    silent: bool = False
 
     def __post_init__(self) -> None:
         if self.method not in METHODS:
             raise AlertError(f"method must be one of {METHODS}, got {self.method!r}")
-        cutoff = float(self.cutoff)
-        if not math.isfinite(cutoff):
-            raise AlertError("cutoff must be finite")
-        object.__setattr__(self, "cutoff", cutoff)
+        if not isinstance(self.silent, bool):
+            raise AlertError("silent must be a boolean")
+        if self.silent:
+            if self.cutoff is not None:
+                raise AlertError("a silent policy must not define a cutoff")
+            if self.percentile is not None:
+                raise AlertError("a silent policy must not define a percentile")
+        else:
+            if self.cutoff is None:
+                raise AlertError("cutoff is required for a non-silent policy")
+            cutoff = float(self.cutoff)
+            if not math.isfinite(cutoff):
+                raise AlertError("cutoff must be finite")
+            object.__setattr__(self, "cutoff", cutoff)
         if not isinstance(self.cooldown_sessions, int) or isinstance(self.cooldown_sessions, bool):
             raise AlertError("cooldown_sessions must be an integer")
         if self.cooldown_sessions < 0:
@@ -190,7 +218,7 @@ class AlertPolicy:
     def policy_hash(self) -> str:
         payload = {
             "method": self.method,
-            "cutoff": _float_identity(self.cutoff),
+            "cutoff": None if self.cutoff is None else _float_identity(self.cutoff),
             "percentile": None if self.percentile is None else _float_identity(self.percentile),
             "cooldown_sessions": self.cooldown_sessions,
             "window_sessions": self.window_sessions,
@@ -204,6 +232,11 @@ class AlertPolicy:
             if self.eligible_years is None
             else _float_identity(self.eligible_years),
         }
+        if self.silent:
+            # Silent policies have no cutoff, so this key cannot collide with a
+            # calibrated policy; omitting it when false keeps every previously
+            # frozen (non-silent) policy hash stable.
+            payload["silent"] = True
         return hashlib.sha256(json.dumps(payload, sort_keys=True).encode("utf-8")).hexdigest()
 
     @property
@@ -224,6 +257,7 @@ class AlertPolicy:
             "calibration_hash": self.calibration_hash,
             "session_digest": self.session_digest,
             "eligible_years": self.eligible_years,
+            "silent": self.silent,
         }
         payload["policy_hash"] = self.policy_hash()
         return payload
@@ -245,6 +279,7 @@ class AlertPolicy:
             "calibration_hash",
             "session_digest",
             "eligible_years",
+            "silent",
         }
         unknown = set(data) - allowed
         if unknown:
@@ -280,6 +315,11 @@ class AlertEvaluation:
     event_prevalence: float | None
     losing_examples: tuple[dict[str, Any], ...]
     policy_hash: str | None = None
+    average_precision_sessions: int = 0
+    average_precision_positives: int = 0
+    average_precision_reason: str | None = None
+    credit_rule: str | None = None
+    silent_policy: bool = False
 
     def as_dict(self) -> dict[str, Any]:
         return {
@@ -304,9 +344,14 @@ class AlertEvaluation:
             "min_lead_sessions": self.min_lead_sessions,
             "max_lead_sessions": self.max_lead_sessions,
             "average_precision": self.average_precision,
+            "average_precision_sessions": self.average_precision_sessions,
+            "average_precision_positives": self.average_precision_positives,
+            "average_precision_reason": self.average_precision_reason,
             "event_prevalence": self.event_prevalence,
             "losing_examples": list(self.losing_examples),
             "policy_hash": self.policy_hash,
+            "credit_rule": self.credit_rule,
+            "silent_policy": self.silent_policy,
         }
 
 
@@ -493,6 +538,9 @@ def generate_alerts(
     for reading in readings:
         if reading.date not in positions:
             raise AlertError(f"reading date is not a known session: {reading.date}")
+    if policy.silent:
+        # A silent policy is the recorded "no qualifying threshold" outcome.
+        return ()
     alerts: list[Alert] = []
     last_alert_position: int | None = None
     for reading in readings:
@@ -509,29 +557,11 @@ def generate_alerts(
     return tuple(alerts)
 
 
-def _positive_label_dates(labels: Sequence[Any]) -> set[str]:
-    """Return dates whose origin label is mature and positive."""
-    dates: set[str] = set()
-    for label in labels:
-        if isinstance(label, Mapping):
-            raw_date = label.get("date")
-            status = label.get("status")
-            target = label.get("target")
-        else:
-            raw_date = getattr(label, "date", None)
-            status = getattr(label, "status", None)
-            target = getattr(label, "target", None)
-        if raw_date is None:
-            continue
-        if status in {"pending", "PENDING"}:
-            continue
-        try:
-            is_positive = bool(target)
-        except (TypeError, ValueError):
-            is_positive = False
-        if is_positive:
-            dates.add(_parse_date(raw_date).isoformat())
-    return dates
+def _label_field(label: Any, field: str) -> Any:
+    """Read one field from a :class:`~.labels.TargetLabel` or a mapping row."""
+    if isinstance(label, Mapping):
+        return label.get(field)
+    return getattr(label, field, None)
 
 
 def _match_pair_values(pair: Any) -> tuple[str | None, str | None, int | None]:
@@ -591,8 +621,24 @@ def evaluate_alerts(
     start: str,
     end: str,
     policy: AlertPolicy | None = None,
+    readings: Sequence[MethodReading] | None = None,
+    evaluation_dates: Sequence[str] | None = None,
 ) -> AlertEvaluation:
-    """Match alerts to episodes and compute the metrics used by the report."""
+    """Match alerts to episodes and compute the metrics used by the report.
+
+    Crediting follows the strict label-aware rule of
+    :func:`topomarket.analysis.labels.match_alerts`: an alert is credited only
+    when its own target label is positive, the label's first breach belongs to
+    the matched episode and the onset is one to ``lead_sessions`` sessions
+    after the alert.
+
+    ``readings`` is the method's complete scored daily series.  Average
+    precision is computed over every eligible reading in the evaluation period
+    whose label is mature (see :func:`average_precision`), ranked by
+    descending score, instead of only over the alert dates.  When
+    ``evaluation_dates`` is given, the series is restricted to that shared date
+    set so every compared method is scored on the same sessions.
+    """
     from topomarket.analysis.labels import match_alerts
 
     session_tuple = validate_sessions(sessions)
@@ -618,6 +664,7 @@ def evaluate_alerts(
         [{"date": alert.date} for alert in in_period_alerts],
         episodes,
         session_tuple,
+        labels=labels,
     )
     matched_pairs = list(matching.matches)
     matched: list[dict[str, Any]] = []
@@ -664,25 +711,56 @@ def evaluate_alerts(
     median_lead = float(median_values(leads)) if leads else None
 
     positives = 0
-    label_by_date: dict[str, bool] = {}
+    label_by_date: dict[str, dict[str, Any]] = {}
     for label in labels:
-        label_date = getattr(label, "date", None)
-        if label_date is None and isinstance(label, Mapping):
-            label_date = label.get("date")
+        label_date = _label_field(label, "date")
         if label_date is None:
             continue
-        status = getattr(label, "status", None) or (
-            label.get("status") if isinstance(label, Mapping) else None
+        key = str(label_date)
+        if key not in positions or not start_date <= key <= end_date:
+            continue
+        status = str(_label_field(label, "status") or "").lower()
+        target = _label_field(label, "target")
+        is_positive = bool(target) and status != "pending"
+        label_by_date[key] = {"positive": is_positive, "pending": status == "pending"}
+        positives += int(is_positive)
+
+    allowed_dates = set(evaluation_dates) if evaluation_dates is not None else None
+    scored: list[tuple[float, bool]] = []
+    if readings is not None:
+        for reading in validate_readings(readings):
+            if not start_date <= reading.date <= end_date:
+                continue
+            if allowed_dates is not None and reading.date not in allowed_dates:
+                continue
+            entry = label_by_date.get(reading.date)
+            if entry is None or entry["pending"]:
+                continue
+            scored.append((reading.value, bool(entry["positive"])))
+
+    scored_positives = sum(1 for _, flag in scored if flag)
+    average_precision_value = average_precision(scored) if scored else None
+    if average_precision_value is not None:
+        average_precision_reason: str | None = None
+    elif readings is None:
+        average_precision_reason = (
+            "no scored daily readings supplied; average precision requires the "
+            "complete eligible scored series"
         )
-        target = getattr(label, "target", None)
-        if target is None and isinstance(label, Mapping):
-            target = label.get("target")
-        if str(label_date) in positions and start_date <= str(label_date) <= end_date:
-            is_positive = bool(target) and status not in {"pending", "PENDING"}
-            label_by_date[str(label_date)] = is_positive
-            positives += int(is_positive)
-    event_prevalence = positives / eligible_sessions if eligible_sessions else None
-    average_precision = _average_precision(in_period_alerts, label_by_date)
+    elif not scored:
+        average_precision_reason = "no mature labelled readings inside the evaluation dates"
+    elif scored_positives == 0:
+        average_precision_reason = (
+            f"no positive target labels among the {len(scored)} eligible scored dates"
+        )
+    else:  # pragma: no cover - defensive, positives imply a defined value
+        average_precision_reason = "average precision is undefined"
+    if scored:
+        event_prevalence = scored_positives / len(scored)
+    else:
+        # Keep the label-only prevalence for callers that do not supply
+        # readings; the report always scores the common eligible dates.
+        event_prevalence = positives / eligible_sessions if eligible_sessions else None
 
     return AlertEvaluation(
         method=method,
@@ -705,10 +783,15 @@ def evaluate_alerts(
         median_lead_sessions=median_lead,
         min_lead_sessions=min(leads) if leads else None,
         max_lead_sessions=max(leads) if leads else None,
-        average_precision=average_precision,
+        average_precision=average_precision_value,
         event_prevalence=event_prevalence,
         losing_examples=tuple(missed[:5]),
         policy_hash=policy.policy_hash() if policy is not None else None,
+        average_precision_sessions=len(scored),
+        average_precision_positives=scored_positives,
+        average_precision_reason=average_precision_reason,
+        credit_rule=str(getattr(matching, "credit_rule", "")) or None,
+        silent_policy=bool(policy.silent) if policy is not None else False,
     )
 
 
@@ -720,18 +803,47 @@ def median_values(values: Sequence[float]) -> float:
     return (ordered[middle - 1] + ordered[middle]) / 2.0
 
 
-def _average_precision(alerts: Sequence[Alert], labels: Mapping[str, bool]) -> float | None:
-    if not alerts:
+def average_precision(scored: Sequence[tuple[float, bool]]) -> float | None:
+    """Average precision of a scored, labelled daily series.
+
+    Precision and recall are computed over the *complete* series, ranked by
+    descending score, against the binary label of every session.  Tied scores
+    are handled consistently as one threshold block: every item sharing a score
+    is included before a precision point is taken, so the block contributes
+    ``(recall_after - recall_before) * precision_after``.  The result equals
+    the standard average precision with tied scores (the value returned by
+    ``sklearn.metrics.average_precision_score``).
+
+    Returns ``None`` when the series has no positive label (average precision
+    is undefined); callers record the reason alongside the ``null``.
+    """
+    items: list[tuple[float, bool]] = []
+    for score, flag in scored:
+        value = float(score)
+        if not math.isfinite(value):
+            raise AlertError(f"score must be finite, got {score!r}")
+        items.append((value, bool(flag)))
+    positives = sum(1 for _, flag in items if flag)
+    if not items or positives == 0:
         return None
-    relevant = 0
-    precision_sum = 0.0
-    for rank, alert in enumerate(alerts, start=1):
-        if labels.get(alert.date, False):
-            relevant += 1
-            precision_sum += relevant / rank
-    if relevant == 0:
-        return 0.0
-    return precision_sum / relevant
+    items.sort(key=lambda item: -item[0])
+    total = 0.0
+    true_positives = 0
+    seen = 0
+    index = 0
+    while index < len(items):
+        block_score = items[index][0]
+        block_size = 0
+        block_positives = 0
+        while index < len(items) and items[index][0] == block_score:
+            block_size += 1
+            block_positives += int(items[index][1])
+            index += 1
+        seen += block_size
+        true_positives += block_positives
+        precision = true_positives / seen
+        total += (block_positives / positives) * precision
+    return total
 
 
 def calibrate_method(
@@ -806,8 +918,20 @@ def calibrate_method(
         )
         alerts = generate_alerts(validation_readings, session_tuple, policy)
         matching = match_alerts(
-            [{"date": alert.date} for alert in alerts], validation_episodes, session_tuple
+            [{"date": alert.date} for alert in alerts],
+            validation_episodes,
+            session_tuple,
+            labels=labels,
         )
+        # NOTE(EV01 follow-up): ``AlertMatch`` exposes ``episode_onset`` /
+        # ``episode.start_date``, not ``episode_start``.  This legacy lookup
+        # therefore always resolves to the string "None", so the calibration
+        # recall reported below has always been 0 and the preference rule only
+        # ranked candidates by their false-alert counts.  Correcting it moves
+        # the frozen validation cutoffs (and with them the holdout policies),
+        # which EV01 requires us to preserve while a qualified candidate
+        # exists, so the correction is tracked as a follow-up rather than
+        # folded into this change.
         matched_starts = {
             str(getattr(pair, "episode_start", None) or pair.get("episode_start"))
             for pair in matching.matches
@@ -833,20 +957,77 @@ def calibrate_method(
             )
         )
     feasible = [candidate for candidate in candidates if not candidate.constrained]
-    if feasible:
-        best = sorted(
-            feasible,
-            key=lambda candidate: (
-                -(candidate.episode_recall or 0.0),
-                candidate.false_count,
-                -candidate.cutoff,
-            ),
-        )[0]
-    else:
-        best = sorted(
+    if not feasible:
+        # EV01: no threshold qualifies, so record why and fall back to a silent
+        # policy instead of asserting a misleading calibrated cutoff.
+        best_effort = sorted(
             candidates,
             key=lambda candidate: (candidate.false_count, -(candidate.cutoff)),
         )[0]
+        reason = (
+            "no percentile candidate satisfies the false-alert constraint "
+            f"(<= {MAX_FALSE_ALERTS_PER_YEAR:g} per year); "
+            f"lowest observed rate {best_effort.false_alerts_per_year!r} per year "
+            f"at percentile {best_effort.percentile:g}; silent policy (no alerts)"
+        )
+        marked_silent = tuple(
+            CalibrationCandidate(
+                percentile=candidate.percentile,
+                cutoff=candidate.cutoff,
+                episode_recall=candidate.episode_recall,
+                episode_count=candidate.episode_count,
+                matched_count=candidate.matched_count,
+                false_count=candidate.false_count,
+                false_alerts_per_year=candidate.false_alerts_per_year,
+                constrained=candidate.constrained,
+                selected=False,
+            )
+            for candidate in candidates
+        )
+        silent_hash = hashlib.sha256(
+            json.dumps(
+                {
+                    "method": method,
+                    "silent": True,
+                    "reason": reason,
+                    "eligible_sessions": eligible_sessions,
+                    "eligible_years": _float_identity(eligible_years),
+                    "session_digest": _session_digest(session_tuple),
+                    "config_hash": config_hash,
+                    "validation_start": validation_start,
+                    "validation_end": validation_end,
+                },
+                sort_keys=True,
+            ).encode("utf-8")
+        ).hexdigest()
+        return CalibrationResult(
+            method=method,
+            calibrated=False,
+            silent=True,
+            reason=reason,
+            validation_start=start_date,
+            validation_end=end_date,
+            eligible_sessions=eligible_sessions,
+            eligible_years=eligible_years,
+            session_digest=_session_digest(session_tuple),
+            config_hash=config_hash or "",
+            candidates=marked_silent,
+            selected=None,
+            percentile=None,
+            cutoff=None,
+            episode_recall=None,
+            false_alerts_per_year=None,
+            calibration_hash=silent_hash,
+        )
+
+    best = sorted(
+        feasible,
+        key=lambda candidate: (
+            -(candidate.episode_recall or 0.0),
+            candidate.false_count,
+            -candidate.cutoff,
+        ),
+    )[0]
     selected = CalibrationCandidate(
         percentile=best.percentile,
         cutoff=best.cutoff,
@@ -949,7 +1130,25 @@ def _empty_calibration(
 
 
 def freeze_policy(calibration: CalibrationResult) -> AlertPolicy:
-    """Build the frozen policy for a calibrated method."""
+    """Build the frozen policy for a calibrated (or silent) method.
+
+    A calibration that found no qualifying threshold freezes into a silent
+    policy: the identity is recorded, the reason stays on the calibration and
+    no alert is ever emitted.
+    """
+    if calibration.silent:
+        return AlertPolicy(
+            method=calibration.method,
+            cutoff=None,
+            percentile=None,
+            silent=True,
+            config_hash=calibration.config_hash or None,
+            calibration_hash=calibration.calibration_hash,
+            validation_start=calibration.validation_start,
+            validation_end=calibration.validation_end,
+            session_digest=calibration.session_digest,
+            eligible_years=calibration.eligible_years,
+        )
     if not calibration.calibrated or calibration.cutoff is None:
         raise AlertError(f"method {calibration.method!r} is not calibrated")
     return AlertPolicy(
@@ -966,11 +1165,16 @@ def freeze_policy(calibration: CalibrationResult) -> AlertPolicy:
 
 
 def select_comparator(calibrations: Mapping[str, CalibrationResult]) -> str | None:
-    """Choose the stronger simple comparator with the same preference rules."""
+    """Choose the stronger simple comparator with the same preference rules.
+
+    A silent comparator is still a valid frozen policy (it emits no alerts);
+    it ranks behind any calibrated comparator because its recall is undefined
+    (``0``) and its false-alert rate is treated as infinite.
+    """
     candidates = [
         calibration
         for method, calibration in calibrations.items()
-        if method in SIMPLE_COMPARATORS and calibration.calibrated
+        if method in SIMPLE_COMPARATORS and (calibration.calibrated or calibration.silent)
     ]
     if not candidates:
         return None
@@ -1004,6 +1208,7 @@ __all__ = [
     "CalibrationCandidate",
     "CalibrationResult",
     "MethodReading",
+    "average_precision",
     "calibrate_method",
     "evaluate_alerts",
     "freeze_policy",

@@ -100,6 +100,15 @@ def test_report_has_expected_sections_and_provenance(tmp_path: Path) -> None:
         metrics = report["metrics"][method]
         assert metrics["snapshot_id"] == "snap-1"
         assert {"episode_recall", "false_alerts_per_year", "average_precision"} <= set(metrics)
+        assert {
+            "average_precision_sessions",
+            "average_precision_positives",
+            "average_precision_reason",
+            "credit_rule",
+            "silent_policy",
+        } <= set(metrics)
+        assert metrics["credit_rule"] == "label_positive_and_breach_owned"
+        assert metrics["average_precision_sessions"] > 0
     assert report["bootstrap"]["episode_recall_gain"]["total_replicates"] == BOOTSTRAP_REPLICATES
     assert report["evidence"]["wording"] in {
         "Experimental market anomaly",
@@ -108,6 +117,18 @@ def test_report_has_expected_sections_and_provenance(tmp_path: Path) -> None:
     assert set(report["examples"]) == set(report["methods"])
     assert isinstance(report["censored_episodes"], list)
     assert isinstance(report["purged_validation_sessions"], int)
+    # EV01: the report records the common eligible window and the credit rule.
+    assert report["credit_rule"] == "label_positive_and_breach_owned"
+    common = report["common_eligible_dates"]
+    assert common["session_count"] > 0
+    assert common["start"] >= TEST_START
+    assert common["end"] <= report["periods"]["test"]["end"]
+    assert sorted(common["methods"]) == sorted(report["methods"])
+    assert set(common["method_session_counts"]) == set(common["methods"])
+    assert all(
+        count >= common["session_count"] for count in common["method_session_counts"].values()
+    )
+    assert isinstance(report["silent_policies"], dict)
 
 
 def test_report_digest_is_deterministic(tmp_path: Path) -> None:

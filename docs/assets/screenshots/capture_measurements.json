@@ -1,0 +1,22 @@
+{
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "above_the_fold_charts": [
+    {
+      "w": 980,
+      "h": 552,
+      "top": 342,
+      "bottom": 895
+    },
+    {
+      "w": 980,
+      "h": 561,
+      "top": 1049,
+      "bottom": 1610
+    }
+  ],
+  "structure_first_chart_fully_visible": true,
+  "browser": "Playwright Chromium headless 1920x1080-capable, 1440x900 viewport"
+}

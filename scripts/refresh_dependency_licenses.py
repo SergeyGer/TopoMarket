@@ -100,6 +100,21 @@ def read_pyproject_requirements() -> dict[str, str]:
     return requirements
 
 
+def read_pins(path: Path) -> dict[str, str]:
+    """Read ``name==version`` pins from a requirements file."""
+
+    if not path.is_file():
+        return {}
+    pins: dict[str, str] = {}
+    for line in path.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "==" not in line:
+            continue
+        name, version = line.split("==", 1)
+        pins[requirement_name(name)] = version.strip()
+    return pins
+
+
 def read_lock_pins(path: Path = LOCKFILE) -> dict[str, str]:
     pins: dict[str, str] = {}
     for line in path.read_text(encoding="utf-8").splitlines():
@@ -236,11 +251,14 @@ def _result(
 def build_registry() -> dict[str, Any]:
     declared = read_pyproject_requirements()
     locked = read_lock_pins()
-    names = sorted(set(declared) | set(locked))
+    cloud = read_pins(CLOUD_REQUIREMENTS)
+    combined = dict(locked)
+    combined.update({name: version for name, version in cloud.items() if name not in combined})
+    names = sorted(set(declared) | set(combined))
     packages: dict[str, dict[str, Any]] = {}
     problems: list[str] = []
     for name in names:
-        version = locked.get(name)
+        version = combined.get(name)
         try:
             metadata = _pypi_metadata(name, version)
         except (urllib.error.URLError, TimeoutError, KeyError) as error:
@@ -262,9 +280,10 @@ def build_registry() -> dict[str, Any]:
         packages[name] = {
             "name": name,
             "version": pins,
-            "declared": "pyproject" if name in declared else "lock",
+            "declared": "pyproject" if name in declared else ("cloud" if name in cloud else "lock"),
             "pyproject_requirement": declared.get(name),
             "locked": name in locked,
+            "cloud": name in cloud,
             "license": display_license,
             "license_classifiers": classification["license_classifiers"],
             "classification": classification["classification"],
@@ -283,7 +302,7 @@ def build_registry() -> dict[str, Any]:
     return {
         "schema_version": 1,
         "generated_by": "scripts/refresh_dependency_licenses.py",
-        "generated_from": ["pyproject.toml", "requirements.lock"],
+        "generated_from": ["pyproject.toml", "requirements.lock", "requirements.txt"],
         "policy": {
             "project_license": "MIT",
             "allow": ["permissive", "weak-copyleft with review"],

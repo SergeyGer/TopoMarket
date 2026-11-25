@@ -34,7 +34,7 @@ jobs:
       - name: Install package with dev extras
         run: |
           python -m pip install --upgrade pip
-          python -m pip install -e ".[dev]"
+          python -m pip install -e ".[dev,ui]"
       - name: Compile
         run: python -m compileall -q src tests app.py
       - name: Lint
@@ -43,3 +43,60 @@ jobs:
         run: ruff format --check .
       - name: Tests
         run: pytest -q
+
+  cloud-smoke:
+    name: cloud dependency smoke (py3.12)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install the effective Cloud dependency definition
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+      - name: Compile and import the application
+        run: |
+          python -m compileall -q src app.py
+          python - <<'PY'
+          import sys
+          from pathlib import Path
+
+          sys.path.insert(0, "src")
+          import app  # noqa: F401 - imports charts, panels and dashboard
+
+          print("imports ok")
+          PY
+      - name: Plain public demo (no private data, no flags)
+        run: python app.py -- --profile demo
+      - name: Streamlit entrypoint health check
+        run: |
+          python -m streamlit run app.py --server.headless true --server.port 8599 > /tmp/cloud-smoke.log 2>&1 &
+          for attempt in $(seq 1 60); do
+            if curl -sf http://127.0.0.1:8599/_stcore/health > /tmp/health.txt; then
+              echo "health: $(cat /tmp/health.txt)"
+              break
+            fi
+            sleep 2
+            if [ "$attempt" = 60 ]; then
+              echo "Streamlit did not become healthy" >&2
+              cat /tmp/cloud-smoke.log
+              exit 1
+            fi
+          done
+          python - <<'PY'
+          import json
+          import urllib.request
+
+          html = urllib.request.urlopen("http://127.0.0.1:8599/", timeout=30).read().decode()
+          # The initial Streamlit document is a generic shell; the application content
+          # is streamed over the websocket, so smoke-check the shell markers only.
+          assert len(html) > 500, "landing page is suspiciously small"
+          assert "streamlit" in html.lower(), "landing page is not a Streamlit shell"
+          print("landing page served", len(html), "bytes")
+          PY
+      - name: Audit the Cloud dependency licenses offline
+        run: python scripts/audit_dependency_licenses.py

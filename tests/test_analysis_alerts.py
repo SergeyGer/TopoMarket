@@ -190,11 +190,16 @@ def test_evaluate_alerts_matches_early_and_classifies_other_alerts() -> None:
 
 
 def test_calibration_selects_a_candidate_and_marks_it() -> None:
-    rows = _crash_rows(200, crash_start=60, crash_days=30, start=date(2004, 1, 1))
+    # Long validation window with one crash and a contiguous high-reading
+    # block: the 85th-percentile cutoff alerts through the whole block and
+    # breaks the false-alert constraint, while the higher percentiles keep
+    # eight false alerts over ~4.5 years (<= 2/year) and qualify.
+    rows = _crash_rows(1200, crash_start=600, crash_days=6, daily_drop=0.97, start=date(2004, 1, 1))
     sessions = _session_dates(rows)
     labels = build_target_labels(rows)
+    high_block = range(590, 761)
     readings = tuple(
-        MethodReading(session, float(index) / len(sessions) * 100.0)
+        MethodReading(session, 100.0 if index in high_block else 0.0)
         for index, session in enumerate(sessions)
     )
     calibration = calibrate_method(
@@ -203,18 +208,27 @@ def test_calibration_selects_a_candidate_and_marks_it() -> None:
         labels=labels,
         sessions=sessions,
         config_hash="cfg",
-        validation_start=sessions[40],
-        validation_end=sessions[170],
+        validation_start=sessions[20],
+        validation_end=sessions[1180],
     )
     assert calibration.calibrated is True
+    assert calibration.silent is False
+    assert calibration.reason is None
     assert len(calibration.candidates) == 6
     selected = [candidate for candidate in calibration.candidates if candidate.selected]
     assert len(selected) == 1
     assert calibration.selected is not None
     assert calibration.selected.selected is True
     assert calibration.selected.percentile in (85.0, 90.0, 92.5, 95.0, 97.5, 99.0)
+    # The constrained 85th-percentile candidate is never selected.
+    assert [
+        candidate.percentile for candidate in calibration.candidates if candidate.constrained
+    ] == [85.0]
+    assert calibration.selected.percentile != 85.0
     policy = freeze_policy(calibration)
     assert policy.method == "vix"
+    assert policy.silent is False
+    assert policy.cutoff is not None
     assert policy.policy_hash()
 
 
