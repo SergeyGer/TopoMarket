@@ -176,7 +176,7 @@ def build_timeline(data: Any, selected: str) -> dict[str, Any]:
                 "label": "S&P 500",
                 "unit": "index points",
                 "values": closes,
-                "color_token": "sp500",
+                "palette": "sp500",
             },
             "vix": {
                 "panel_id": "vix",
@@ -184,7 +184,7 @@ def build_timeline(data: Any, selected: str) -> dict[str, Any]:
                 "unit": "index points",
                 "values": vix_values,
                 "missing_sessions": sum(1 for value in vix_values if value is None),
-                "color_token": "vix",
+                "palette": "vix",
             },
             "score": {
                 "panel_id": "score",
@@ -194,7 +194,7 @@ def build_timeline(data: Any, selected: str) -> dict[str, Any]:
                 "threshold": cutoff,
                 "threshold_label": None if cutoff is None else f"Frozen threshold {cutoff:.2f}",
                 "alert_markers": alerts,
-                "color_token": "score",
+                "palette": "score",
             },
         },
         "alert_markers": alerts,

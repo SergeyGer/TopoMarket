@@ -92,7 +92,10 @@ jobs:
           import urllib.request
 
           html = urllib.request.urlopen("http://127.0.0.1:8599/", timeout=30).read().decode()
-          assert "TopoMarket" in html, "landing page does not embed the app shell"
+          # The initial Streamlit document is a generic shell; the application content
+          # is streamed over the websocket, so smoke-check the shell markers only.
+          assert len(html) > 500, "landing page is suspiciously small"
+          assert "streamlit" in html.lower(), "landing page is not a Streamlit shell"
           print("landing page served", len(html), "bytes")
           PY
       - name: Audit the Cloud dependency licenses offline
