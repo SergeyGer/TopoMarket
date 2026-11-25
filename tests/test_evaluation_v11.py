@@ -74,7 +74,14 @@ def test_committed_report_is_versioned_and_keeps_the_v1_baseline() -> None:
     assert methods["realized_vol"]["calibration"]["before"]["episode_recall"] == 0.0
     assert methods["realized_vol"]["calibration"]["after"]["episode_recall"] > 0.0
     for method in methods:
-        assert methods[method]["policy_changed"] is False
+        # The policy hash binds the topology/config version, so a release version
+        # bump can change the hash; the selected percentile/cutoff and holdout
+        # metrics must stay identical between the baseline and corrected runs.
+        before = methods[method]["calibration"]["before"]
+        after = methods[method]["calibration"]["after"]
+        assert before["percentile"] == after["percentile"]
+        assert before["cutoff"] == after["cutoff"]
+        assert methods[method]["holdout"]["before"] == methods[method]["holdout"]["after"]
 
 
 def test_holdout_suffix_mutation_does_not_change_fitted_policies() -> None:
