@@ -30,10 +30,14 @@ if str(_SRC) not in sys.path:
 from topomarket import __version__  # noqa: E402  (path is configured above)
 from topomarket.profiles import PROFILE_NAMES  # noqa: E402
 
-try:  # matplotlib is a UI extra; the plain-text fallback must import without it.
-    from topomarket.ui import charts  # noqa: E402
+try:  # UI extras; the plain-text fallback must import without them.
+    from topomarket.ui import (
+        charts,  # noqa: E402
+        interactive,  # noqa: E402
+    )
 except ImportError:  # pragma: no cover - exercised by minimal installs
     charts = None  # type: ignore[assignment]
+    interactive = None  # type: ignore[assignment]
 from topomarket.ui.accessibility import motion_css  # noqa: E402
 from topomarket.ui.dashboard import (  # noqa: E402
     DEFAULT_NETWORK_VIEW,
@@ -60,6 +64,7 @@ from topomarket.ui.panels import (  # noqa: E402
     load_dashboard_data,
 )
 from topomarket.ui.presets import build_presets  # noqa: E402
+from topomarket.ui.structure import build_window_comparison  # noqa: E402
 
 try:  # Streamlit is optional; importing app.py must work without it.
     import streamlit as st  # type: ignore[import-not-found]  # noqa: E402
@@ -482,6 +487,72 @@ def _apply_widgets(
         if str(selection.network_view) == "mapper":
             selection = _apply_mapper_edge_selector(sidebar, data, selection)
 
+    if selection.screen == "structure" and presets.get("available"):
+        _call(sidebar, "markdown", "**Guided tour**")
+        steps = _guided_steps(presets, data)
+        state = ui.session_state
+        step_index = int(state.get(GUIDE_STEP_KEY, 0) or 0) % max(1, len(steps))
+        changed = False
+        if _call(sidebar, "button", "Guided: back", key="tm_guide_prev"):
+            step_index = (step_index - 1) % len(steps)
+            changed = True
+        if _call(sidebar, "button", "Guided: next step ▶", key="tm_guide_next"):
+            step_index = (step_index + 1) % len(steps)
+            changed = True
+        if changed:
+            state[GUIDE_STEP_KEY] = step_index
+            selection = _apply_guided_step(selection, steps[step_index])
+        step = steps[step_index]
+        _call(
+            sidebar,
+            "caption",
+            f"Guided step {step_index + 1}/{len(steps)}: {step['name']}. {step['description']}",
+        )
+        compare_on = _call(
+            sidebar,
+            "checkbox",
+            "Compare two windows",
+            value=bool(state.get(COMPARE_TOGGLE_KEY, False)),
+            key=COMPARE_TOGGLE_KEY,
+        )
+        if compare_on:
+            dates = list(_loaded_context(data)["session_dates"])
+            if dates:
+                default_compare = next(
+                    (
+                        str(record.get("date"))
+                        for record in presets["presets"]
+                        if record.get("preset_id") == "quiet" and record.get("date")
+                    ),
+                    dates[0],
+                )
+                stored = state.get(COMPARE_DATE_KEY) or default_compare
+                if stored not in dates:
+                    stored = dates[-1]
+                index = dates.index(stored)
+                compare_index = _call(
+                    sidebar,
+                    "slider",
+                    "Comparison window date",
+                    min_value=0,
+                    max_value=len(dates) - 1,
+                    value=index,
+                    key=f"tm_compare_index::{selection.date}",
+                )
+                if compare_index is not None and 0 <= int(compare_index) < len(dates):
+                    state[COMPARE_DATE_KEY] = dates[int(compare_index)]
+                else:
+                    state[COMPARE_DATE_KEY] = stored
+                _call(sidebar, "caption", f"Comparison window: {state.get(COMPARE_DATE_KEY)}")
+                _call(
+                    sidebar,
+                    "caption",
+                    "Both windows use the fixed 60-session window, r >= 0.80 cutoff and the same "
+                    "node layout; changes are context, not proof of crisis emergence.",
+                )
+        else:
+            state.pop(COMPARE_DATE_KEY, None)
+
     if selection.screen == "replay":
         if not selection.reveal:
             if _call(
@@ -503,7 +574,7 @@ def _apply_widgets(
             "Industry member",
             member_options,
             index=member_index,
-            key="tm_member_select",
+            key=f"tm_member_select::{selection.member}",
         )
         if member_value and member_value != "(none)":
             selection = selection.replace(member=str(member_value))
@@ -599,6 +670,310 @@ def _alert_dates(data: DashboardData, selection: DashboardSelection) -> list[str
     return [alert for alert in alerts if selection.date is None or alert <= selection.date]
 
 
+GUIDE_STEP_KEY = "tm_guide_step"
+COMPARE_TOGGLE_KEY = "tm_compare"
+COMPARE_DATE_KEY = "tm_compare_date"
+
+
+def _chronological_quiet_date(data: DashboardData, stress_date: str | None) -> str | None:
+    """Latest low-density window that precedes the stress transition.
+
+    The frozen "quiet period" preset sits after the stress window on the synthetic
+    fixture, so the guided tour derives a chronological quiet -> stress pair for
+    the story while the preset itself stays untouched.  The candidate is verified
+    (sparse network) and cached on the data object.
+    """
+
+    if not stress_date:
+        return None
+    dates = list(getattr(data, "session_dates", ()) or ())
+    if stress_date not in dates:
+        return None
+    stress_index = dates.index(stress_date)
+    cache = getattr(data, "_topology_cache", None)
+    key = f"guided-quiet:{stress_date}"
+    if isinstance(cache, dict) and key in cache:
+        return cache[key]
+    from topomarket.analysis.network import build_correlation_network
+
+    rows = getattr(data, "industry_rows", None) or getattr(data, "rows", ()) or ()
+    chosen: str | None = None
+    for offset in (120, 100, 80, 60):
+        candidate_index = stress_index - offset
+        if candidate_index < 0:
+            continue
+        candidate = dates[candidate_index]
+        try:
+            network = build_correlation_network(rows, candidate)
+        except Exception:  # noqa: BLE001 - fall back to the next offset
+            continue
+        if network.get("available") and int(network.get("pairs_qualifying") or 0) <= 30:
+            chosen = candidate
+            break
+    if chosen is None:
+        chosen = dates[max(0, stress_index - 60)]
+    if isinstance(cache, dict):
+        cache[key] = chosen
+    return chosen
+
+
+def _guided_steps(
+    presets: Mapping[str, Any], data: DashboardData | None = None
+) -> list[dict[str, Any]]:
+    """Four-stop guided sequence: Quiet -> Stress -> Explain -> Replay."""
+
+    records = {str(record.get("preset_id")): record for record in presets.get("presets") or ()}
+    quiet = records.get("quiet") or {}
+    stress = records.get("stress_transition") or {}
+    alert = records.get("matched_warning") or {}
+    quiet_date = quiet.get("date")
+    stress_date = stress.get("date")
+    chronological_quiet = (
+        _chronological_quiet_date(data, stress_date) if data is not None else None
+    ) or quiet_date
+    return [
+        {
+            "name": "Quiet window",
+            "description": (
+                "Few industry pairs move together; the score is below the frozen threshold."
+            ),
+            "date": chronological_quiet,
+            "mode": "live",
+            "screen": "structure",
+            "reveal": False,
+        },
+        {
+            "name": "Stress transition",
+            "description": "The same fixed layout, now with many more qualified pairs.",
+            "date": stress.get("date"),
+            "mode": "replay",
+            "screen": "structure",
+            "reveal": False,
+        },
+        {
+            "name": "Explain the alert",
+            "description": (
+                "A recorded alert opens the Takens window and highlighted H1 interval inline."
+            ),
+            "date": alert.get("date"),
+            "mode": "replay",
+            "screen": "structure",
+            "reveal": False,
+        },
+        {
+            "name": "Replay it blind",
+            "description": (
+                "The Replay screen keeps the outcome hidden until you explicitly reveal it."
+            ),
+            "date": alert.get("date"),
+            "mode": "replay",
+            "screen": "replay",
+            "reveal": False,
+        },
+    ]
+
+
+def _apply_guided_step(
+    selection: DashboardSelection, step: Mapping[str, Any]
+) -> DashboardSelection:
+    updated = selection
+    if step.get("date"):
+        updated = updated.with_date(str(step["date"]))
+    return updated.replace(
+        screen=str(step.get("screen") or "structure"),
+        mode=str(step.get("mode") or "replay"),
+        reveal=bool(step.get("reveal", False)),
+        network_view="correlation",
+    )
+
+
+def _comparison_state(
+    ui: Any, data: DashboardData, selection: DashboardSelection
+) -> dict[str, Any] | None:
+    """Build the two-window comparison when the visitor enabled it."""
+
+    state = getattr(ui, "session_state", None)
+    if not isinstance(state, Mapping):
+        return None
+    if not state.get(COMPARE_TOGGLE_KEY):
+        return None
+    compare_date = state.get(COMPARE_DATE_KEY)
+    if not compare_date or not selection.date:
+        return None
+    cache = getattr(data, "_topology_cache", None)
+    key = f"window-comparison:{selection.date}:{compare_date}"
+    if isinstance(cache, dict) and key in cache:
+        return cache[key]
+    try:
+        comparison = build_window_comparison(data, str(selection.date), str(compare_date))
+    except Exception as error:  # noqa: BLE001 - comparison is an optional view
+        return {"available": False, "reason": str(error)}
+    if isinstance(cache, dict):
+        cache[key] = comparison
+    return comparison
+
+
+def _render_interactive_or_static(
+    ui: Any,
+    figure_factory: Any,
+    *,
+    key: str,
+    caption: str,
+    alt_text: str,
+    show_alt_caption: bool = True,
+) -> Any:
+    """Render a Plotly figure when the UI supports it, else the static fallback."""
+
+    plotter = getattr(ui, "plotly_chart", None)
+    if plotter is not None and interactive is not None:
+        event = _call(
+            ui,
+            "plotly_chart",
+            figure_factory(),
+            key=key,
+            on_select="rerun",
+            selection_mode=("box", "lasso"),
+            width="stretch",
+            theme=None,
+            config={
+                "displayModeBar": False,
+                "displaylogo": False,
+                "scrollZoom": False,
+                "doubleClick": False,
+            },
+        )
+        if show_alt_caption:
+            _call(ui, "caption", alt_text)
+        if caption:
+            _call(ui, "caption", caption)
+        return event
+    if charts is not None:
+        _render_figure(
+            ui,
+            figure_factory,
+            caption=caption,
+            alt_text=alt_text,
+            cache_key=key,
+        )
+    return None
+
+
+def _commit_interactive_selection(ui: Any, selection: DashboardSelection) -> DashboardSelection:
+    """Persist an interactive selection and request a clean rerun.
+
+    The click/box selection arrives while the chart is being drawn, so the
+    payload for the inspector/timeline below was built for the previous state.
+    Persisting and rerunning once keeps a single authoritative session state
+    (the alternative double render would duplicate the chart work).
+    """
+
+    _persist_selection(ui.session_state, selection)
+    rerun = getattr(ui, "rerun", None)
+    if callable(rerun):
+        rerun()
+    return selection
+
+
+def _render_mini_timeline(
+    ui: Any,
+    selection: DashboardSelection,
+    payload: Mapping[str, Any],
+) -> DashboardSelection:
+    """Compact above-the-fold timeline with click-to-select (Studio C)."""
+
+    timeline = payload.get("timeline") or {}
+    event = _render_interactive_or_static(
+        ui,
+        lambda: interactive.mini_timeline_figure(timeline, selected_date=selection.date),
+        key="tm_mini_timeline_chart",
+        caption="",
+        alt_text=(
+            "Compact S&P 500 timeline for the trailing "
+            f"{timeline.get('window_sessions', 0)} sessions ending {timeline.get('selected')}; "
+            "click a point to select that session (the sidebar date control is the keyboard "
+            "equivalent)."
+        ),
+    )
+    if interactive is not None:
+        clicked = interactive.timeline_selection(event, list(timeline.get("dates") or ()))
+        if clicked and clicked != selection.date:
+            selection = _commit_interactive_selection(ui, selection.with_date(clicked))
+    return selection
+
+
+def _render_landing(
+    ui: Any,
+    network: Mapping[str, Any],
+    timeline: Mapping[str, Any],
+    selection: DashboardSelection,
+) -> DashboardSelection:
+    """Render the combined interactive network + compact timeline (one chart)."""
+
+    plotter = getattr(ui, "plotly_chart", None)
+    if plotter is not None and interactive is not None:
+        state = getattr(ui, "session_state", None)
+        cache = None
+        cache_key = f"landing:{timeline.get('selected')}:{selection.member}"
+        if isinstance(state, Mapping):
+            cache = state.get("tm_landing_cache")
+            if not isinstance(cache, dict):
+                cache = {}
+                state["tm_landing_cache"] = cache
+        if cache is not None and cache_key in cache:
+            figure = cache[cache_key]
+        else:
+            figure = interactive.landing_figure(
+                network,
+                timeline,
+                selected_code=selection.member,
+                selected_date=selection.date,
+            ).to_plotly_json()
+            if cache is not None:
+                cache[cache_key] = figure
+                while len(cache) > 80:
+                    cache.pop(next(iter(cache)))
+        event = _call(
+            ui,
+            "plotly_chart",
+            figure,
+            key="tm_landing_chart",
+            on_select="rerun",
+            selection_mode=("box", "lasso"),
+            width="stretch",
+            theme=None,
+            config={
+                "displayModeBar": False,
+                "displaylogo": False,
+                "scrollZoom": False,
+                "doubleClick": False,
+            },
+        )
+        dates = list(timeline.get("dates") or ())
+        codes = [str(node.get("code")) for node in network.get("nodes") or ()]
+        mapped = interactive.landing_selection(event, dates, codes)
+        if mapped.get("member") and mapped["member"] != selection.member:
+            selection = _commit_interactive_selection(ui, selection.with_member(mapped["member"]))
+        elif mapped.get("date") and mapped["date"] != selection.date:
+            selection = _commit_interactive_selection(ui, selection.with_date(mapped["date"]))
+        _call(
+            ui,
+            "caption",
+            "Interactive network and compact timeline in one frame · box-select a node or a "
+            "timeline point (modebar Select) to update the inspector and the authoritative "
+            "session; the sidebar controls are the keyboard equivalent.",
+        )
+        return selection
+    if charts is not None:
+        _render_figure(
+            ui,
+            lambda: charts.correlation_network_figure(network, selected_code=selection.member),
+            caption=str(network.get("summary") or ""),
+            alt_text=str(network.get("summary") or "Correlation network"),
+            cache_key=f"network:{(network.get('window') or {}).get('end')}:{selection.member}",
+        )
+    return selection
+
+
 def render_dashboard(
     data: DashboardData,
     selection: DashboardSelection,
@@ -616,13 +991,26 @@ def render_dashboard(
     ui = _ui(streamlit_module)
     _call(ui, "set_page_config", page_title="TopoMarket research", layout="wide")
     _call(ui, "markdown", motion_css(), unsafe_allow_html=True)
+    _call(
+        ui,
+        "markdown",
+        "<style>"
+        ".block-container {padding-top: 1.1rem; padding-bottom: 1.6rem;}"
+        "div[data-testid='stVerticalBlock'] {gap: 0.45rem;}"
+        "div[data-testid='stHorizontalBlock'] {gap: 0.6rem;}"
+        ".js-plotly-plot {margin: 0 !important;}"
+        "</style>",
+        unsafe_allow_html=True,
+    )
     selection, _options = _apply_widgets(ui, data, selection)
     _persist_selection(ui.session_state, selection)
     if cache is not None:
         payloads = _screen_payloads(cache, selection)
     screens = {name: payloads.get(name) or {} for name in SCREEN_ORDER}
     if selection.screen == "structure":
-        render_structure_screen(ui, data, selection, screens["structure"])
+        updated = render_structure_screen(ui, data, selection, screens["structure"])
+        if isinstance(updated, DashboardSelection):
+            selection = updated
     elif selection.screen == "replay":
         render_replay_screen(ui, data, selection, screens["replay"])
     elif selection.screen == "validation":
@@ -631,6 +1019,10 @@ def render_dashboard(
         render_data_screen(ui, data, selection, screens["data"])
     else:  # pragma: no cover - selection validation prevents this
         _call(ui, "error", f"Unknown screen {selection.screen!r}")
+    # Interactive Plotly selections (node click, timeline point, guided step)
+    # update the selection during rendering; persist it for the next rerun so the
+    # canonical session state - not a widget duplicate - drives the payload.
+    _persist_selection(ui.session_state, selection)
     _call(ui, "caption", KEYBOARD_HELP)
     return selection
 
@@ -648,8 +1040,13 @@ def blind_structure_state(selection: DashboardSelection) -> bool:
 
 def render_structure_screen(
     ui: Any, data: DashboardData, selection: DashboardSelection, payload: Mapping[str, Any]
-) -> None:
-    """Render the public Structure landing screen."""
+) -> DashboardSelection:
+    """Render the public Structure landing screen.
+
+    Return the (possibly) updated selection so interactive selections - a node
+    click on the network, a timeline point, the guided tour - flow through the
+    same canonical session state as the keyboard controls (WP-C).
+    """
 
     _call(ui, "title", "TopoMarket research")
     _synthetic_label(ui, data, selection)
@@ -728,14 +1125,100 @@ def render_structure_screen(
         with _expander(ui, "Mapper table (keyboard equivalent)") as table_area:
             _call(table_area, "text", str(mapper.get("table_alternative") or ""))
     else:
-        _call(ui, "subheader", "Industry correlation network")
-        _render_figure(
-            ui,
-            lambda: charts.correlation_network_figure(network, selected_code=selection.member),
-            caption=str(network.get("summary") or ""),
-            alt_text=str(network.get("summary") or "Correlation network"),
-            cache_key=(f"network:{(network.get('window') or {}).get('end')}:{selection.member}"),
-        )
+        comparison = _comparison_state(ui, data, selection)
+        if comparison and comparison.get("available"):
+            _call(ui, "subheader", "Two-window comparison")
+            _call(ui, "markdown", f"**{comparison['statement']}**")
+            event = _render_interactive_or_static(
+                ui,
+                lambda: interactive.comparison_figure(comparison, selected_code=selection.member),
+                key="tm_comparison_chart",
+                caption=str(comparison.get("edge_density_note") or ""),
+                alt_text=str(
+                    comparison.get("table_alternative") or "Two-window network comparison"
+                ),
+            )
+            selected = interactive.network_selection(event) if interactive is not None else None
+            if selected and selected != selection.member:
+                selection = _commit_interactive_selection(ui, selection.with_member(selected))
+            windows = comparison.get("windows") or {}
+            left = windows.get("A") or {}
+            right = windows.get("B") or {}
+            metric_columns = _call(ui, "columns", 4) or []
+            cards = (
+                (
+                    f"Window A · {left.get('date')}",
+                    f"{left.get('pairs_qualifying')}/{left.get('pairs_total')} pairs",
+                ),
+                (
+                    f"Window B · {right.get('date')}",
+                    f"{right.get('pairs_qualifying')}/{right.get('pairs_total')} pairs",
+                ),
+                (
+                    "Change in qualified pairs",
+                    f"{comparison.get('delta_pairs'):+d} "
+                    f"({comparison.get('delta_percentage_points'):+.1f} pp)",
+                ),
+                (
+                    "Mean off-diagonal correlation",
+                    f"{left.get('mean_off_diagonal_correlation'):.3f} → "
+                    f"{right.get('mean_off_diagonal_correlation'):.3f}",
+                ),
+            )
+            for position, (label, value) in enumerate(cards):
+                target = metric_columns[position] if position < len(metric_columns) else ui
+                _call(target, "metric", label, value)
+            _call(
+                ui,
+                "caption",
+                f"Edges added in window B: {comparison.get('added_count')} · removed: "
+                f"{comparison.get('removed_count')} · material increase: "
+                f"{comparison.get('material_increase')} · sequence claim: "
+                f"{comparison.get('sequence_claim')}",
+            )
+            with _expander(ui, "Comparison table (keyboard equivalent)") as table_area:
+                _call(table_area, "text", str(comparison.get("table_alternative") or ""))
+                _call(
+                    table_area,
+                    "caption",
+                    "Hover an edge in the figure for its exact Pearson correlation and both "
+                    "portfolio names; added edges use the positive colour, removed edges amber.",
+                )
+            selection = _render_mini_timeline(ui, selection, payload)
+        else:
+            _call(ui, "subheader", "Industry correlation network")
+            timeline = payload.get("timeline") or {}
+            selection = _render_landing(ui, network, timeline, selection)
+            _call(ui, "caption", str(network.get("summary") or ""))
+            pairs = [
+                pair for pair in network.get("pairs") or () if pair.get("correlation") is not None
+            ]
+            mean_correlation = (
+                sum(float(pair["correlation"]) for pair in pairs) / len(pairs) if pairs else None
+            )
+            score = payload.get("score") or {}
+            score_value = score.get("value")
+            metric_columns = _call(ui, "columns", 3) or []
+            cards = (
+                (
+                    "Qualified pairs",
+                    f"{network.get('pairs_qualifying')}/{network.get('pairs_total')} "
+                    f"at r ≥ {float(network.get('cutoff') or 0.0):.2f}",
+                ),
+                (
+                    "Mean off-diagonal correlation",
+                    "n/a" if mean_correlation is None else f"{mean_correlation:.3f}",
+                ),
+                (
+                    "TDA score percentile",
+                    "unavailable"
+                    if score_value is None
+                    else f"{float(score_value):.1f} (comparative)",
+                ),
+            )
+            for position, (label, value) in enumerate(cards):
+                target = metric_columns[position] if position < len(metric_columns) else ui
+                _call(target, "metric", label, value)
         inspector = payload.get("member_inspector") or {}
         if selection.member and inspector.get("pairs"):
             _call(
@@ -764,20 +1247,44 @@ def render_structure_screen(
                 "(zero-variance series) and are not drawn.",
             )
 
-    _call(ui, "subheader", "Shared timeline")
     timeline = payload.get("timeline") or {}
-    _render_figure(
+    show_full_timeline = _call(
         ui,
-        lambda: charts.timeline_figure(timeline),
-        cache_key=f"timeline:{selection.date}",
-        caption=str(timeline.get("legend") or ""),
-        alt_text=(
-            f"Aligned S&P 500, VIX and score panels for the trailing "
-            f"{timeline.get('window_sessions', 0)} sessions ending {timeline.get('selected')}; "
-            f"threshold {timeline.get('threshold')}; "
-            f"{len(timeline.get('alert_markers') or ())} alert marker(s)."
-        ),
+        "checkbox",
+        "Show the full shared timeline",
+        value=False,
+        key=f"tm_full_timeline::{selection.date}",
+        help="The compact timeline above already supports click selection; enable this for all "
+        "three full panels.",
     )
+    if not show_full_timeline:
+        _call(
+            ui,
+            "caption",
+            "Compact timeline shown above · enable “Show the full shared timeline” for the full "
+            "S&P 500, VIX and score panels.",
+        )
+
+    if show_full_timeline:
+        timeline_event = _render_interactive_or_static(
+            ui,
+            lambda: interactive.timeline_figure(timeline, selected_date=selection.date),
+            key="tm_full_timeline_chart",
+            caption=str(timeline.get("legend") or ""),
+            alt_text=(
+                f"Aligned S&P 500, VIX and score panels for the trailing "
+                f"{timeline.get('window_sessions', 0)} sessions ending {timeline.get('selected')}; "
+                f"threshold {timeline.get('threshold')}; "
+                f"{len(timeline.get('alert_markers') or ())} alert marker(s). Click a point to "
+                f"select that session; the sidebar date control remains the keyboard equivalent."
+            ),
+        )
+        if interactive is not None:
+            clicked = interactive.timeline_selection(
+                timeline_event, list(timeline.get("dates") or ())
+            )
+            if clicked and clicked != selection.date:
+                selection = _commit_interactive_selection(ui, selection.with_date(clicked))
     explanation = payload.get("explanation") or {}
     _call(ui, "subheader", "Score explanation")
     if explanation.get("available"):
@@ -838,6 +1345,8 @@ def render_structure_screen(
         f"Selected session {selection.date}: score {score_text}; "
         f"frozen threshold {cutoff if cutoff is not None else 'not available'}.",
     )
+
+    return selection
 
 
 def render_replay_screen(

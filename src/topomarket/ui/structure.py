@@ -32,11 +32,13 @@ import numpy as np
 
 from topomarket.analysis.asof import alert_markers as asof_alert_markers
 from topomarket.analysis.industries import industry_explorer_payload
+from topomarket.analysis.labels import build_breach_episodes, build_target_labels
 from topomarket.analysis.network import (
     DEFAULT_CORRELATION_CUTOFF,
     DEFAULT_CORRELATION_WINDOW,
     INDUSTRY_CODES,
     INDUSTRY_LABELS,
+    PAIR_COUNT,
     build_correlation_network,
     pair_lookup,
 )
@@ -206,6 +208,170 @@ def _timeline_alerts(data: Any, selected: str, *, blinded: bool) -> list[dict[st
     """Causally available alert markers (neutral in blind mode)."""
 
     return asof_alert_markers(data, selected, blinded=blinded)
+
+
+# --------------------------------------------------------------------------- #
+# Two-window comparison (Studio C1)
+# --------------------------------------------------------------------------- #
+def _pair_key(edge: Mapping[str, Any]) -> tuple[str, str]:
+    return (str(edge.get("source")), str(edge.get("target")))
+
+
+def _network_metrics(network: Mapping[str, Any]) -> dict[str, Any]:
+    pairs = [pair for pair in network.get("pairs") or () if pair.get("correlation") is not None]
+    values = [float(pair["correlation"]) for pair in pairs]
+    total = int(network.get("pairs_total") or PAIR_COUNT)
+    qualifying = int(network.get("pairs_qualifying") or 0)
+    return {
+        "pairs_qualifying": qualifying,
+        "pairs_total": total,
+        "pairs_percentage": 100.0 * qualifying / total if total else 0.0,
+        "mean_off_diagonal_correlation": sum(values) / len(values) if values else None,
+        "defined_pairs": len(values),
+        "missing_pairs": len(network.get("undefined_pairs") or ())
+        + max(0, total - len(values) - len(network.get("undefined_pairs") or ())),
+    }
+
+
+def _same_episode(data: Any, left_date: str, right_date: str) -> bool:
+    """Both windows lie inside the same synthetic drawdown episode's context."""
+
+    rows = _price_rows(data)
+    dates = [str(row.get("date")) for row in rows]
+    try:
+        labels = build_target_labels(rows)
+        episodes = build_breach_episodes(labels)
+    except Exception:  # noqa: BLE001 - comparison stays usable without labels
+        return False
+    positions = {date: index for index, date in enumerate(dates)}
+    left = positions.get(left_date)
+    right = positions.get(right_date)
+    if left is None or right is None:
+        return False
+    for episode in episodes:
+        window_start = max(0, episode.start_index - 30)
+        window_end = min(len(dates) - 1, episode.end_index + 10)
+        if window_start <= left <= window_end and window_start <= right <= window_end:
+            return True
+    return False
+
+
+def build_window_comparison(
+    data: Any,
+    left_date: str,
+    right_date: str,
+    *,
+    cutoff: float = DEFAULT_CORRELATION_CUTOFF,
+    window: int = DEFAULT_CORRELATION_WINDOW,
+) -> dict[str, Any]:
+    """Compare two explicitly dated correlation windows (fixed layout/scale).
+
+    The statement never claims chronological crisis emergence unless the right
+    window is later, the qualified-pair increase is material and both windows
+    belong to the same drawdown-episode context; otherwise it is presented as a
+    regime contrast between two independent dated windows.
+    """
+
+    rows = _industry_rows(data)
+    left = build_correlation_network(rows, left_date, window=window, cutoff=cutoff)
+    right = build_correlation_network(rows, right_date, window=window, cutoff=cutoff)
+    if not left.get("available") or not right.get("available"):
+        return {
+            "available": False,
+            "reason": left.get("reason") or right.get("reason") or "comparison unavailable",
+        }
+    left_metrics = _network_metrics(left)
+    right_metrics = _network_metrics(right)
+    left_pairs = {_pair_key(edge) for edge in left.get("edges") or ()}
+    right_pairs = {_pair_key(edge) for edge in right.get("edges") or ()}
+    added = [
+        {"source": source, "target": target} for source, target in sorted(right_pairs - left_pairs)
+    ]
+    removed = [
+        {"source": source, "target": target} for source, target in sorted(left_pairs - right_pairs)
+    ]
+    delta = right_metrics["pairs_qualifying"] - left_metrics["pairs_qualifying"]
+    material_increase = delta >= max(5, int(round(PAIR_COUNT * 0.10)))
+    chronological = right_date > left_date
+    same_episode = _same_episode(data, left_date, right_date)
+    sequence_claim = bool(chronological and material_increase and same_episode)
+    if sequence_claim:
+        statement = (
+            f"Chronological windows from the same episode: {left_date} → {right_date}, "
+            f"+{delta} qualified pairs"
+        )
+    elif chronological:
+        statement = (
+            f"Chronological windows {left_date} → {right_date}; the change is shown as a "
+            "regime contrast, not as proven crisis emergence"
+        )
+    else:
+        statement = (
+            f"Regime contrast: {left_date} vs {right_date}; the later-dated window is "
+            f"{left_date}, so no chronological crisis-emergence claim is made"
+        )
+    return {
+        "available": True,
+        "cutoff": float(cutoff),
+        "window_sessions": int(window),
+        "left_date": left_date,
+        "right_date": right_date,
+        "chronological": chronological,
+        "same_episode": same_episode,
+        "material_increase": material_increase,
+        "sequence_claim": sequence_claim,
+        "statement": statement,
+        "delta_pairs": delta,
+        "delta_percentage_points": right_metrics["pairs_percentage"]
+        - left_metrics["pairs_percentage"],
+        "added_edges": added,
+        "removed_edges": removed,
+        "added_count": len(added),
+        "removed_count": len(removed),
+        "windows": {
+            "A": {"date": left_date, "network": left, **left_metrics},
+            "B": {"date": right_date, "network": right, **right_metrics},
+        },
+        "edge_density_note": (
+            "Edge density is the share of the 66 industry pairs with Pearson r above the fixed "
+            "0.80 cutoff; it is not the topological anomaly score."
+        ),
+        "table_alternative": _comparison_table(
+            left_date, right_date, left_metrics, right_metrics, delta
+        ),
+    }
+
+
+def _comparison_table(
+    left_date: str,
+    right_date: str,
+    left: Mapping[str, Any],
+    right: Mapping[str, Any],
+    delta: int,
+) -> str:
+    labels = (
+        ("date", left_date, right_date),
+        ("qualified pairs", left["pairs_qualifying"], right["pairs_qualifying"]),
+        (
+            "percentage of 66",
+            f"{left['pairs_percentage']:.1f}%",
+            f"{right['pairs_percentage']:.1f}%",
+        ),
+        (
+            "mean off-diagonal correlation",
+            f"{left['mean_off_diagonal_correlation']:.3f}"
+            if left["mean_off_diagonal_correlation"] is not None
+            else "n/a",
+            f"{right['mean_off_diagonal_correlation']:.3f}"
+            if right["mean_off_diagonal_correlation"] is not None
+            else "n/a",
+        ),
+        ("missing/undefined pairs", left["missing_pairs"], right["missing_pairs"]),
+        ("change in qualified pairs", delta, ""),
+    )
+    lines = ["metric, window A, window B"]
+    lines.extend(f"{name}, {first}, {second}" for name, first, second in labels)
+    return "\n".join(lines)
 
 
 # --------------------------------------------------------------------------- #

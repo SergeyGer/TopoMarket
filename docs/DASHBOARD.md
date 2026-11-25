@@ -69,17 +69,18 @@ Streamlit (`topomarket.ui.dashboard`).
 ## Performance
 
 Cached date changes must stay within p95 <= 500 ms over 100 changes; the cold public startup is
-measured separately. The shell keeps the loaded data and the panel cache in session state and caches
-each rendered chart as PNG bytes per payload identity, so a cached date change does not rebuild the
-payload or the matplotlib figure.
+measured separately. The shell keeps the loaded data, the panel cache, the Plotly landing figure and
+the static PNG charts in session state, so a cached date change rebuilds only the payload and reuses
+the prepared chart definitions; the full three-panel timeline is loaded on request.
 
-Reference measurement on the release candidate (Playwright Chromium headless, 1440x900):
-**cached preset date-change p95 409 ms / p50 374 ms over 100 changes** (target 500 ms), while a first
-visit to a new date measures p95 546 ms (payload build + chart rendering, recorded separately).
-`docs/measurements/browser_performance.json` holds the measurements and
-`docs/measurements/browser_evidence.json` the functional browser checks (boot, presets, inspectors,
-Mapper edge, explanation, Replay blind/reveal/reset, Validation, Data, session isolation, mobile,
-keyboard focus). `topomarket.ui.performance` provides
+Reference measurement on the v1.1 release candidate (Playwright Chromium headless, 1440x900):
+**cached preset date-change p95 497 ms / p50 442 ms over 100 changes** (target 500 ms); uncached
+first visits to a new date measure p95 438 ms (recorded separately), and a final repeat run measured
+p95 508 ms, so the budget is met within run-to-run noise on the 2-vCPU reference environment.
+`docs/measurements/browser_performance.json` holds the measurements, `docs/measurements/studio_evidence.json`
+the direct-manipulation evidence (node box-selection -> inspector, timeline box-selection -> session
+date, comparison mode, above-fold layout) and `docs/measurements/browser_evidence.json` the wider
+functional checks. `topomarket.ui.performance` provides
 `measure_cached_date_changes` and `measure_dashboard_startup`; both return the measured values plus
 Python/platform/package/NumPy/Ripser versions and build metadata. Public tests assert both limits;
 the opt-in private acceptance exercises the real 9,250-row snapshot for replay, keyboard and data

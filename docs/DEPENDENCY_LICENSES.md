@@ -11,8 +11,8 @@ with `scripts/audit_dependency_licenses.py` and `tests/test_dependency_licenses.
 
 ## Result
 
-- Packages audited: **79**
-- Permissive / compatible: **78**
+- Packages audited: **80**
+- Permissive / compatible: **79**
 - Weak copyleft or manual review: **1**
 - Strong copyleft (GPL/AGPL): **0**
 
@@ -88,6 +88,7 @@ The package imports `httpx`, `numpy` and `ripser` at runtime; the Streamlit UI e
 | `pandas` | 3.1.1 | cloud | BSD-3-Clause | permissive | PASS |
 | `persim` | 0.4.1 | cloud | OSI Approved :: MIT License | permissive | PASS |
 | `pillow` | 13.0.0 | cloud | MIT-CMU | permissive | PASS |
+| `plotly` | 6.5.0 | pyproject | OSI Approved :: MIT License | permissive | PASS |
 | `pluggy` | 1.7.0 | lock | OSI Approved :: MIT License | permissive | PASS |
 | `protobuf` | 7.36.2 | cloud | 3-Clause BSD License | permissive | PASS |
 | `pyarrow` | 26.0.1 | cloud | Apache-2.0 | permissive | PASS |

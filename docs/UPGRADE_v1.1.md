@@ -115,6 +115,18 @@ The specification's order is binding; a later package starts only when the previ
   classifications/matches and prove the blind payload/DOM text is unchanged, with pending/unobserved
   boundary coverage.
 
+- **WP-C (in review, #45)** - interactive Plotly landing frame replacing the static landing network
+  and compact timeline (direct node/timeline box-selection through one Streamlit chart, modebar
+  Select, accessible sidebar equivalents); three landing metrics above the fold; two-window
+  comparison with honest chronology/regime statement, fixed layout/threshold/scale, added/removed
+  edges, counts/percentages, mean off-diagonal correlation and missing pairs; guided tour Quiet ->
+  Stress -> Explain -> Replay (chronological quiet date derived for the synthetic fixture) and the
+  full timeline behind an opt-in; Mapper/explanation retained. Browser evidence records node click
+  -> inspector, timeline click -> authoritative session date change, comparison rendering and
+  above-fold layout; cached date-change p95 497 ms over 100 transitions (repeat 508 ms) against the
+  500 ms budget, uncached p95 438 ms. Plotly 6.5 is pinned in `[ui]`, Cloud requirements and the
+  lock; license audit still 0 GPL/AGPL.
+
 ## Reporting
 
 After each build step: what landed, remaining steps, failures/limitations, and expected actions from

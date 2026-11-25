@@ -2,18 +2,18 @@
   "environment": "Playwright Chromium headless, 1440x900, local release candidate",
   "cached_preset_date_changes": {
     "iterations": 100,
-    "p50_ms": 374.4,
-    "p95_ms": 409.3,
-    "max_ms": 466.4,
+    "p50_ms": 442.2,
+    "p95_ms": 497.1,
+    "max_ms": 538.8,
     "failures": 0
   },
   "uncached_next_session_changes": {
     "iterations": 20,
-    "p50_ms": 270.1,
-    "p95_ms": 545.7,
-    "max_ms": 4772.7
+    "p50_ms": 179.0,
+    "p95_ms": 437.5,
+    "max_ms": 2760.5
   },
   "cached_target_ms": 500,
-  "measured_at_utc": "2026-11-25T14:38:24Z",
+  "measured_at_utc": "2026-11-25T17:25:48Z",
   "cached_within_target": true
 }

@@ -36,6 +36,7 @@ packaging==26.4
 pandas==3.1.1
 persim==0.4.1
 pillow==13.0.0
+plotly==6.5.0
 protobuf==7.36.2
 pyarrow==26.0.1
 pydeck==0.9.3

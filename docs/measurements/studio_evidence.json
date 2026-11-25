@@ -1,0 +1,41 @@
+{
+  "measured_at_utc": "2026-11-25T17:22:14Z",
+  "viewport": "1440x900",
+  "browser": "Playwright Chromium headless",
+  "node_selection": {
+    "clicked_code": "money",
+    "inspector_visible": true,
+    "pair_rows": 1
+  },
+  "landing_metrics": {
+    "pairs": true,
+    "mean": true,
+    "score": true
+  },
+  "above_fold": {
+    "charts": [
+      {
+        "top": 227.09375,
+        "bottom": 587.09375,
+        "height": 360
+      }
+    ],
+    "graph_plus_metrics_visible": true
+  },
+  "comparison": {
+    "heading": true,
+    "honest_statement": true,
+    "metrics": true,
+    "edge_counts": true
+  },
+  "timeline_selection": {
+    "before": [
+      "Selected session: 2020-02-24"
+    ],
+    "after": [
+      "Selected session: 2019-12-24"
+    ],
+    "selected_session_changed": true,
+    "selected_date_visible_in_caption": true
+  }
+}
