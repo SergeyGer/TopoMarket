@@ -21,3 +21,20 @@ manifests, UI labels and validation tables. Do not present synthetic data as mar
 
 For the full import contracts, units, join rules and provenance requirements see the TopoMarket
 technical specification maintained with the private research inputs (not part of this repository).
+
+## Software license and third-party dependencies
+
+TopoMarket source code is released under the MIT license (`LICENSE`). The dependency
+audit in [`docs/DEPENDENCY_LICENSES.md`](docs/DEPENDENCY_LICENSES.md) reviews every
+direct dependency in `pyproject.toml` and every distribution pinned in
+`requirements.lock` (and the Cloud `requirements.txt`) and confirms there is no
+strong-copyleft (GPL/AGPL) dependency. Weak-copyleft packages (for example
+`certifi`, MPL-2.0) keep their own terms and are used unmodified as external
+dependencies. Regenerate the audit with `python scripts/refresh_dependency_licenses.py`
+and verify it offline in CI with `scripts/audit_dependency_licenses.py`.
+
+The committed `showcase/` fixture is fully synthetic (seed 4242, snapshot
+`showcase-synthetic`). The public application, README examples, screenshots, the
+GitHub social preview and the demo video use that fixture only; no genuine market
+data, provider downloads or derived products are published in this repository.
+Local research data stays outside the checkout (`private_data/`) and outside GitHub.
