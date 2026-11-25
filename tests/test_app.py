@@ -141,9 +141,11 @@ def test_streamlit_app_smoke_run() -> None:
     sidebar_sliders = {widget.label for widget in app_test.sidebar.select_slider}
     assert "Selected session" in sidebar_sliders
 
-    # The landing screen renders the network and the shared timeline sections.
+    # The landing screen renders the interactive network plus the compact timeline;
+    # the full three-panel timeline is an explicit opt-in.
     headings = [item.value for item in app_test.subheader]
-    assert headings[:2] == ["Industry correlation network", "Shared timeline"]
+    assert headings[:2] == ["Industry correlation network", "Score explanation"]
+    assert any(checkbox.label == "Show the full shared timeline" for checkbox in app_test.checkbox)
 
 
 @pytest.mark.skipif(
@@ -234,3 +236,39 @@ def test_streamlit_blind_replay_is_neutral_about_outcomes() -> None:
     for forbidden in ("Late warning", "matched warning", "post_onset", "episode_onset"):
         assert forbidden not in page_text
     assert "Alert recorded" in page_text or "No alert recorded" in page_text
+
+
+@pytest.mark.skipif(
+    importlib.util.find_spec("streamlit") is None,
+    reason="Streamlit is an optional dependency",
+)
+def test_streamlit_market_studio_guided_tour_and_comparison() -> None:
+    """WP-C: guided sequence, comparison toggle and interactive chart mounting."""
+
+    from streamlit.testing.v1 import AppTest
+
+    app_test = AppTest.from_file(str(APP_PATH), default_timeout=120).run()
+    assert not list(app_test.exception)
+    assert any(checkbox.label == "Compare two windows" for checkbox in app_test.sidebar.checkbox)
+    assert any(button.label.startswith("Guided:") for button in app_test.sidebar.button)
+
+    app_test.sidebar.checkbox(key="tm_compare").set_value(True).run()
+    assert not list(app_test.exception)
+    subheaders = [subheader.value for subheader in app_test.subheader]
+    assert "Two-window comparison" in subheaders
+    page_text = " ".join(str(item.value) for item in [*app_test.markdown, *app_test.caption])
+    assert (
+        "no chronological crisis-emergence claim" in page_text
+        or "regime contrast, not as proven crisis emergence" in page_text
+    )
+    assert "Edges added in window B" in page_text
+
+    for expected_step in (2, 3, 4):
+        app_test.sidebar.button(key="tm_guide_next").click().run()
+        assert not list(app_test.exception)
+        guided = [
+            str(caption.value)
+            for caption in app_test.sidebar.caption
+            if "Guided step" in str(caption.value)
+        ]
+        assert guided and f"Guided step {expected_step}/4" in guided[0]

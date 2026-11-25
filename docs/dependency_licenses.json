@@ -1,9 +1,9 @@
 {
   "counts": {
     "fail": 0,
-    "pass": 78,
+    "pass": 79,
     "review": 1,
-    "total": 79
+    "total": 80
   },
   "generated_by": "scripts/refresh_dependency_licenses.py",
   "generated_from": [
@@ -764,6 +764,24 @@
       "pyproject_requirement": null,
       "risk": "PASS",
       "version": "13.0.0"
+    },
+    "plotly": {
+      "classification": "permissive",
+      "cloud": true,
+      "declared": "pyproject",
+      "evidence": [
+        "License :: OSI Approved :: MIT License"
+      ],
+      "license": "OSI Approved :: MIT License",
+      "license_classifiers": [
+        "License :: OSI Approved :: MIT License"
+      ],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "plotly",
+      "pyproject_requirement": "ui: plotly>=6.5,<7",
+      "risk": "PASS",
+      "version": "6.5.0"
     },
     "pluggy": {
       "classification": "permissive",
