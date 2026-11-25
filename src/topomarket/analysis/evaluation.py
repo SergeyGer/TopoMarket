@@ -28,7 +28,6 @@ import json
 import math
 import os
 import random
-import subprocess
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
@@ -385,23 +384,38 @@ def _frame_label_counts(labels: Sequence[Any]) -> dict[str, int]:
 
 @functools.lru_cache(maxsize=1)
 def _code_revision() -> str | None:
-    """Return an explicit revision or the checkout's short git commit."""
+    """Return an explicit revision or the checkout's short git commit.
+
+    The repository files are read directly (no subprocess) so deployments and
+    security scanners see no shell/git invocation from the analysis path.
+    """
 
     explicit = os.environ.get("TOPOMARKET_CODE_REVISION")
     if explicit:
         return explicit.strip()
     try:
-        result = subprocess.run(
-            ["git", "rev-parse", "--short=12", "HEAD"],
-            capture_output=True,
-            text=True,
-            timeout=5,
-            check=False,
-        )
-    except (OSError, subprocess.SubprocessError):
+        repository_root = Path(__file__).resolve().parents[3]
+        git_dir = repository_root / ".git"
+        head = (git_dir / "HEAD").read_text(encoding="utf-8").strip()
+        if head.startswith("ref:"):
+            reference = head.split(" ", 1)[1].strip()
+            revision_file = git_dir / reference
+            if revision_file.is_file():
+                revision = revision_file.read_text(encoding="utf-8").strip()
+            else:
+                packed = git_dir / "packed-refs"
+                revision = ""
+                if packed.is_file():
+                    for line in packed.read_text(encoding="utf-8").splitlines():
+                        parts = line.split()
+                        if len(parts) == 2 and parts[1] == reference:
+                            revision = parts[0]
+                            break
+        else:
+            revision = head
+        return revision[:12] if revision else None
+    except OSError:
         return None
-    revision = result.stdout.strip()
-    return revision or None
 
 
 def _policy_identity(policies: Mapping[str, Any]) -> dict[str, str | None]:
