@@ -1,6 +1,7 @@
 {
-  "schema_version": 1,
-  "title": "TopoMarket - market structure and early warning research",
+  "schema_version": 2,
+  "title": "TopoMarket v1.1 - market structure and experimental warning evidence",
+  "spec": "TopoMarket_v1.1_Release_Specification_EN.docx section 9",
   "repository_url": "https://github.com/SergeyGer/TopoMarket",
   "end_card_url": "github.com/SergeyGer/TopoMarket",
   "target_seconds": 60,
@@ -25,114 +26,85 @@
     "range": "2005-01-03..2026-09-30",
     "presets_file": "showcase/presets.json"
   },
+  "release_identity": "v1.1.0, recorded from the public Streamlit Community Cloud deployment after anonymous smoke checks",
   "timing": {
-    "opening_s": 6.5,
-    "app_s": 48.5,
+    "opening_s": 6.0,
+    "app_s": 49.0,
     "end_s": 5.0
   },
   "scenes": [
     {
       "id": "opening",
       "start_s": 0.0,
-      "end_s": 6.5,
-      "picture": "GitHub social preview (1280x640) fitted to 16:9 without distortion",
+      "end_s": 6.0,
+      "picture": "GitHub social preview (1280x640) fitted to 16:9 without distortion; exact URL and product claim",
       "asset": "docs/assets/opening_card_16x9.png",
-      "narration": "TopoMarket explores how market structure changes under stress and tests whether topology can flag major declines early."
+      "narration": "TopoMarket visualizes market structure and tests whether topology can warn of sharp declines."
     },
     {
-      "id": "structure",
-      "start_s": 6.5,
-      "end_s": 16.0,
-      "picture": "Structure screen: quiet preset then stress transition preset; synthetic label visible",
-      "narration": "Start with twelve industry portfolios. As I move from a quiet window to a stressed one, more industries begin moving together.",
+      "id": "comparison",
+      "start_s": 6.0,
+      "end_s": 18.0,
+      "picture": "Market Structure Studio: two-window comparison with both dates and qualified-pair counts; honest regime-contrast wording; fixed layout/threshold/scale",
+      "narration": "These twelve industry portfolios contrast two market regimes. Watch how the network becomes far more connected under stress.",
       "interactions": [
-        {
-          "action": "preset",
-          "preset": "quiet",
-          "at_s": 6.7
-        },
-        {
-          "action": "preset",
-          "preset": "stress_transition",
-          "at_s": 11.5
-        }
+        {"action": "checkbox", "label": "Compare two windows", "at_s": 6.3}
       ]
     },
     {
-      "id": "mapper",
-      "start_s": 16.0,
+      "id": "explore",
+      "start_s": 18.0,
       "end_s": 27.0,
-      "picture": "Select an industry, open the Mapper view, highlight a group pair and its shared portfolios",
-      "narration": "The correlation map shows which industries move together. Mapper groups them by similar behavior and highlights industries shared between groups.",
+      "picture": "Direct manipulation: Finance selected in the interactive correlation network, then Mapper view with volatility bands and highlighted shared-portfolio edge",
+      "narration": "Explore the relationships directly. Mapper connects groups that share industry portfolios.",
       "interactions": [
-        {
-          "action": "open inspectors"
-        },
-        {
-          "action": "select member",
-          "member": "money"
-        },
-        {
-          "action": "network view",
-          "view": "mapper"
-        },
-        {
-          "action": "highlight mapper edge"
-        }
+        {"action": "member", "value": "Finance", "at_s": 18.2},
+        {"action": "mapper", "at_s": 21.5},
+        {"action": "highlight_edge", "at_s": 23.0}
       ]
     },
     {
-      "id": "alert",
+      "id": "explain",
       "start_s": 27.0,
       "end_s": 39.0,
-      "picture": "Late-warning teaching example alert, shared S&P 500/VIX/score timeline, Takens and H1 explanation",
-      "narration": "A separate indicator uses the shape of recent S and P five hundred returns to flag unusual behavior. Here is the alert and the feature behind it.",
-      "teaching_example": true,
+      "picture": "Guided alert example: selected date, alert explanation with the 56-point Takens window and the H1 birth-death diagram; actual percentile and frozen threshold visible",
+      "narration": "A separate indicator studies the shape of recent S and P five hundred returns. This percentile measures unusual behavior.",
       "interactions": [
-        {
-          "action": "preset",
-          "preset": "matched_warning (labelled late-warning teaching example)",
-          "date": "2025-03-10"
-        },
-        {
-          "action": "scroll to shared timeline"
-        },
-        {
-          "action": "scroll to score explanation"
-        }
+        {"action": "preset", "preset": "matched_warning", "at_s": 27.2},
+        {"action": "scroll", "target": "Score explanation", "at_s": 30.0}
       ]
     },
     {
       "id": "replay",
       "start_s": 39.0,
       "end_s": 50.0,
-      "picture": "Blind Replay at the cutoff, then Reveal: origin close, 10% boundary, lowest close, first breach",
-      "narration": "Replay shows when the alert appeared. Revealing the outcome lets us see that the decline had already begun.",
-      "alternate_line_used": "late warning (the frozen synthetic showcase has no evaluator-credited TDA alert)",
+      "picture": "Blind Replay (neutral alert state, no outcome), then explicit reveal of the actual next 20 closes, origin/threshold/actual decline; honest late-warning statement",
+      "narration": "Now test the warning without hindsight. Reveal the next twenty sessions and see whether the index fell ten percent. The decline had already begun; the next twenty sessions did not reach the ten percent target.",
       "interactions": [
-        {
-          "action": "screen",
-          "screen": "Replay"
-        },
-        {
-          "action": "reveal next 20 sessions"
-        }
+        {"action": "screen", "value": "Replay", "at_s": 39.2},
+        {"action": "reveal", "at_s": 43.0}
       ]
     },
     {
-      "id": "validation",
+      "id": "evidence",
       "start_s": 50.0,
       "end_s": 55.0,
-      "picture": "Validation screen: Experimental market anomaly, metrics, sample size and false-alert rate",
-      "narration": "The results show where the signal works and where it misses."
+      "picture": "Validation screen: large three-method evidence metrics and comparison chart with synthetic label; no positive-prediction claim",
+      "narration": "Forecasting remains experimental. Compare the results with simpler benchmarks.",
+      "interactions": [
+        {"action": "screen", "value": "Validation", "at_s": 50.2}
+      ]
     },
     {
       "id": "end",
       "start_s": 55.0,
       "end_s": 60.0,
-      "picture": "Static end card with the exact repository URL held for the full five seconds",
+      "picture": "Static branded card with the exact URL github.com/SergeyGer/TopoMarket for the full five seconds",
       "asset": "docs/assets/end_card_16x9.png",
       "narration": "Explore the code and the live demo on GitHub."
     }
-  ]
+  ],
+  "final_filename": "TopoMarket_demo_60s.mp4",
+  "captions_filename": "TopoMarket_demo_60s.srt",
+  "captioned_playback_filename": "TopoMarket_demo_60s_captioned.mp4"
 }

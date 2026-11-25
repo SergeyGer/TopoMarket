@@ -30,8 +30,8 @@ FFMPEG = "ffmpeg"
 FFPROBE = "ffprobe"
 PORT = 8631
 WIDTH, HEIGHT, FPS = 1920, 1080, 30
-OPENING_SECONDS = 6.5
-APP_SECONDS = 48.5
+OPENING_SECONDS = 6.0
+APP_SECONDS = 49.0
 END_SECONDS = 5.0
 TOTAL = OPENING_SECONDS + APP_SECONDS + END_SECONDS
 
@@ -41,101 +41,104 @@ NARRATION = [
     (
         "opening",
         0.0,
-        "TopoMarket explores how market structure changes under stress and tests whether "
-        "topology can flag major declines early.",
-        15,
+        "TopoMarket visualizes market structure and tests whether topology can warn of "
+        "sharp declines.",
+        10,
     ),
     (
-        "structure",
-        6.5,
-        "Start with twelve industry portfolios. As I move from a quiet window to a stressed "
-        "one, more industries begin moving together.",
+        "comparison",
+        6.0,
+        "These twelve industry portfolios contrast two market regimes. Watch how the network "
+        "becomes far more connected under stress.",
         0,
     ),
     (
-        "mapper",
-        16.0,
-        "The correlation map shows which industries move together. Mapper groups them by "
-        "similar behavior and highlights industries shared between groups.",
+        "explore",
+        18.0,
+        "Explore the relationships directly. Mapper connects groups that share industry "
+        "portfolios.",
         0,
     ),
     (
-        "alert",
+        "explain",
         27.0,
-        "A separate indicator uses the shape of recent S and P five hundred returns to flag "
-        "unusual behavior. Here is the alert and the feature behind it.",
+        "A separate indicator studies the shape of recent S and P five hundred returns. "
+        "This percentile measures unusual behavior.",
         0,
     ),
     (
         "replay",
         39.0,
-        "Replay shows when the alert appeared. Revealing the outcome lets us see that the "
-        "decline had already begun.",
+        "Now test the warning without hindsight. Reveal the next twenty sessions and see "
+        "whether the index fell ten percent. The decline had already begun; the next twenty "
+        "sessions did not reach the ten percent target.",
         0,
     ),
-    ("validation", 50.0, "The results show where the signal works and where it misses.", 0),
+    (
+        "evidence",
+        50.0,
+        "Forecasting remains experimental. Compare the results with simpler benchmarks.",
+        0,
+    ),
     ("end", 55.0, "Explore the code and the live demo on GitHub.", 0),
 ]
 
 SCENES = [
     (
-        "structure",
-        9.5,
-        1.8,
+        "comparison",
+        12.0,
+        1.0,
         [
-            ("button_regex", r"Quiet period"),
-            ("sleep", 4.0),
-            ("button_regex", r"Stress transition"),
-            ("sleep", 2.0),
+            ("checkbox", "Compare two windows"),
+            ("sleep", 4.5),
         ],
     ),
     (
-        "mapper",
-        11.0,
+        "explore",
+        9.0,
         1.0,
         [
+            ("checkbox", "Compare two windows"),
+            ("sleep", 1.6),
             ("text", "Inspectors and advanced controls"),
             ("select_option", ("Industry member", "money")),
             ("radio", "Mapper groups"),
             ("scroll_align", "Mapper groups"),
             ("select_edge", "Highlight Mapper edge"),
-            ("sleep", 3.0),
+            ("sleep", 2.6),
         ],
     ),
     (
-        "alert",
+        "explain",
         12.0,
         1.0,
         [
-            ("button_regex", r"Late warning"),
-            ("scroll_align", "Shared timeline"),
-            ("sleep", 2.0),
+            ("button_regex", r"Guided alert example"),
             ("scroll_align", "Score explanation"),
-            ("sleep", 3.4),
+            ("sleep", 4.0),
         ],
     ),
     (
         "replay",
         11.0,
-        3.2,
+        2.0,
         [
-            ("button_regex", r"Late warning"),
             ("select_option", ("Screen", "Replay")),
-            ("sleep", 2.2),
+            ("sleep", 2.0),
             ("button_regex", r"Reveal next 20 sessions"),
-            ("sleep", 1.0),
+            ("sleep", 0.8),
             ("scroll_fraction", 0.10),
-            ("sleep", 3.0),
+            ("sleep", 2.6),
         ],
     ),
     (
-        "validation",
+        "evidence",
         5.0,
-        3.4,
+        2.0,
         [
             ("select_option", ("Screen", "Validation")),
-            ("scroll_fraction", 0.25),
-            ("sleep", 2.5),
+            ("scroll_fraction", 0.26),
+            ("sleep", 2.0),
         ],
     ),
 ]
@@ -260,13 +263,21 @@ def _act(fn, events, label, attempts=3):
     )
 
 
-def _scene_setup(page, actions, events, scene_name):
+def _scene_setup(root, page, actions, events, scene_name):
+    keyboard = getattr(getattr(root, "page", None), "keyboard", None) or page.keyboard
     for kind, payload in actions:
         try:
             if kind == "sleep":
                 time.sleep(float(payload))
+            elif kind == "checkbox":
+                loc = root.get_by_role("checkbox", name=payload)
+                loc.first.click(timeout=10000)
+                events.append(
+                    {"t": round(time.perf_counter() - t0, 3), "click": True, "label": kind}
+                )
+                page.wait_for_timeout(600)
             elif kind == "button_regex":
-                loc = page.get_by_role("button", name=re.compile(payload)).first
+                loc = root.get_by_role("button", name=re.compile(payload)).first
                 loc.scroll_into_view_if_needed(timeout=8000)
                 box = loc.bounding_box()
                 loc.click(timeout=8000)
@@ -281,35 +292,34 @@ def _scene_setup(page, actions, events, scene_name):
                     )
                 page.wait_for_timeout(500)
             elif kind == "text":
-                box = page.get_by_text(payload, exact=True).first.bounding_box()
-                page.get_by_text(payload, exact=True).first.click(timeout=8000)
+                root.get_by_text(payload, exact=True).first.click(timeout=8000)
                 page.wait_for_timeout(700)
             elif kind == "radio":
-                page.get_by_text(payload, exact=True).first.click(timeout=8000)
+                root.get_by_text(payload, exact=True).first.click(timeout=8000)
                 page.wait_for_timeout(900)
             elif kind == "select_option":
                 label, option = payload
-                page.get_by_role("combobox", name=label, exact=True).click(timeout=8000)
+                root.get_by_role("combobox", name=label, exact=True).click(timeout=8000)
                 page.wait_for_timeout(700)
-                page.get_by_role("option", name=option, exact=True).click(timeout=8000)
+                root.get_by_role("option", name=option, exact=True).click(timeout=8000)
                 events.append(
                     {"t": round(time.perf_counter() - t0, 3), "click": True, "label": kind}
                 )
                 page.wait_for_timeout(900)
             elif kind == "select_edge":
-                page.get_by_role("combobox", name=payload, exact=True).click(timeout=8000)
+                root.get_by_role("combobox", name=payload, exact=True).click(timeout=10000)
                 page.wait_for_timeout(800)
-                page.keyboard.press("ArrowDown")
-                page.keyboard.press("Enter")
+                keyboard.press("ArrowDown")
+                keyboard.press("Enter")
                 events.append(
                     {"t": round(time.perf_counter() - t0, 3), "click": True, "label": kind}
                 )
                 page.wait_for_timeout(900)
             elif kind == "scroll_text":
-                page.get_by_text(payload, exact=True).first.scroll_into_view_if_needed(timeout=8000)
+                root.get_by_text(payload, exact=True).first.scroll_into_view_if_needed(timeout=8000)
                 page.wait_for_timeout(900)
             elif kind == "scroll_align":
-                locator = page.get_by_text(payload, exact=True).first
+                locator = root.get_by_text(payload, exact=True).first
                 scroll_js = "el => el.scrollIntoView({block: 'start', behavior: 'smooth'})"
                 locator.evaluate(scroll_js)
                 page.wait_for_timeout(1100)
@@ -318,7 +328,7 @@ def _scene_setup(page, actions, events, scene_name):
                     "(f) => window.scrollTo({top: document.body.scrollHeight * f, "
                     "behavior: 'smooth'})"
                 )
-                page.evaluate(fraction_js, payload)
+                root.evaluate(fraction_js, payload)
                 page.wait_for_timeout(1000)
         except Exception as error:  # noqa: BLE001 - report and continue
             events.append(
@@ -357,19 +367,69 @@ def capture_app(app_url: str | None) -> dict:
                 page_created = time.perf_counter()
                 page = context.new_page()
                 page.goto(app_url, wait_until="load", timeout=240000)
-                page.wait_for_selector("h1:has-text('TopoMarket research')", timeout=240000)
-                page.wait_for_timeout(2500)
-                page.add_style_tag(
-                    content=(
-                        'header, [data-testid="stToolbar"], '
-                        '[data-testid="stDecoration"], #MainMenu, footer '
-                        "{visibility: hidden !important;}"
+                hosted = "streamlit.app" in app_url
+                frame = None
+                if hosted:
+                    # Community Cloud renders the app in an iframe; make it fill the
+                    # recorded viewport so the film shows the real public release.
+                    for _ in range(120):
+                        for candidate in page.frames:
+                            if "~/+/" in (candidate.url or ""):
+                                try:
+                                    candidate.wait_for_selector(
+                                        "h1:has-text('TopoMarket research')", timeout=5000
+                                    )
+                                    frame = candidate
+                                    break
+                                except Exception:  # noqa: BLE001 - frame still loading
+                                    pass
+                        if frame is not None:
+                            break
+                        page.wait_for_timeout(1000)
+                    if frame is None:
+                        raise SystemExit("hosted app frame did not load")
+                    page.evaluate(
+                        """() => {
+                            const frames = Array.from(document.querySelectorAll('iframe'));
+                            const f = frames[frames.length - 1] || frames[0];
+                            if (f) {
+                                f.style.position = 'fixed';
+                                f.style.inset = '0';
+                                f.style.width = '100vw';
+                                f.style.height = '100vh';
+                                f.style.zIndex = '9999';
+                                f.style.border = '0';
+                                f.style.background = '#F8FAFC';
+                            }
+                            document.body.style.background = '#F8FAFC';
+                        }"""
                     )
-                )
+                    frame.evaluate(
+                        """() => {
+                            const style = document.createElement('style');
+                            style.textContent = 'header, [data-testid="stToolbar"], ' +
+                                '[data-testid="stDecoration"], #MainMenu, footer ' +
+                                '{visibility: hidden !important;}';
+                            document.head.appendChild(style);
+                        }"""
+                    )
+                    page.wait_for_timeout(1500)
+                    root = frame
+                else:
+                    page.wait_for_selector("h1:has-text('TopoMarket research')", timeout=240000)
+                    page.wait_for_timeout(2500)
+                    page.add_style_tag(
+                        content=(
+                            'header, [data-testid="stToolbar"], '
+                            '[data-testid="stDecoration"], #MainMenu, footer '
+                            "{visibility: hidden !important;}"
+                        )
+                    )
+                    root = page
                 lead = time.perf_counter() - page_created
                 t0 = time.perf_counter()
                 events: list[dict] = []
-                _scene_setup(page, actions, events, name)
+                _scene_setup(root, page, actions, events, name)
                 remaining = (scene_seconds + skip_seconds) - (time.perf_counter() - t0)
                 if remaining > 0.2:
                     time.sleep(remaining)

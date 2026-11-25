@@ -82,7 +82,7 @@
             "matched_count": 0
           }
         },
-        "policy_changed": false
+        "policy_changed": true
       },
       "tda": {
         "calibration": {
@@ -115,7 +115,7 @@
             "matched_count": 0
           }
         },
-        "policy_changed": false
+        "policy_changed": true
       },
       "vix": {
         "calibration": {
@@ -148,7 +148,7 @@
             "matched_count": 1
           }
         },
-        "policy_changed": false
+        "policy_changed": true
       }
     },
     "same_eligible_dates": true
@@ -157,7 +157,7 @@
   "calibrations": {
     "realized_vol": {
       "calibrated": true,
-      "calibration_hash": "dec671ca920a4b6bacaa70448bb61640d61e881caefc18b8630c0796b13a074d",
+      "calibration_hash": "d5b2ec4aee9a01d6719c5232e522f3681e3996f4a296bb89207cfe4d00ad829b",
       "candidates": [
         {
           "constrained": true,
@@ -226,7 +226,7 @@
           "selected": true
         }
       ],
-      "config_hash": "32484c1897a2d702bab73d3e43867c27404184fcc42a51dde72ac28095cdeefc",
+      "config_hash": "d33d825314c367fac644918966a829a4210ee9ffafe8000ce81ee035edfe0a36",
       "cutoff": 0.10727190502348415,
       "eligible_sessions": 2327,
       "eligible_years": 9.234126984126984,
@@ -253,7 +253,7 @@
     },
     "tda": {
       "calibrated": true,
-      "calibration_hash": "96867593ce9ced2cab54df870876c232fa2570347dba17896cc12c9ff8df73e9",
+      "calibration_hash": "91ed1ddba80dfafad2caf88dbfa747ea2f8da3e485be661d396578aa30adbab9",
       "candidates": [
         {
           "constrained": true,
@@ -322,7 +322,7 @@
           "selected": true
         }
       ],
-      "config_hash": "32484c1897a2d702bab73d3e43867c27404184fcc42a51dde72ac28095cdeefc",
+      "config_hash": "d33d825314c367fac644918966a829a4210ee9ffafe8000ce81ee035edfe0a36",
       "cutoff": 100.0,
       "eligible_sessions": 2327,
       "eligible_years": 9.234126984126984,
@@ -349,7 +349,7 @@
     },
     "vix": {
       "calibrated": true,
-      "calibration_hash": "5ea7495704a48cca3a3d47e8e9370de93da38261045fb80d0f09258d6b294377",
+      "calibration_hash": "47634c9a04229f00da6b72011096abd6ee9fc8ac8afd3d89d6d455fa58bad47e",
       "candidates": [
         {
           "constrained": true,
@@ -418,7 +418,7 @@
           "selected": true
         }
       ],
-      "config_hash": "32484c1897a2d702bab73d3e43867c27404184fcc42a51dde72ac28095cdeefc",
+      "config_hash": "d33d825314c367fac644918966a829a4210ee9ffafe8000ce81ee035edfe0a36",
       "cutoff": 23.018437719999998,
       "eligible_sessions": 2327,
       "eligible_years": 9.234126984126984,
@@ -462,7 +462,7 @@
     "start": "2014-01-01"
   },
   "comparator_method": "realized_vol",
-  "config_hash": "32484c1897a2d702bab73d3e43867c27404184fcc42a51dde72ac28095cdeefc",
+  "config_hash": "d33d825314c367fac644918966a829a4210ee9ffafe8000ce81ee035edfe0a36",
   "credit_rule": "label_positive_and_breach_owned",
   "data_end": "2026-09-30",
   "data_start": "2005-01-03",
@@ -744,7 +744,7 @@
         }
       ],
       "pending_alerts": [],
-      "policy_hash": "a972915ca965289531af3591b919440d955341306871406919c30bf394b7df0f",
+      "policy_hash": "64570e2c6c1f8e77b57b51bfed8a132e08b4db372228d2a132231eaea0d399bb",
       "post_onset_alerts": [
         "2020-02-25"
       ],
@@ -893,7 +893,7 @@
         }
       ],
       "pending_alerts": [],
-      "policy_hash": "7861d94beffb163cea5046f3e7e8d52a3dc1cd8fd595f64d1fa16365f9a7cf59",
+      "policy_hash": "86b8e90f841c321474134d8c907e1fe594e44e9461c42479ad07d52856dd7c9a",
       "post_onset_alerts": [
         "2020-03-13",
         "2025-03-10"
@@ -1002,14 +1002,14 @@
         }
       ],
       "pending_alerts": [],
-      "policy_hash": "3fe0a17153c78253a97e228478a78891614e2abc8129fca9aa389739c119d4b4",
+      "policy_hash": "3cb715b5208323e448e36f55f3dbe1b4666fe4a97a11e07e48d8b4998ae9eb54",
       "post_onset_alerts": [],
       "silent_policy": false,
       "snapshot_id": "showcase-synthetic",
       "start": "2014-01-01"
     }
   },
-  "package_version": "1.0.0",
+  "package_version": "1.1.0",
   "periods": {
     "development": {
       "end": "2004-12-31",
@@ -1027,14 +1027,14 @@
   "policies": {
     "realized_vol": {
       "annualization": 252.0,
-      "calibration_hash": "dec671ca920a4b6bacaa70448bb61640d61e881caefc18b8630c0796b13a074d",
-      "config_hash": "32484c1897a2d702bab73d3e43867c27404184fcc42a51dde72ac28095cdeefc",
+      "calibration_hash": "d5b2ec4aee9a01d6719c5232e522f3681e3996f4a296bb89207cfe4d00ad829b",
+      "config_hash": "d33d825314c367fac644918966a829a4210ee9ffafe8000ce81ee035edfe0a36",
       "cooldown_sessions": 20,
       "cutoff": 0.10727190502348415,
       "eligible_years": 9.234126984126984,
       "method": "realized_vol",
       "percentile": 99.0,
-      "policy_hash": "a972915ca965289531af3591b919440d955341306871406919c30bf394b7df0f",
+      "policy_hash": "64570e2c6c1f8e77b57b51bfed8a132e08b4db372228d2a132231eaea0d399bb",
       "session_digest": "c1f3ccbc6d6828d193315d8417d763e098753b3b5839305ed9e69a5b1a654c8b",
       "silent": false,
       "validation_end": "2013-12-31",
@@ -1043,14 +1043,14 @@
     },
     "tda": {
       "annualization": 252.0,
-      "calibration_hash": "96867593ce9ced2cab54df870876c232fa2570347dba17896cc12c9ff8df73e9",
-      "config_hash": "32484c1897a2d702bab73d3e43867c27404184fcc42a51dde72ac28095cdeefc",
+      "calibration_hash": "91ed1ddba80dfafad2caf88dbfa747ea2f8da3e485be661d396578aa30adbab9",
+      "config_hash": "d33d825314c367fac644918966a829a4210ee9ffafe8000ce81ee035edfe0a36",
       "cooldown_sessions": 20,
       "cutoff": 100.0,
       "eligible_years": 9.234126984126984,
       "method": "tda",
       "percentile": 99.0,
-      "policy_hash": "7861d94beffb163cea5046f3e7e8d52a3dc1cd8fd595f64d1fa16365f9a7cf59",
+      "policy_hash": "86b8e90f841c321474134d8c907e1fe594e44e9461c42479ad07d52856dd7c9a",
       "session_digest": "c1f3ccbc6d6828d193315d8417d763e098753b3b5839305ed9e69a5b1a654c8b",
       "silent": false,
       "validation_end": "2013-12-31",
@@ -1059,14 +1059,14 @@
     },
     "vix": {
       "annualization": 252.0,
-      "calibration_hash": "5ea7495704a48cca3a3d47e8e9370de93da38261045fb80d0f09258d6b294377",
-      "config_hash": "32484c1897a2d702bab73d3e43867c27404184fcc42a51dde72ac28095cdeefc",
+      "calibration_hash": "47634c9a04229f00da6b72011096abd6ee9fc8ac8afd3d89d6d455fa58bad47e",
+      "config_hash": "d33d825314c367fac644918966a829a4210ee9ffafe8000ce81ee035edfe0a36",
       "cooldown_sessions": 20,
       "cutoff": 23.018437719999998,
       "eligible_years": 9.234126984126984,
       "method": "vix",
       "percentile": 99.0,
-      "policy_hash": "3fe0a17153c78253a97e228478a78891614e2abc8129fca9aa389739c119d4b4",
+      "policy_hash": "3cb715b5208323e448e36f55f3dbe1b4666fe4a97a11e07e48d8b4998ae9eb54",
       "session_digest": "c1f3ccbc6d6828d193315d8417d763e098753b3b5839305ed9e69a5b1a654c8b",
       "silent": false,
       "validation_end": "2013-12-31",
@@ -1077,13 +1077,13 @@
   "primary_method": "tda",
   "provenance": {
     "calibration_hashes": {
-      "realized_vol": "dec671ca920a4b6bacaa70448bb61640d61e881caefc18b8630c0796b13a074d",
-      "tda": "96867593ce9ced2cab54df870876c232fa2570347dba17896cc12c9ff8df73e9",
-      "vix": "5ea7495704a48cca3a3d47e8e9370de93da38261045fb80d0f09258d6b294377"
+      "realized_vol": "d5b2ec4aee9a01d6719c5232e522f3681e3996f4a296bb89207cfe4d00ad829b",
+      "tda": "91ed1ddba80dfafad2caf88dbfa747ea2f8da3e485be661d396578aa30adbab9",
+      "vix": "47634c9a04229f00da6b72011096abd6ee9fc8ac8afd3d89d6d455fa58bad47e"
     },
     "calibration_version": "F01-corrected-v1",
-    "code_revision": "c7884259b196",
-    "config_hash": "32484c1897a2d702bab73d3e43867c27404184fcc42a51dde72ac28095cdeefc",
+    "code_revision": "9b952e24a201",
+    "config_hash": "d33d825314c367fac644918966a829a4210ee9ffafe8000ce81ee035edfe0a36",
     "label_contract": {
       "credit_rule": "label_positive_and_breach_owned",
       "horizon_sessions": 20,
@@ -1092,11 +1092,11 @@
       "validation_end": "2013-12-31",
       "validation_start": "2005-01-01"
     },
-    "package_version": "1.0.0",
+    "package_version": "1.1.0",
     "policy_hashes": {
-      "realized_vol": "a972915ca965289531af3591b919440d955341306871406919c30bf394b7df0f",
-      "tda": "7861d94beffb163cea5046f3e7e8d52a3dc1cd8fd595f64d1fa16365f9a7cf59",
-      "vix": "3fe0a17153c78253a97e228478a78891614e2abc8129fca9aa389739c119d4b4"
+      "realized_vol": "64570e2c6c1f8e77b57b51bfed8a132e08b4db372228d2a132231eaea0d399bb",
+      "tda": "86b8e90f841c321474134d8c907e1fe594e44e9461c42479ad07d52856dd7c9a",
+      "vix": "3cb715b5208323e448e36f55f3dbe1b4666fe4a97a11e07e48d8b4998ae9eb54"
     },
     "report_version": "1.1",
     "seed": 42,

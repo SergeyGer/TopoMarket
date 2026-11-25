@@ -11,7 +11,7 @@ within the next 20 index sessions**. The application ships with a credential-fre
 and a private-research profile; a working dashboard and a positive forecasting result are separate
 release decisions.
 
-**Live demo (v1.0.0, hosted verification passed):** <https://topomarket-juhbvrgk2k67pnr6qbpfmc.streamlit.app/> ·
+**Live demo (v1.1.0):** <https://topomarket-juhbvrgk2k67pnr6qbpfmc.streamlit.app/> ·
 **Local one-command demo:** `streamlit run app.py` (bundled synthetic showcase, no key) ·
 **One-minute demo video:** [watch the synthetic-data walkthrough](https://github.com/SergeyGer/TopoMarket/releases/latest/download/TopoMarket_demo_60s.mp4)
 ([captions](https://github.com/SergeyGer/TopoMarket/releases/latest/download/TopoMarket_demo_60s.srt))
