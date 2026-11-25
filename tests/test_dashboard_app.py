@@ -212,6 +212,7 @@ def test_screen_payloads_tolerant_of_legacy_cache() -> None:
     """A brief old-module/new-shell deployment must not break the page."""
 
     import app
+
     from topomarket.ui.dashboard import DashboardSelection
 
     class LegacyCache:
