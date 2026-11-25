@@ -117,6 +117,13 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
 # --------------------------------------------------------------------------- #
 def _loaded_context(data: DashboardData) -> dict[str, Any]:
     members = list(getattr(data, "members", ()) or ())
+    if not members:
+        for row in data.rows:
+            for key in row:
+                if key.startswith("ind_") and key.endswith("_return"):
+                    code = key[len("ind_") : -len("_return")]
+                    if code not in members:
+                        members.append(code)
     return {
         "session_dates": list(data.session_dates),
         "members": members,
@@ -598,7 +605,7 @@ def render_dashboard(
     selection, _options = _apply_widgets(ui, data, selection)
     _persist_selection(ui.session_state, selection)
     if cache is not None:
-        payloads = cache.get(selection, screens=(selection.screen,))
+        payloads = _screen_payloads(cache, selection)
     screens = {name: payloads.get(name) or {} for name in SCREEN_ORDER}
     if selection.screen == "structure":
         render_structure_screen(ui, data, selection, screens["structure"])
@@ -1117,6 +1124,30 @@ def plain_text_dashboard(
 # --------------------------------------------------------------------------- #
 # Shell entry point
 # --------------------------------------------------------------------------- #
+def _screen_payloads(cache: Any, selection: DashboardSelection) -> dict[str, dict[str, Any]]:
+    """Build the visible screen payloads, tolerant of older cached panel caches.
+
+    A deployment can briefly run a newer ``app.py`` against an already-imported
+    older ``topomarket`` module. The fallbacks keep the shell working until the
+    app process restarts instead of failing the whole page.
+    """
+
+    getter = getattr(cache, "get_screen", None)
+    if callable(getter):
+        try:
+            return getter(selection)
+        except AttributeError:
+            pass
+    try:
+        return cache.get(selection, screens=(selection.screen,))
+    except TypeError:
+        payloads = cache.get(selection)
+    screen = selection.screen
+    if isinstance(payloads, dict) and screen in payloads:
+        return {screen: payloads[screen]}
+    return payloads
+
+
 def _data_stamp(profile: str, data_dir: Path | None) -> tuple[Any, ...]:
     """Return a cheap change stamp for the dashboard data cache.
 
@@ -1207,7 +1238,7 @@ def run_shell(args: argparse.Namespace, streamlit_module: Any | None = None) -> 
         cache = PanelCache(data)
         state["tm_panel_cache"] = cache
     selection = selection_from_state(state, data)
-    payloads = cache.get_screen(selection)
+    payloads = _screen_payloads(cache, selection)
     selection = render_dashboard(data, selection, payloads, ui, cache=cache)
     _persist_selection(state, selection)
     return 0
