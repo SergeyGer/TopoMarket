@@ -52,6 +52,27 @@ PRESET_DESCRIPTIONS: dict[str, str] = {
     "missed_warning": "A decline the indicator missed or flagged only after the onset.",
 }
 
+#: Neutral preset labels/descriptions shown while blind Replay is active.  Blind
+#: mode must not disclose retrospective outcome names such as "late warning" or
+#: "missed warning" (F02); those stay in the explicit review flow (reveal).
+PRESET_BLIND_LABELS: dict[str, str] = {
+    "quiet": "Quiet period",
+    "stress_transition": "Stress transition",
+    "matched_warning": "Guided alert example",
+    "missed_warning": "Review example",
+}
+
+PRESET_BLIND_DESCRIPTIONS: dict[str, str] = {
+    "quiet": PRESET_DESCRIPTIONS["quiet"],
+    "stress_transition": PRESET_DESCRIPTIONS["stress_transition"],
+    "matched_warning": (
+        "A labelled demonstration example; its retrospective outcome is hidden in blind mode."
+    ),
+    "missed_warning": (
+        "A second demonstration example; its retrospective outcome is hidden in blind mode."
+    ),
+}
+
 #: Frozen preset dates freeze the demonstration once step 4 locks them.
 FROZEN_PRESETS_FILENAME = "presets.json"
 
@@ -74,6 +95,10 @@ class Preset:
     verified: bool = False
     reason: str | None = None
     teaching: bool = False
+    blind_label: str = ""
+    review_label: str = ""
+    blind_description: str = ""
+    review_description: str = ""
 
     def as_dict(self) -> dict[str, Any]:
         return {
@@ -87,6 +112,10 @@ class Preset:
             "verified": self.verified,
             "reason": self.reason,
             "teaching": self.teaching,
+            "blind_label": self.blind_label or self.label,
+            "review_label": self.review_label or self.label,
+            "blind_description": self.blind_description or self.description,
+            "review_description": self.review_description or self.description,
         }
 
 
@@ -135,6 +164,10 @@ def load_frozen_presets(path: Path) -> list[Preset]:
                 verified=bool(record.get("verified", True)),
                 reason=record.get("reason"),
                 teaching=bool(record.get("teaching", False)),
+                blind_label=str(record.get("blind_label") or ""),
+                review_label=str(record.get("review_label") or ""),
+                blind_description=str(record.get("blind_description") or ""),
+                review_description=str(record.get("review_description") or ""),
             )
         )
     return presets
@@ -312,6 +345,25 @@ def derive_presets(data: Any) -> list[Preset]:
                 verified=verified,
                 reason=None if verified else _preset_reason(preset_id, date),
                 teaching=is_teaching,
+                blind_label=(
+                    "Guided alert example"
+                    if preset_id == "matched_warning"
+                    else (
+                        "Review example"
+                        if preset_id == "missed_warning"
+                        else PRESET_LABELS[preset_id]
+                    )
+                ),
+                review_label=(
+                    "Late warning (teaching example)" if is_teaching else PRESET_LABELS[preset_id]
+                ),
+                blind_description=PRESET_BLIND_DESCRIPTIONS[preset_id],
+                review_description=(
+                    "A late alert used as a labelled teaching example; it is not part of the "
+                    "frozen evaluation."
+                    if is_teaching
+                    else PRESET_DESCRIPTIONS[preset_id]
+                ),
             )
         )
     return presets
@@ -384,6 +436,10 @@ def find_preset(data: Any, preset_id: str) -> Preset | None:
                 verified=record["verified"],
                 reason=record["reason"],
                 teaching=bool(record.get("teaching", False)),
+                blind_label=str(record.get("blind_label") or ""),
+                review_label=str(record.get("review_label") or ""),
+                blind_description=str(record.get("blind_description") or ""),
+                review_description=str(record.get("review_description") or ""),
             )
     return None
 

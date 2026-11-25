@@ -106,6 +106,15 @@ The specification's order is binding; a later package starts only when the previ
   comparison chart and a before/after calibration table; `docs/reports/evaluation-v1.0-baseline.json`
   is retained. Corrected private report still needs the owner's seed path (not present here).
 
+- **WP-B (in review, #44)** - a new `topomarket.analysis.asof` module derives alert state from
+  readings/frozen policy/cooldown up to the selected session only. Blind Replay and the Structure
+  timeline now expose neutral `Alert recorded` markers and no retrospective classifications,
+  matched objects, episode onsets or evaluation-wide outcome hints; presets show neutral labels
+  while blind. Review classifications are computed from the alert's own observed 20-session horizon
+  and flagged retrospective; tests mutate both future prices and frozen report
+  classifications/matches and prove the blind payload/DOM text is unchanged, with pending/unobserved
+  boundary coverage.
+
 ## Reporting
 
 After each build step: what landed, remaining steps, failures/limitations, and expected actions from
