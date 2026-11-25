@@ -77,6 +77,16 @@ def test_validation_payload_reports_sample_size_rate_and_evidence(data) -> None:
     assert sample["eligible_sessions"] is not None
     assert validation["false_alert_rate"] is not None
     assert "limitations" in validation
+    # v1.1 evidence panel: three methods with numerator/denominator recall,
+    # versioned report identity and the v1.0 before/after comparison.
+    table = validation["evidence_table"]
+    assert {row["method"] for row in table} == {"tda", "vix", "realized_vol"}
+    assert all(row["recall_denominator"] is not None for row in table)
+    assert validation["report_version"] == "1.1"
+    comparison = validation["calibration_comparison"]
+    assert comparison["same_eligible_dates"] is True
+    assert set(comparison["methods"]) == {"tda", "vix", "realized_vol"}
+    assert validation["provenance"]["policy_hashes"]
     assert validation["table_alternative"]
     json.dumps(validation)
 

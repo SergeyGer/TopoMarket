@@ -22,9 +22,11 @@ be traced back to the assessed data.
 
 from __future__ import annotations
 
+import functools
 import hashlib
 import json
 import math
+import os
 import random
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
@@ -50,7 +52,7 @@ from .alerts import (
     readings_from_scores,
     select_comparator,
 )
-from .labels import build_breach_episodes, build_target_labels
+from .labels import DEFAULT_THRESHOLD, build_breach_episodes, build_target_labels
 from .ledger import ForecastLedger, ledger_records_for_alerts
 
 TEST_START = "2014-01-01"
@@ -58,6 +60,15 @@ DEVELOPMENT_START = "1990-01-01"
 BOOTSTRAP_BLOCK_SESSIONS = 60
 BOOTSTRAP_REPLICATES = 1_000
 DEFAULT_SEED = 42
+
+#: Version of the evaluation report schema/metadata (v1.1 adds provenance and
+#: before/after calibration comparison; the v1.0 report remains a baseline).
+REPORT_VERSION = "1.1"
+
+#: Identity of the calibration semantics.  ``F01-corrected-v1`` counts unique
+#: matched episode onsets (the v1.0 code reported zero recall for every
+#: candidate); changing the rule requires a new version string and a new report.
+CALIBRATION_VERSION = "F01-corrected-v1"
 MIN_EVALUABLE_EPISODES = 5
 MAX_FALSE_ALERTS_PER_YEAR = 2.0
 
@@ -371,6 +382,132 @@ def _frame_label_counts(labels: Sequence[Any]) -> dict[str, int]:
     return counts
 
 
+@functools.lru_cache(maxsize=1)
+def _code_revision() -> str | None:
+    """Return an explicit revision or the checkout's short git commit.
+
+    The repository files are read directly (no subprocess) so deployments and
+    security scanners see no shell/git invocation from the analysis path.
+    """
+
+    explicit = os.environ.get("TOPOMARKET_CODE_REVISION")
+    if explicit:
+        return explicit.strip()
+    try:
+        repository_root = Path(__file__).resolve().parents[3]
+        git_dir = repository_root / ".git"
+        head = (git_dir / "HEAD").read_text(encoding="utf-8").strip()
+        if head.startswith("ref:"):
+            reference = head.split(" ", 1)[1].strip()
+            revision_file = git_dir / reference
+            if revision_file.is_file():
+                revision = revision_file.read_text(encoding="utf-8").strip()
+            else:
+                packed = git_dir / "packed-refs"
+                revision = ""
+                if packed.is_file():
+                    for line in packed.read_text(encoding="utf-8").splitlines():
+                        parts = line.split()
+                        if len(parts) == 2 and parts[1] == reference:
+                            revision = parts[0]
+                            break
+        else:
+            revision = head
+        return revision[:12] if revision else None
+    except OSError:
+        return None
+
+
+def _policy_identity(policies: Mapping[str, Any]) -> dict[str, str | None]:
+    return {
+        method: policy.policy_hash() if hasattr(policy, "policy_hash") else None
+        for method, policy in policies.items()
+    }
+
+
+def _calibration_comparison(
+    baseline_report: Mapping[str, Any] | None,
+    report: Mapping[str, Any],
+) -> dict[str, Any] | None:
+    """Compare the corrected calibration with the retained v1.0 baseline report."""
+
+    if not isinstance(baseline_report, Mapping):
+        return None
+    baseline_common = baseline_report.get("common_eligible_dates") or {}
+    current_common = report.get("common_eligible_dates") or {}
+    baseline_calibrations = baseline_report.get("calibrations") or {}
+    baseline_metrics = baseline_report.get("metrics") or {}
+    baseline_policies = baseline_report.get("policies") or {}
+    current_calibrations = report.get("calibrations") or {}
+    current_metrics = report.get("metrics") or {}
+    current_policies = report.get("policies") or {}
+    methods = sorted(set(baseline_calibrations) | set(current_calibrations) | set(current_metrics))
+    comparison: dict[str, Any] = {
+        "baseline": {
+            "report_version": "1.0",
+            "package_version": baseline_report.get("package_version"),
+            "schema_version": baseline_report.get("schema_version"),
+            "snapshot_id": baseline_report.get("snapshot_id"),
+            "config_hash": baseline_report.get("config_hash"),
+            "common_eligible_dates": baseline_common.get("session_count"),
+            "policy_hashes": {
+                method: policy.get("policy_hash")
+                for method, policy in baseline_policies.items()
+                if isinstance(policy, Mapping)
+            },
+        },
+        "same_eligible_dates": (
+            baseline_common.get("session_count") == current_common.get("session_count")
+            and baseline_common.get("start") == current_common.get("start")
+            and baseline_common.get("end") == current_common.get("end")
+        ),
+        "methods": {},
+    }
+    for method in methods:
+        before_calibration = baseline_calibrations.get(method) or {}
+        after_calibration = current_calibrations.get(method) or {}
+        before_metrics = baseline_metrics.get(method) or {}
+        after_metrics = current_metrics.get(method) or {}
+        before_policy = baseline_policies.get(method) or {}
+        after_policy = current_policies.get(method) or {}
+        comparison["methods"][method] = {
+            "calibration": {
+                "before": {
+                    "percentile": before_calibration.get("percentile"),
+                    "cutoff": before_calibration.get("cutoff"),
+                    "episode_recall": before_calibration.get("episode_recall"),
+                    "matched_count": (before_calibration.get("selected") or {}).get(
+                        "matched_count"
+                    ),
+                    "false_alerts_per_year": before_calibration.get("false_alerts_per_year"),
+                },
+                "after": {
+                    "percentile": after_calibration.get("percentile"),
+                    "cutoff": after_calibration.get("cutoff"),
+                    "episode_recall": after_calibration.get("episode_recall"),
+                    "matched_count": (after_calibration.get("selected") or {}).get("matched_count"),
+                    "false_alerts_per_year": after_calibration.get("false_alerts_per_year"),
+                },
+            },
+            "holdout": {
+                "before": {
+                    "episode_recall": before_metrics.get("episode_recall"),
+                    "matched_count": before_metrics.get("matched_count"),
+                    "average_precision": before_metrics.get("average_precision"),
+                    "false_alerts_per_year": before_metrics.get("false_alerts_per_year"),
+                },
+                "after": {
+                    "episode_recall": after_metrics.get("episode_recall"),
+                    "matched_count": after_metrics.get("matched_count"),
+                    "average_precision": after_metrics.get("average_precision"),
+                    "false_alerts_per_year": after_metrics.get("false_alerts_per_year"),
+                },
+            },
+            "policy_changed": before_policy.get("policy_hash") != after_policy.get("policy_hash"),
+        }
+    return comparison
+
+
 def build_evaluation_report(
     rows: Sequence[Mapping[str, Any]],
     *,
@@ -382,6 +519,9 @@ def build_evaluation_report(
     ledger_path: Path | str | None = None,
     ledger_snapshot_id: str | None = None,
     clock: Any | None = None,
+    baseline_report: Mapping[str, Any] | None = None,
+    report_version: str = REPORT_VERSION,
+    calibration_version: str = CALIBRATION_VERSION,
 ) -> dict[str, Any]:
     """Run the full deterministic evaluation pipeline and return the report."""
     materialised = [dict(row) for row in rows]
@@ -499,7 +639,9 @@ def build_evaluation_report(
             )
 
     report: dict[str, Any] = {
-        "schema_version": 1,
+        "schema_version": 2,
+        "report_version": report_version,
+        "calibration_version": calibration_version,
         "package_version": __version__,
         "snapshot_id": snapshot_id or ledger_snapshot_id,
         "seed": int(seed),
@@ -560,7 +702,29 @@ def build_evaluation_report(
             }
             for method, evaluation in evaluations.items()
         },
+        "provenance": {
+            "report_version": report_version,
+            "calibration_version": calibration_version,
+            "code_revision": _code_revision(),
+            "package_version": __version__,
+            "snapshot_id": snapshot_id or ledger_snapshot_id,
+            "config_hash": config_hash,
+            "seed": int(seed),
+            "label_contract": {
+                "threshold": DEFAULT_THRESHOLD,
+                "horizon_sessions": 20,
+                "credit_rule": "label_positive_and_breach_owned",
+                "validation_start": VALIDATION_START,
+                "validation_end": VALIDATION_END,
+                "test_start": TEST_START,
+            },
+            "calibration_hashes": {
+                method: calibration.calibration_hash for method, calibration in calibrations.items()
+            },
+            "policy_hashes": {method: policy.policy_hash() for method, policy in policies.items()},
+        },
     }
+    report["calibration_comparison"] = _calibration_comparison(baseline_report, report)
 
     if include_ablations:
         ablations = _build_ablations(

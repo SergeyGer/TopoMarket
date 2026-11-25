@@ -259,3 +259,96 @@ def test_calibration_hash_includes_sessions_and_years() -> None:
     assert first.calibration_hash
     assert first.session_digest != second.session_digest
     assert first.calibration_hash != second.calibration_hash
+
+
+def _two_crash_rows(
+    count: int = 4200,
+    *,
+    crash_starts: tuple[int, int] = (2000, 3200),
+    crash_days: int = 25,
+    daily_drop: float = 0.97,
+) -> list[dict]:
+    days = _business_days(count, date(2004, 1, 2))
+    headings = []
+    price = 100.0
+    for index in range(count):
+        if any(start <= index < start + crash_days for start in crash_starts):
+            price *= daily_drop
+        else:
+            price *= 1.0012
+        headings.append(price)
+    rows: list[dict] = []
+    previous = None
+    for day, close in zip(days, headings, strict=True):
+        rows.append(
+            {
+                "date": day.isoformat(),
+                "sp500_close": close,
+                "sp500_log_return": ""
+                if previous is None
+                else f"{__import__('math').log(close / previous):.12f}",
+                "vix_close": 20.0,
+            }
+        )
+        previous = close
+    return rows
+
+
+def test_calibration_recall_prefers_higher_recall_over_fewer_false_alerts() -> None:
+    """F01 regression: recall must count unique matched episode onsets.
+
+    Two eligible episodes are warned with 60-value windows; a 100-value candidate
+    has one fewer false alert but recalls no episode. The corrected calibration
+    must select the higher-recall candidate (97.5th percentile, 2/2 matched)
+    instead of the lower-false-alert 99th percentile.
+    """
+
+    rows = _two_crash_rows()
+    sessions = _session_dates(rows)
+    labels = build_target_labels(rows)
+    episodes = build_breach_episodes(labels)
+    assert [episode.start_index for episode in episodes[:2]] == [2003, 3203]
+    values = [0.0] * len(sessions)
+    for episode in episodes[:2]:
+        onset = episode.start_index
+        for index in range(onset - 19, onset + 50):
+            values[index] = 60.0
+        for index in range(onset + 5, onset + 30):
+            values[index] = 100.0
+    for index in (300, 900, 1500):
+        values[index] = 60.0
+    far = [
+        index
+        for index in range(100, 4000, 140)
+        if all(abs(index - episode.start_index) > 80 for episode in episodes)
+    ]
+    for index in far[:28]:
+        values[index] = 100.0
+    readings = tuple(
+        MethodReading(session, value) for session, value in zip(sessions, values, strict=True)
+    )
+    calibration = calibrate_method(
+        method="vix",
+        readings=readings,
+        labels=labels,
+        sessions=sessions,
+        config_hash="cfg",
+        validation_start=sessions[30],
+        validation_end=sessions[4150],
+    )
+    assert calibration.calibrated is True
+    assert calibration.silent is False
+    selected = calibration.selected
+    assert selected is not None
+    assert selected.percentile == 97.5
+    assert selected.episode_count == 2
+    assert selected.matched_count == 2
+    assert selected.episode_recall == 1.0
+    assert selected.false_alerts_per_year is not None
+    assert selected.false_alerts_per_year <= 2.0
+    candidates = {candidate.percentile: candidate for candidate in calibration.candidates}
+    # The 99th percentile has fewer false alerts but no recall; the corrected
+    # ordering still prefers the matched candidate.
+    assert candidates[99.0].matched_count == 0
+    assert candidates[99.0].false_count < selected.false_count
+    assert candidates[99.0].constrained is False

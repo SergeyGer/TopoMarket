@@ -28,6 +28,7 @@ from topomarket.topology import compute_topology_scores, load_topology_config, w
 
 SEED = 4242
 SNAPSHOT_ID = "showcase-synthetic"
+BASELINE_REPORT = ROOT / "docs" / "reports" / "evaluation-v1.0-baseline.json"
 START = date(2005, 1, 3)
 END = date(2026, 9, 30)
 CRASHES = (
@@ -121,6 +122,9 @@ def build(out: Path) -> dict:
     scores_path = out / "scores.csv"
     write_scores_csv(series, scores_path)
 
+    baseline_report = None
+    if BASELINE_REPORT.exists():
+        baseline_report = json.loads(BASELINE_REPORT.read_text(encoding="utf-8"))
     report = build_evaluation_report(
         rows,
         score_series=series,
@@ -128,6 +132,7 @@ def build(out: Path) -> dict:
         snapshot_id=SNAPSHOT_ID,
         seed=42,
         include_ablations=False,
+        baseline_report=baseline_report,
     )
     report_path = reports / "evaluation-showcase.json"
     write_evaluation_report(report, report_path)
