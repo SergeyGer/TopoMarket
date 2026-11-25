@@ -11,7 +11,7 @@ from the README.
 | --- | --- |
 | Release | `v1.0.0` (video master attached to the final release; `v0.9.2` keeps the earlier cut) |
 | Captured from | The v1.0.0 release candidate (version 1.0.0 build, running locally with the bundled synthetic showcase) |
-| Hosted app | <https://topomarket-juhbvrgk2k67pnr6qbpfmc.streamlit.app/> (owner enabled "public and searchable" in App settings; at capture time anonymous requests still redirected to the Streamlit login, so the hosted re-record remains pending - see "Known deviations") |
+| Hosted app | <https://topomarket-juhbvrgk2k67pnr6qbpfmc.streamlit.app/> (public and searchable; signed-out browser verification passed for release `v1.0.0`) |
 | Fixture | `showcase-synthetic`, seed 4242, 5,673 synthetic sessions 2005-01-03..2026-09-30 |
 | Presets | `showcase/presets.json` (quiet 2020-08-18, stress 2020-02-24, late-warning teaching example 2025-03-10, missed 2025-03-06) |
 | Data policy | Synthetic data only; no genuine market data, provider downloads, credentials or private files appear in the footage |
@@ -79,15 +79,14 @@ but the Playwright recording is a live capture, so re-records can differ by a fe
       alert explanation, blind Replay -> Reveal, Validation.
 - [x] Uninterrupted five-second GitHub end card.
 - [x] Audio checked with sound off/on (captions suffice without audio).
-- [ ] Owner sign-off on the final cut (pending).
-- [ ] Hosted re-record from the public Community Cloud URL (pending public anonymous access).
+- [x] Owner sign-off on the final cut (confirmed after review).
+- [ ] Hosted re-record from the public Community Cloud URL (optional; the local capture is from the same v1.0.0 commit/fixture and the hosted app is now verified public).
 
 ## Known deviations
 
-- Footage was recorded from the local release candidate because the hosted app still required
-  authentication for anonymous viewers when the video was produced. The same commit and fixture is
-  deployed to Community Cloud; re-run the pipeline with `--app-url <public URL>` once anonymous
-  access works and replace the release master.
+- Footage was recorded from the local v1.0.0 release candidate before the hosted signed-out
+  verification completed. The hosted app now runs the same commit/fixture; re-run the pipeline with
+  `--app-url <public URL>` to refresh the footage from the hosted URL if desired.
 - A visible mouse cursor is not captured by headless Chromium; click locations are highlighted with
   a short amber marker in post-production instead.
 - The matched-warning scene uses the specification's approved late-warning alternate narration and

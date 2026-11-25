@@ -11,7 +11,7 @@ within the next 20 index sessions**. The application ships with a credential-fre
 and a private-research profile; a working dashboard and a positive forecasting result are separate
 release decisions.
 
-**Live demo:** <https://topomarket-juhbvrgk2k67pnr6qbpfmc.streamlit.app/> ·
+**Live demo (v1.0.0, hosted verification passed):** <https://topomarket-juhbvrgk2k67pnr6qbpfmc.streamlit.app/> ·
 **Local one-command demo:** `streamlit run app.py` (bundled synthetic showcase, no key) ·
 **One-minute demo video:** [watch the synthetic-data walkthrough](https://github.com/SergeyGer/TopoMarket/releases/latest/download/TopoMarket_demo_60s.mp4)
 ([captions](https://github.com/SergeyGer/TopoMarket/releases/latest/download/TopoMarket_demo_60s.srt))
@@ -31,7 +31,7 @@ release decisions.
 | 7 | Interactive dashboard: four screens, global date selection, accessibility (A7) | **Delivered** |
 | 8 | Package and rehearse the GitHub release (A8) | **Delivered** |
 | 9 | Upgrade: authoritative replay date, independent calendars, corrected evaluation, Structure/Replay experience, Community Cloud packaging (v0.9.0) | **Delivered** |
-| 10 | Demo video, frozen presets, hosted release and final v1.0 publication | Video and presets **delivered** (v0.9.2); hosted verification pending owner sharing setting |
+| 10 | Demo video, frozen presets, hosted release and final v1.0 publication | **Delivered** - release `v1.0.0`: video, presets, hosted signed-out verification and live demo |
 
 The v1.0 upgrade plan, defects closed and the build sequence live in
 [docs/UPGRADE.md](docs/UPGRADE.md); the acceptance-evidence matrix (A01-A07) is in
