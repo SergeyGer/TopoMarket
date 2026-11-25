@@ -24,6 +24,7 @@ build/
 # Environment files and secrets
 .env
 .env.*
+.git-token
 
 # Local data and generated artifacts
 data/local/

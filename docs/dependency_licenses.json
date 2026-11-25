@@ -1,0 +1,968 @@
+{
+  "counts": {
+    "fail": 0,
+    "pass": 59,
+    "review": 1,
+    "total": 60
+  },
+  "generated_by": "scripts/refresh_dependency_licenses.py",
+  "generated_from": [
+    "pyproject.toml",
+    "requirements.lock"
+  ],
+  "packages": {
+    "anyio": {
+      "classification": "permissive",
+      "declared": "lock",
+      "evidence": [
+        "MIT"
+      ],
+      "license": "MIT",
+      "license_classifiers": [],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "anyio",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "4.16.0"
+    },
+    "build": {
+      "classification": "permissive",
+      "declared": "pyproject",
+      "evidence": [
+        "MIT"
+      ],
+      "license": "MIT",
+      "license_classifiers": [],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "build",
+      "pyproject_requirement": "dev: build>=1.0",
+      "risk": "PASS",
+      "version": "1.6.1"
+    },
+    "certifi": {
+      "classification": "weak-copyleft",
+      "declared": "lock",
+      "evidence": [
+        "License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)"
+      ],
+      "license": "OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)",
+      "license_classifiers": [
+        "License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)"
+      ],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "certifi",
+      "pyproject_requirement": null,
+      "risk": "REVIEW",
+      "version": "2026.11.20"
+    },
+    "cffi": {
+      "classification": "permissive",
+      "declared": "lock",
+      "evidence": [
+        "MIT-0"
+      ],
+      "license": "MIT-0",
+      "license_classifiers": [],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "cffi",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "2.1.1"
+    },
+    "charset-normalizer": {
+      "classification": "permissive",
+      "declared": "lock",
+      "evidence": [
+        "MIT"
+      ],
+      "license": "MIT",
+      "license_classifiers": [],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "charset-normalizer",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "3.5.2"
+    },
+    "cloudpickle": {
+      "classification": "permissive",
+      "declared": "lock",
+      "evidence": [
+        "BSD-3-Clause"
+      ],
+      "license": "BSD-3-Clause",
+      "license_classifiers": [],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "cloudpickle",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "3.1.3"
+    },
+    "contourpy": {
+      "classification": "permissive",
+      "declared": "lock",
+      "evidence": [
+        "BSD-3-Clause"
+      ],
+      "license": "BSD-3-Clause",
+      "license_classifiers": [],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "contourpy",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "1.4.0"
+    },
+    "cryptography": {
+      "classification": "permissive",
+      "declared": "lock",
+      "evidence": [
+        "Apache-2.0 OR BSD-3-Clause"
+      ],
+      "license": "Apache-2.0 OR BSD-3-Clause",
+      "license_classifiers": [],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "cryptography",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "50.0.2"
+    },
+    "cycler": {
+      "classification": "permissive",
+      "declared": "lock",
+      "evidence": [
+        "License :: OSI Approved :: BSD License"
+      ],
+      "license": "OSI Approved :: BSD License",
+      "license_classifiers": [
+        "License :: OSI Approved :: BSD License"
+      ],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "cycler",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "0.12.1"
+    },
+    "cython": {
+      "classification": "permissive",
+      "declared": "lock",
+      "evidence": [
+        "Apache-2.0"
+      ],
+      "license": "Apache-2.0",
+      "license_classifiers": [],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "cython",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "3.3.1"
+    },
+    "deprecated": {
+      "classification": "permissive",
+      "declared": "lock",
+      "evidence": [
+        "MIT"
+      ],
+      "license": "MIT",
+      "license_classifiers": [],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "deprecated",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "3.0.1"
+    },
+    "docutils": {
+      "classification": "permissive",
+      "declared": "lock",
+      "evidence": [
+        "License :: OSI Approved :: BSD License",
+        "License :: Public Domain"
+      ],
+      "license": "OSI Approved :: BSD License; OSI Approved :: GNU General Public License (GPL); Public Domain",
+      "license_classifiers": [
+        "License :: OSI Approved :: BSD License",
+        "License :: OSI Approved :: GNU General Public License (GPL)",
+        "License :: Public Domain"
+      ],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "docutils",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "0.23"
+    },
+    "fonttools": {
+      "classification": "permissive",
+      "declared": "lock",
+      "evidence": [
+        "MIT"
+      ],
+      "license": "MIT",
+      "license_classifiers": [],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "fonttools",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "4.68.0"
+    },
+    "h11": {
+      "classification": "permissive",
+      "declared": "lock",
+      "evidence": [
+        "License :: OSI Approved :: MIT License"
+      ],
+      "license": "OSI Approved :: MIT License",
+      "license_classifiers": [
+        "License :: OSI Approved :: MIT License"
+      ],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "h11",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "0.16.0"
+    },
+    "httpcore": {
+      "classification": "permissive",
+      "declared": "lock",
+      "evidence": [
+        "BSD-3-Clause"
+      ],
+      "license": "BSD-3-Clause",
+      "license_classifiers": [],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "httpcore",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "1.0.9"
+    },
+    "httpx": {
+      "classification": "permissive",
+      "declared": "pyproject",
+      "evidence": [
+        "License :: OSI Approved :: BSD License"
+      ],
+      "license": "OSI Approved :: BSD License",
+      "license_classifiers": [
+        "License :: OSI Approved :: BSD License"
+      ],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "httpx",
+      "pyproject_requirement": "httpx>=0.27,<1",
+      "risk": "PASS",
+      "version": "0.28.1"
+    },
+    "id": {
+      "classification": "permissive",
+      "declared": "lock",
+      "evidence": [
+        "License :: OSI Approved :: Apache Software License"
+      ],
+      "license": "OSI Approved :: Apache Software License",
+      "license_classifiers": [
+        "License :: OSI Approved :: Apache Software License"
+      ],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "id",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "1.6.1"
+    },
+    "idna": {
+      "classification": "permissive",
+      "declared": "lock",
+      "evidence": [
+        "BSD-3-Clause"
+      ],
+      "license": "BSD-3-Clause",
+      "license_classifiers": [],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "idna",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "3.20"
+    },
+    "iniconfig": {
+      "classification": "permissive",
+      "declared": "lock",
+      "evidence": [
+        "MIT"
+      ],
+      "license": "MIT",
+      "license_classifiers": [],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "iniconfig",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "2.3.1"
+    },
+    "jaraco.classes": {
+      "classification": "permissive",
+      "declared": "lock",
+      "evidence": [
+        "License :: OSI Approved :: MIT License"
+      ],
+      "license": "OSI Approved :: MIT License",
+      "license_classifiers": [
+        "License :: OSI Approved :: MIT License"
+      ],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "jaraco.classes",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "3.4.0"
+    },
+    "jaraco.context": {
+      "classification": "permissive",
+      "declared": "lock",
+      "evidence": [
+        "MIT"
+      ],
+      "license": "MIT",
+      "license_classifiers": [],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "jaraco.context",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "6.1.2"
+    },
+    "jaraco.functools": {
+      "classification": "permissive",
+      "declared": "lock",
+      "evidence": [
+        "MIT"
+      ],
+      "license": "MIT",
+      "license_classifiers": [],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "jaraco.functools",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "4.6.0"
+    },
+    "jeepney": {
+      "classification": "permissive",
+      "declared": "lock",
+      "evidence": [
+        "MIT"
+      ],
+      "license": "MIT",
+      "license_classifiers": [],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "jeepney",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "0.9.0"
+    },
+    "joblib": {
+      "classification": "permissive",
+      "declared": "lock",
+      "evidence": [
+        "BSD-3-Clause"
+      ],
+      "license": "BSD-3-Clause",
+      "license_classifiers": [],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "joblib",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "1.6.0"
+    },
+    "keyring": {
+      "classification": "permissive",
+      "declared": "lock",
+      "evidence": [
+        "MIT"
+      ],
+      "license": "MIT",
+      "license_classifiers": [],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "keyring",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "25.7.0"
+    },
+    "kiwisolver": {
+      "classification": "permissive",
+      "declared": "lock",
+      "evidence": [
+        "License :: OSI Approved :: BSD License"
+      ],
+      "license": "OSI Approved :: BSD License",
+      "license_classifiers": [
+        "License :: OSI Approved :: BSD License"
+      ],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "kiwisolver",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "1.5.1"
+    },
+    "markdown-it-py": {
+      "classification": "permissive",
+      "declared": "lock",
+      "evidence": [
+        "License :: OSI Approved :: MIT License"
+      ],
+      "license": "OSI Approved :: MIT License",
+      "license_classifiers": [
+        "License :: OSI Approved :: MIT License"
+      ],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "markdown-it-py",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "4.3.0"
+    },
+    "matplotlib": {
+      "classification": "permissive",
+      "declared": "lock",
+      "evidence": [
+        "License :: OSI Approved :: Python Software Foundation License"
+      ],
+      "license": "OSI Approved :: Python Software Foundation License",
+      "license_classifiers": [
+        "License :: OSI Approved :: Python Software Foundation License"
+      ],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "matplotlib",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "3.11.2"
+    },
+    "mdurl": {
+      "classification": "permissive",
+      "declared": "lock",
+      "evidence": [
+        "License :: OSI Approved :: MIT License"
+      ],
+      "license": "OSI Approved :: MIT License",
+      "license_classifiers": [
+        "License :: OSI Approved :: MIT License"
+      ],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "mdurl",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "0.1.2"
+    },
+    "more-itertools": {
+      "classification": "permissive",
+      "declared": "lock",
+      "evidence": [
+        "MIT"
+      ],
+      "license": "MIT",
+      "license_classifiers": [],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "more-itertools",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "11.2.1"
+    },
+    "narwhals": {
+      "classification": "permissive",
+      "declared": "lock",
+      "evidence": [
+        "MIT"
+      ],
+      "license": "MIT",
+      "license_classifiers": [],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "narwhals",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "2.29.0"
+    },
+    "nh3": {
+      "classification": "permissive",
+      "declared": "lock",
+      "evidence": [
+        "MIT"
+      ],
+      "license": "MIT",
+      "license_classifiers": [],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "nh3",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "0.3.8"
+    },
+    "numpy": {
+      "classification": "permissive",
+      "declared": "pyproject",
+      "evidence": [
+        "BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0"
+      ],
+      "license": "BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0",
+      "license_classifiers": [],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "numpy",
+      "pyproject_requirement": "numpy>=1.24",
+      "risk": "PASS",
+      "version": "2.5.5"
+    },
+    "packaging": {
+      "classification": "permissive",
+      "declared": "lock",
+      "evidence": [
+        "Apache-2.0 OR BSD-2-Clause"
+      ],
+      "license": "Apache-2.0 OR BSD-2-Clause",
+      "license_classifiers": [],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "packaging",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "26.3"
+    },
+    "persim": {
+      "classification": "permissive",
+      "declared": "lock",
+      "evidence": [
+        "License :: OSI Approved :: MIT License"
+      ],
+      "license": "OSI Approved :: MIT License",
+      "license_classifiers": [
+        "License :: OSI Approved :: MIT License"
+      ],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "persim",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "0.4.1"
+    },
+    "pillow": {
+      "classification": "permissive",
+      "declared": "lock",
+      "evidence": [
+        "MIT-CMU"
+      ],
+      "license": "MIT-CMU",
+      "license_classifiers": [],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "pillow",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "13.0.0"
+    },
+    "pluggy": {
+      "classification": "permissive",
+      "declared": "lock",
+      "evidence": [
+        "License :: OSI Approved :: MIT License"
+      ],
+      "license": "OSI Approved :: MIT License",
+      "license_classifiers": [
+        "License :: OSI Approved :: MIT License"
+      ],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "pluggy",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "1.7.0"
+    },
+    "pycparser": {
+      "classification": "permissive",
+      "declared": "lock",
+      "evidence": [
+        "BSD-3-Clause"
+      ],
+      "license": "BSD-3-Clause",
+      "license_classifiers": [],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "pycparser",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "3.12"
+    },
+    "pygments": {
+      "classification": "permissive",
+      "declared": "lock",
+      "evidence": [
+        "BSD-2-Clause"
+      ],
+      "license": "BSD-2-Clause",
+      "license_classifiers": [],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "pygments",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "2.21.0"
+    },
+    "pyparsing": {
+      "classification": "permissive",
+      "declared": "lock",
+      "evidence": [
+        "MIT"
+      ],
+      "license": "MIT",
+      "license_classifiers": [],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "pyparsing",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "3.3.3"
+    },
+    "pyproject-hooks": {
+      "classification": "permissive",
+      "declared": "lock",
+      "evidence": [
+        "MIT"
+      ],
+      "license": "MIT",
+      "license_classifiers": [],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "pyproject-hooks",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "1.3.3"
+    },
+    "pytest": {
+      "classification": "permissive",
+      "declared": "pyproject",
+      "evidence": [
+        "MIT"
+      ],
+      "license": "MIT",
+      "license_classifiers": [],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "pytest",
+      "pyproject_requirement": "dev: pytest>=8.0",
+      "risk": "PASS",
+      "version": "9.2.0"
+    },
+    "python-dateutil": {
+      "classification": "permissive",
+      "declared": "lock",
+      "evidence": [
+        "BSD-3-Clause"
+      ],
+      "license": "BSD-3-Clause",
+      "license_classifiers": [],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "python-dateutil",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "4.0.0"
+    },
+    "readme-renderer": {
+      "classification": "permissive",
+      "declared": "lock",
+      "evidence": [
+        "Apache-2.0"
+      ],
+      "license": "Apache-2.0",
+      "license_classifiers": [],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "readme-renderer",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "46.0"
+    },
+    "requests": {
+      "classification": "permissive",
+      "declared": "lock",
+      "evidence": [
+        "License :: OSI Approved :: Apache Software License"
+      ],
+      "license": "OSI Approved :: Apache Software License",
+      "license_classifiers": [
+        "License :: OSI Approved :: Apache Software License"
+      ],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "requests",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "2.34.2"
+    },
+    "requests-toolbelt": {
+      "classification": "permissive",
+      "declared": "lock",
+      "evidence": [
+        "License :: OSI Approved :: Apache Software License"
+      ],
+      "license": "OSI Approved :: Apache Software License",
+      "license_classifiers": [
+        "License :: OSI Approved :: Apache Software License"
+      ],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "requests-toolbelt",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "1.0.0"
+    },
+    "rfc3986": {
+      "classification": "permissive",
+      "declared": "lock",
+      "evidence": [
+        "License :: OSI Approved :: Apache Software License"
+      ],
+      "license": "OSI Approved :: Apache Software License",
+      "license_classifiers": [
+        "License :: OSI Approved :: Apache Software License"
+      ],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "rfc3986",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "2.0.0"
+    },
+    "rich": {
+      "classification": "permissive",
+      "declared": "lock",
+      "evidence": [
+        "License :: OSI Approved :: MIT License"
+      ],
+      "license": "OSI Approved :: MIT License",
+      "license_classifiers": [
+        "License :: OSI Approved :: MIT License"
+      ],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "rich",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "15.0.0"
+    },
+    "ripser": {
+      "classification": "permissive",
+      "declared": "pyproject",
+      "evidence": [
+        "License :: OSI Approved :: MIT License"
+      ],
+      "license": "OSI Approved :: MIT License",
+      "license_classifiers": [
+        "License :: OSI Approved :: MIT License"
+      ],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "ripser",
+      "pyproject_requirement": "ripser>=0.6,<0.7",
+      "risk": "PASS",
+      "version": "0.6.15"
+    },
+    "ruff": {
+      "classification": "permissive",
+      "declared": "pyproject",
+      "evidence": [
+        "MIT"
+      ],
+      "license": "MIT",
+      "license_classifiers": [],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "ruff",
+      "pyproject_requirement": "dev: ruff>=0.6",
+      "risk": "PASS",
+      "version": "0.17.6"
+    },
+    "scikit-learn": {
+      "classification": "permissive",
+      "declared": "lock",
+      "evidence": [
+        "BSD-3-Clause"
+      ],
+      "license": "BSD-3-Clause",
+      "license_classifiers": [],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "scikit-learn",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "1.9.1"
+    },
+    "scipy": {
+      "classification": "permissive",
+      "declared": "lock",
+      "evidence": [
+        "License :: OSI Approved :: BSD License"
+      ],
+      "license": "OSI Approved :: BSD License",
+      "license_classifiers": [
+        "License :: OSI Approved :: BSD License"
+      ],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "scipy",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "1.18.1"
+    },
+    "secretstorage": {
+      "classification": "permissive",
+      "declared": "lock",
+      "evidence": [
+        "BSD-3-Clause"
+      ],
+      "license": "BSD-3-Clause",
+      "license_classifiers": [],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "secretstorage",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "3.5.0"
+    },
+    "streamlit": {
+      "classification": "permissive",
+      "declared": "pyproject",
+      "evidence": [
+        "Apache-2.0"
+      ],
+      "license": "Apache-2.0",
+      "license_classifiers": [],
+      "locked": false,
+      "metadata_source": "pypi",
+      "name": "streamlit",
+      "pyproject_requirement": "ui: streamlit>=1.30,<2",
+      "risk": "PASS",
+      "version": "1.67.0"
+    },
+    "threadpoolctl": {
+      "classification": "permissive",
+      "declared": "lock",
+      "evidence": [
+        "BSD-3-Clause"
+      ],
+      "license": "BSD-3-Clause",
+      "license_classifiers": [],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "threadpoolctl",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "3.8.0"
+    },
+    "twine": {
+      "classification": "permissive",
+      "declared": "pyproject",
+      "evidence": [
+        "Apache-2.0"
+      ],
+      "license": "Apache-2.0",
+      "license_classifiers": [],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "twine",
+      "pyproject_requirement": "dev: twine>=5.0",
+      "risk": "PASS",
+      "version": "7.0.0"
+    },
+    "typing-extensions": {
+      "classification": "permissive",
+      "declared": "lock",
+      "evidence": [
+        "PSF-2.0"
+      ],
+      "license": "PSF-2.0",
+      "license_classifiers": [],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "typing-extensions",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "4.16.0"
+    },
+    "tzdata": {
+      "classification": "permissive",
+      "declared": "lock",
+      "evidence": [
+        "Apache-2.0"
+      ],
+      "license": "Apache-2.0",
+      "license_classifiers": [],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "tzdata",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "2026.6"
+    },
+    "urllib3": {
+      "classification": "permissive",
+      "declared": "lock",
+      "evidence": [
+        "MIT"
+      ],
+      "license": "MIT",
+      "license_classifiers": [],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "urllib3",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "2.8.0"
+    },
+    "wrapt": {
+      "classification": "permissive",
+      "declared": "lock",
+      "evidence": [
+        "BSD-2-Clause"
+      ],
+      "license": "BSD-2-Clause",
+      "license_classifiers": [],
+      "locked": true,
+      "metadata_source": "pypi",
+      "name": "wrapt",
+      "pyproject_requirement": null,
+      "risk": "PASS",
+      "version": "2.5.2"
+    }
+  },
+  "policy": {
+    "allow": [
+      "permissive",
+      "weak-copyleft with review"
+    ],
+    "fail": [
+      "strong-copyleft (GPL/AGPL)"
+    ],
+    "project_license": "MIT"
+  },
+  "problems": [],
+  "schema_version": 1
+}
