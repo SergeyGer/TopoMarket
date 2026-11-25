@@ -340,13 +340,16 @@ def _apply_widgets(
     dates = list(data.session_dates)
     if dates:
         current = selection.date if selection.date in dates else dates[-1]
+        # The widget key is scoped to the current session date: a programmatic
+        # date change (preset, alert jump, previous/next) must not be reverted by
+        # the widget's retained state on the next rerun.
         slider_value = _call(
             sidebar,
             "select_slider",
             "Selected session",
             options=dates,
             value=current,
-            key="tm_session_index",
+            key=f"tm_session_index::{selection.date}",
             help="The authoritative selected session for every panel.",
         )
         if slider_value and str(slider_value) != selection.date:
@@ -416,6 +419,8 @@ def _apply_widgets(
             selection = selection.with_network_view(
                 "correlation" if str(view_value).startswith("Correlation") else "mapper"
             )
+        if str(selection.network_view) == "mapper":
+            selection = _apply_mapper_edge_selector(sidebar, data, selection)
 
     if selection.screen == "replay":
         if not selection.reveal:
@@ -465,6 +470,56 @@ def _apply_widgets(
                 _call(ui, "warning", f"Unknown keyboard command {command!r}: {error}")
     options["presets"] = presets
     return selection, options
+
+
+def _apply_mapper_edge_selector(
+    sidebar: Any, data: DashboardData, selection: DashboardSelection
+) -> DashboardSelection:
+    """Offer a keyboard-operable Mapper edge picker (UI02)."""
+
+    from topomarket.ui.calendars import map_observation_date
+    from topomarket.ui.structure import build_mapper_view
+
+    selected_date = selection.date or (data.session_dates[-1] if data.session_dates else None)
+    if selected_date is None:
+        return selection
+    map_info = map_observation_date(data, selected_date)
+    map_date = map_info.get("date") or selected_date
+    try:
+        mapper = build_mapper_view(data, map_date, selected_member=selection.member)
+    except Exception:  # noqa: BLE001 - short windows have no Mapper edges
+        return selection
+    edges = list(mapper.get("edges") or ())
+    if not edges:
+        return selection
+    labels = ["(no edge highlighted)"]
+    by_label: dict[str, str] = {}
+    for edge in edges:
+        shared = ", ".join(entry["label"] for entry in edge.get("shared_members") or ())
+        label = f"{edge['source']} -- {edge['target']}: {shared}"
+        labels.append(label)
+        by_label[label] = str(edge["edge_id"])
+    index = 0
+    if selection.edge:
+        for position, edge in enumerate(edges, start=1):
+            if str(edge["edge_id"]) == str(selection.edge):
+                index = position
+                break
+    value = _call(
+        sidebar,
+        "selectbox",
+        "Highlight Mapper edge",
+        labels,
+        index=index,
+        key="tm_edge_select",
+        help="Highlight the member portfolios shared by the selected pair of groups.",
+    )
+    if value is None:
+        return selection
+    if str(value) == labels[0]:
+        return selection.with_edge(None)
+    edge_id = by_label.get(str(value))
+    return selection.with_edge(edge_id) if edge_id else selection
 
 
 def _screen_from_label(value: Any) -> str:
@@ -563,6 +618,16 @@ def render_structure_screen(
             caption=str(mapper.get("position_rule") or ""),
             alt_text=str(mapper.get("table_alternative") or "Mapper groups")[:4000],
         )
+        selected_edge = mapper.get("selected_edge") or None
+        if selected_edge:
+            shared = ", ".join(
+                entry["label"] for entry in selected_edge.get("shared_members") or ()
+            )
+            _call(
+                ui,
+                "markdown",
+                f"**Highlighted edge {selected_edge['edge_id']}** - shared portfolios: {shared}",
+            )
         inspector = mapper.get("member_inspector") or {}
         if inspector.get("members"):
             _call(

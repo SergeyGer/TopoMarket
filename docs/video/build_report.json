@@ -1,0 +1,166 @@
+{
+  "schema_version": 1,
+  "release": "v0.9.2",
+  "recorded_release_identity": "0.9.2 (sidebar label in footage)",
+  "master": {
+    "file": "TopoMarket_demo_60s.mp4",
+    "sha256": "16571f7c586d67a1f4d597311cd91a2e03a38a9bfcf140c818f231fadc770b69",
+    "size_bytes": 5923492
+  },
+  "captions": {
+    "file": "TopoMarket_demo_60s.srt",
+    "sha256": "988a6ddbc1b8dfa3f6248661282825ba1852d35ded2433a3c6a64be8b009bafe",
+    "cues": 11,
+    "review": "TopoMarket, Mapper and S&P 500 spellings verified; cues clear of the alert label and end-card URL"
+  },
+  "narration_master": {
+    "file": "narration.wav",
+    "sha256": "3b27729703659ac7efeea777dd0ada3626c841732ba36618bc82e7768d30d830"
+  },
+  "production_source": {
+    "file": "TopoMarket_demo_production_source.zip",
+    "sha256": "51b98c3cc2595f8bc78fa1816ea64c2506b63f98012f54461143c84336e9603c"
+  },
+  "video": {
+    "codec": "h264",
+    "profile": "High",
+    "width": 1920,
+    "height": 1080,
+    "pix_fmt": "yuv420p",
+    "frame_rate": "30/1",
+    "bit_rate": "654271"
+  },
+  "audio": {
+    "codec": "aac",
+    "profile": "LC",
+    "sample_rate": 48000,
+    "channels": 2,
+    "bit_rate": "134201"
+  },
+  "duration_seconds": 60.0,
+  "loudness": {
+    "measured_integrated_lufs": -16.15,
+    "measured_true_peak_dbtp": -4.32,
+    "measured_lra": 5.7,
+    "target": {
+      "integrated_lufs": -16.0,
+      "true_peak_dbtp": -1.5
+    },
+    "method": "two-pass loudnorm, linear=true"
+  },
+  "timing": {
+    "opening_s": 6.5,
+    "app_s": 48.5,
+    "end_s": 5.0
+  },
+  "scenes": [
+    {
+      "name": "structure",
+      "duration_s": 9.5,
+      "trim_skip_s": 1.8,
+      "recording": "page@b14b8251df18d4cb3f33a643acf5ad12.webm",
+      "recording_sha256": "0865dec454efe4942602422c1d267f2689551c845c332e3969be4070ae9cbc41",
+      "actions": [
+        {
+          "t": 0.17,
+          "x": 118,
+          "y": 765,
+          "label": "button_regex"
+        },
+        {
+          "t": 4.803,
+          "x": 130,
+          "y": 821,
+          "label": "button_regex"
+        }
+      ]
+    },
+    {
+      "name": "mapper",
+      "duration_s": 11.0,
+      "trim_skip_s": 1.0,
+      "recording": "page@08fdaacbfaaca125a06678ef9375895a.webm",
+      "recording_sha256": "20484247d43c2eca9b5053b7e10839daee325527019ca6671527848272305ad9",
+      "actions": [
+        {
+          "t": 1.751,
+          "click": true,
+          "label": "select_option"
+        },
+        {
+          "t": 6.279,
+          "click": true,
+          "label": "select_edge"
+        }
+      ]
+    },
+    {
+      "name": "alert",
+      "duration_s": 12.0,
+      "trim_skip_s": 1.0,
+      "recording": "page@9db2cb83c24f0a967d7dec072163202f.webm",
+      "recording_sha256": "4a6e9f14314203cadcb575a958cc7f9407029f6a5132d4d8b6c9222dfb9c3b7e",
+      "actions": [
+        {
+          "t": 0.148,
+          "x": 150,
+          "y": 884,
+          "label": "button_regex"
+        }
+      ]
+    },
+    {
+      "name": "replay",
+      "duration_s": 11.0,
+      "trim_skip_s": 3.2,
+      "recording": "page@f2add179387aa7c736584680a57921c0.webm",
+      "recording_sha256": "8bee3d67e4eedf12dd4097c1ac746f0c82072b86887c87ea8b32cc78f1c38d87",
+      "actions": [
+        {
+          "t": 0.155,
+          "x": 150,
+          "y": 884,
+          "label": "button_regex"
+        },
+        {
+          "t": 1.684,
+          "click": true,
+          "label": "select_option"
+        },
+        {
+          "t": 4.914,
+          "x": 115,
+          "y": 1060,
+          "label": "button_regex"
+        }
+      ]
+    },
+    {
+      "name": "validation",
+      "duration_s": 5.0,
+      "trim_skip_s": 3.4,
+      "recording": "page@524a035c1dbec75033950f85aa0dddd6.webm",
+      "recording_sha256": "912160e50a9822e21b5a8120f83451969560067b3dbb4b8d7329d3bc90c1aaf5",
+      "actions": [
+        {
+          "t": 0.921,
+          "click": true,
+          "label": "select_option"
+        }
+      ]
+    }
+  ],
+  "capture": {
+    "app_url": "http://127.0.0.1:8631/",
+    "browser": "Playwright Chromium headless",
+    "viewport": "1920x1080",
+    "toolbar_hidden": true
+  },
+  "provenance": {
+    "fixture_id": "showcase-synthetic",
+    "synthetic": true,
+    "seed": 4242,
+    "hosted_app": "https://topomarket-juhbvrgk2k67pnr6qbpfmc.streamlit.app/",
+    "hosted_anonymous_access_at_capture": "pending (redirected to login); recorded from the local 0.9.2 release candidate instead"
+  }
+}

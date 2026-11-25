@@ -6,7 +6,9 @@ industry series, a frozen topology score file and a regenerated evaluation repor
 **no private or genuine market data** and requires no API key, credentials or network access.
 
 The same experience is available at the hosted demo:
-<https://topomarket-juhbvrgk2k67pnr6qbpfmc.streamlit.app/>.
+<https://topomarket-juhbvrgk2k67pnr6qbpfmc.streamlit.app/>. A ~60 second narrated walkthrough
+(synthetic data only) is published with the releases:
+[watch the demo](https://github.com/SergeyGer/TopoMarket/releases/latest/download/TopoMarket_demo_60s.mp4).
 
 ## 1. Install and launch
 

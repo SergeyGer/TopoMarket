@@ -71,10 +71,14 @@ Record the date, URL, branch, full SHA and Python version with the result.
 - [ ] Version identity in the app sidebar matches the tested release tag.
 - [ ] Two independent browser sessions do not share selection state.
 
-The owner must also make the app publicly viewable (Cloud app settings → sharing) before the
-signed-out checks can be completed; the URL currently redirects anonymous visitors to the Streamlit
-login page (checked with an anonymous HTTP request at release time). Local release-candidate
-evidence for the same screens is in `docs/assets/screenshots/`.
+The app must be publicly viewable before the signed-out checks can complete. The owner reported
+selecting **"This app is public and searchable"** in App settings -> Sharing, but anonymous HTTP
+requests still receive a 303 redirect to `share.streamlit.io/-/auth/app` (checked repeatedly on
+2026-11-25, including after v0.9.0 was merged). Action required from the owner: press **Save
+changes** in the App settings -> Sharing dialog and, if the setting does not take effect within
+about ten minutes, use **Reboot app** from the app menu. Then run the checklist above and record
+the result in this log. Local release-candidate evidence for the same screens is in
+`docs/assets/screenshots/`.
 
 ## Rollback
 
@@ -88,4 +92,5 @@ evidence for the same screens is in `docs/assets/screenshots/`.
 | Date (UTC) | Release | Commit | Result |
 | --- | --- | --- | --- |
 | 2026-11-25 | app created | `main` at v0.8.2 baseline | app created by owner; anonymous access currently restricted (sharing setting) |
-| 2026-11-25 | v0.9.0 | pending merge/redeploy | smoke checks pending public sharing; to be filled after the merge |
+| 2026-11-25 | v0.9.0 | `4f3a1c6` (main) | badge/version 0.9.0 deployed by the owner's Cloud app; anonymous access still redirects to login |
+| 2026-11-25 | v0.9.2 | video/docs release | demo video recorded locally from the release candidate because anonymous hosted access was still gated; hosted checks pending |
