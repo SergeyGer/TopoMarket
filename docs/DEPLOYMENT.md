@@ -73,7 +73,8 @@ Record the date, URL, branch, full SHA and Python version with the result.
 
 The owner must also make the app publicly viewable (Cloud app settings → sharing) before the
 signed-out checks can be completed; the URL currently redirects anonymous visitors to the Streamlit
-login page.
+login page (checked with an anonymous HTTP request at release time). Local release-candidate
+evidence for the same screens is in `docs/assets/screenshots/`.
 
 ## Rollback
 

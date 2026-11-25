@@ -339,19 +339,18 @@ def _apply_widgets(
 
     dates = list(data.session_dates)
     if dates:
-        index = dates.index(selection.date) if selection.date in dates else len(dates) - 1
+        current = selection.date if selection.date in dates else dates[-1]
         slider_value = _call(
             sidebar,
-            "slider",
+            "select_slider",
             "Selected session",
-            min_value=0,
-            max_value=len(dates) - 1,
-            value=index,
+            options=dates,
+            value=current,
             key="tm_session_index",
             help="The authoritative selected session for every panel.",
         )
-        if slider_value is not None and int(slider_value) != index:
-            selection = selection.with_date(dates[int(slider_value)])
+        if slider_value and str(slider_value) != selection.date:
+            selection = selection.with_date(str(slider_value))
         alert_options = _alert_dates(data, selection)
         if alert_options:
             alert_labels = ["(jump to an alert)"] + alert_options
@@ -391,6 +390,12 @@ def _apply_widgets(
                     selection.with_date(record["date"])
                     .replace(mode=record["mode"])
                     .replace(screen="structure")
+                )
+            if record.get("teaching"):
+                _call(
+                    sidebar,
+                    "caption",
+                    "Teaching example, not part of the frozen evaluation.",
                 )
 
     if selection.screen == "structure":
@@ -481,14 +486,22 @@ def render_dashboard(
     selection: DashboardSelection,
     payloads: Mapping[str, Mapping[str, Any]],
     streamlit_module: Any | None = None,
+    cache: PanelCache | None = None,
 ) -> DashboardSelection:
-    """Render the four-screen shell; returns the effective selection."""
+    """Render the four-screen shell; returns the effective selection.
+
+    Widgets are applied *before* the screens are drawn.  When a cache is supplied
+    the payloads are recomputed for the effective selection in the same rerun, so
+    a preset click, reveal or screen switch never shows a one-rerun-stale view.
+    """
 
     ui = _ui(streamlit_module)
     _call(ui, "set_page_config", page_title="TopoMarket research", layout="wide")
     _call(ui, "markdown", motion_css(), unsafe_allow_html=True)
     selection, _options = _apply_widgets(ui, data, selection)
     _persist_selection(ui.session_state, selection)
+    if cache is not None:
+        payloads = cache.get(selection)
     screens = {name: payloads.get(name) or {} for name in SCREEN_ORDER}
     if selection.screen == "structure":
         render_structure_screen(ui, data, selection, screens["structure"])
@@ -514,6 +527,18 @@ def render_structure_screen(
 
     _call(ui, "title", "TopoMarket research")
     _synthetic_label(ui, data, selection)
+    presets = payload.get("presets") or {}
+    active_preset = next(
+        (record for record in presets.get("presets") or () if record.get("date") == selection.date),
+        None,
+    )
+    if active_preset and active_preset.get("teaching"):
+        _call(
+            ui,
+            "warning",
+            "Teaching example (late warning): shown for demonstration only and not part of the "
+            "frozen evaluation.",
+        )
     map_obs = payload.get("map_observation") or {}
     if map_obs.get("stale"):
         _call(
@@ -1002,7 +1027,7 @@ def run_shell(args: argparse.Namespace, streamlit_module: Any | None = None) -> 
     state = ui.session_state
     selection = selection_from_state(state, data)
     payloads = cache.get(selection)
-    selection = render_dashboard(data, selection, payloads, ui)
+    selection = render_dashboard(data, selection, payloads, ui, cache=cache)
     _persist_selection(state, selection)
     return 0
 

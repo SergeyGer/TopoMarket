@@ -97,7 +97,7 @@ def correlation_network_figure(
     network: Mapping[str, Any],
     *,
     selected_code: str | None = None,
-    height: float = 5.2,
+    height: float = 3.55,
 ) -> Figure:
     """Draw the fixed-position 12-node correlation network."""
 
@@ -105,11 +105,11 @@ def correlation_network_figure(
         return _empty_figure(str(network.get("reason") or "Correlation network unavailable"))
     nodes = {node["code"]: node for node in network.get("nodes") or ()}
     edges = list(network.get("edges") or ())
-    figure = plt.figure(figsize=(8.0, height), dpi=DPI)
+    figure = plt.figure(figsize=(8.8, height), dpi=DPI)
     _style(figure)
     axes = figure.add_axes((0.02, 0.10, 0.96, 0.84))
-    axes.set_xlim(-1.55, 1.55)
-    axes.set_ylim(-1.45, 1.45)
+    axes.set_xlim(-1.78, 1.78)
+    axes.set_ylim(-1.62, 1.62)
     axes.set_aspect("equal")
     axes.axis("off")
     cutoff = float(network.get("cutoff") or 0.0)
@@ -149,13 +149,19 @@ def correlation_network_figure(
             zorder=5,
         )
         axes.scatter([node["x"]], [node["y"]], s=size * 0.30, color=CANVAS, zorder=6)
+        # Place labels radially outward with quadrant-aware alignment so long
+        # industry names never overlap a neighbouring node or each other.
+        label_x = node["x"] * 1.34
+        label_y = node["y"] * 1.30
+        horizontal = "left" if label_x > 0.25 else ("right" if label_x < -0.25 else "center")
+        vertical = "bottom" if label_y > 0.25 else ("top" if label_y < -0.25 else "center")
         axes.annotate(
             node["short_label"],
             (node["x"], node["y"]),
-            xytext=(node["x"] * 1.20, node["y"] * 1.18),
-            ha="center",
-            va="center",
-            fontsize=8.5,
+            xytext=(label_x, label_y),
+            ha=horizontal,
+            va=vertical,
+            fontsize=9.0,
             color=INK,
             zorder=7,
         )
@@ -176,9 +182,9 @@ def correlation_network_figure(
     axes.legend(
         handles=legend_handles,
         loc="lower center",
-        bbox_to_anchor=(0.5, -0.04),
+        bbox_to_anchor=(0.5, -0.06),
         frameon=False,
-        fontsize=8,
+        fontsize=7.6,
         ncol=3,
         labelcolor=MUTED,
     )
@@ -186,7 +192,7 @@ def correlation_network_figure(
         f"{network.get('pairs_qualifying')}/{network.get('pairs_total')} pairs at "
         f"{network.get('cutoff_display')} · {network['window']['start']} to "
         f"{network['window']['end']}",
-        fontsize=9.5,
+        fontsize=9.0,
         color=MUTED,
         loc="left",
     )
@@ -579,7 +585,7 @@ def replay_figure(replay: Mapping[str, Any], *, height: float = 6.2) -> Figure:
     figure = plt.figure(figsize=(10.4, height), dpi=DPI)
     _style(figure)
     axes_score, axes_price = figure.subplots(
-        2, 1, gridspec_kw={"height_ratios": [1.0, 1.4], "hspace": 0.18}
+        2, 1, gridspec_kw={"height_ratios": [1.0, 1.4], "hspace": 0.34}
     )
     if score_history:
         positions = np.arange(len(score_history))
@@ -733,10 +739,17 @@ def replay_figure(replay: Mapping[str, Any], *, height: float = 6.2) -> Figure:
         if replay.get("blind")
         else "Outcome revealed for this selection"
     )
-    axes_price.set_title(
-        mode_text, fontsize=9, color=AMBER if replay.get("blind") else MUTED, loc="left"
-    )
     _axes_style(axes_price)
+    figure.subplots_adjust(bottom=0.19)
+    figure.text(
+        0.01,
+        0.035,
+        mode_text,
+        fontsize=8.5,
+        color=AMBER if replay.get("blind") else MUTED,
+        ha="left",
+        va="bottom",
+    )
     handles, labels = axes_price.get_legend_handles_labels()
     if handles:
         axes_price.legend(

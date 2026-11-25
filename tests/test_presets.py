@@ -56,17 +56,35 @@ def test_quiet_window_is_sparser_than_stress_transition(data) -> None:
     assert quiet_network["pairs_qualifying"] < stress_network["pairs_qualifying"]
 
 
-def test_matched_warning_is_credited_by_the_evaluator_or_explicitly_unavailable(data) -> None:
+def test_matched_warning_is_credited_or_a_labelled_teaching_example(data) -> None:
     preset = find_preset(data, "matched_warning")
     assert preset is not None
-    if preset.verified:
-        report = data.primary_report() or {}
-        method = report.get("primary_method")
-        metrics = (report.get("metrics") or {}).get(method) or {}
+    report = data.primary_report() or {}
+    method = report.get("primary_method")
+    metrics = (report.get("metrics") or {}).get(method) or {}
+    if not preset.verified:
+        assert "no verified" in (preset.reason or "")
+        return
+    if preset.teaching:
+        # The frozen synthetic showcase has no credited TDA alert; the fallback is a
+        # labelled late-warning teaching example that is not part of the evaluation.
+        assert preset.date in {str(value) for value in metrics.get("post_onset_alerts") or ()}
+        assert "teaching" in preset.label.lower()
+        assert "not part of the frozen evaluation" in preset.description
+    else:
         matched_dates = {entry.get("alert_date") for entry in metrics.get("matched") or ()}
         assert preset.date in matched_dates
-    else:
-        assert "teaching" in (preset.reason or "") or "no verified" in (preset.reason or "")
+
+
+def test_frozen_presets_match_the_deterministic_derivation(data) -> None:
+    from topomarket.ui.presets import derive_presets
+
+    frozen = build_presets(data)
+    assert frozen["source"] == "frozen"
+    derived = [record.as_dict() for record in derive_presets(data)]
+    assert [(r["preset_id"], r["date"], r["mode"], r["teaching"]) for r in frozen["presets"]] == [
+        (r["preset_id"], r["date"], r["mode"], r["teaching"]) for r in derived
+    ]
 
 
 def test_missed_warning_points_at_a_missed_or_late_episode(data) -> None:
@@ -85,6 +103,8 @@ def test_preset_payload_has_a_table_alternative(data) -> None:
     text = str(payload["table_alternative"])
     assert "Quiet period" in text
     assert "Fixture" in text
+    if find_preset(data, "matched_warning") and find_preset(data, "matched_warning").teaching:
+        assert "Late warning" in text
 
 
 def test_frozen_presets_file_is_loaded_when_present(tmp_path: Path) -> None:

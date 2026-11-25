@@ -40,7 +40,9 @@ plain-text fallback (no Streamlit) prints the same four-screen summary:
 
 1. The S&P 500, VIX and score panels share one date cursor. The amber dashed line is the frozen
    threshold; alert markers use symbols plus text (matched, late, false, pending).
-2. Use **Jump to an alert** (or a preset) to select an alert session. The score explanation opens
+2. Use **Jump to an alert** (or a preset) to select an alert session. The "Late warning (teaching
+   example)" preset is labelled on screen as a demonstration scene that is not part of the frozen
+   evaluation. The score explanation opens
    below: the 56-point Takens window (dimension 3, lag 2) as a 2-D display-coordinate scatter, the
    H1 birth-death diagram with the diagonal and the longest finite lifetime highlighted, and the
    industry PCA scatter (one point per session).

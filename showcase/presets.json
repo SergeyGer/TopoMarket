@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "fixture_id": "showcase-synthetic",
+  "synthetic": true,
+  "private_data": false,
+  "generated_by": "scripts/build_presets.py",
+  "calendar_sessions": 5673,
+  "presets": [
+    {
+      "preset_id": "quiet",
+      "label": "Quiet period",
+      "date": "2020-08-18",
+      "mode": "live",
+      "expected": [
+        "score below threshold",
+        "sparse correlation network"
+      ],
+      "description": "Few industry pairs move together and the score is below the frozen threshold.",
+      "fixture_id": "showcase-synthetic",
+      "verified": true,
+      "reason": null,
+      "teaching": false
+    },
+    {
+      "preset_id": "stress_transition",
+      "label": "Stress transition",
+      "date": "2020-02-24",
+      "mode": "replay",
+      "expected": [
+        "dense correlation network",
+        "score near or above threshold"
+      ],
+      "description": "More industries begin moving together as the market turns.",
+      "fixture_id": "showcase-synthetic",
+      "verified": true,
+      "reason": null,
+      "teaching": false
+    },
+    {
+      "preset_id": "matched_warning",
+      "label": "Late warning (teaching example)",
+      "date": "2025-03-10",
+      "mode": "replay",
+      "expected": [
+        "late alert",
+        "decline already under way"
+      ],
+      "description": "A late alert used as a labelled teaching example; it is not part of the frozen evaluation.",
+      "fixture_id": "showcase-synthetic",
+      "verified": true,
+      "reason": null,
+      "teaching": true
+    },
+    {
+      "preset_id": "missed_warning",
+      "label": "Missed or late warning",
+      "date": "2025-03-06",
+      "mode": "replay",
+      "expected": [
+        "missed decline",
+        "no early warning credited"
+      ],
+      "description": "A decline the indicator missed or flagged only after the onset.",
+      "fixture_id": "showcase-synthetic",
+      "verified": true,
+      "reason": null,
+      "teaching": false
+    }
+  ]
+}

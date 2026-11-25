@@ -109,6 +109,8 @@ streamlit run app.py -- --profile private --data-dir /path/to/data
 The release opens directly on **Structure** with a preselected, warmed-up synthetic scene. Four
 screens share one authoritative selected session:
 
+![Structure screen: synthetic correlation network](docs/assets/screenshots/structure_desktop_1440x900.png)
+
 - **Structure** - the 12-industry Pearson-correlation network (fixed node positions, trailing 60
   valid returns, fixed `r >= 0.80` cutoff, `n/66` pair count, node-degree inspector), a Mapper view
   of the same window (groups placed by volatility lens band, node area = membership, edge width =
@@ -128,9 +130,18 @@ screens share one authoritative selected session:
   gaps and stale-map marking, source coverage, last successful refresh, revisions, errors, and a
   private-only validated refresh action. The public demo is read-only.
 
+More synthetic captures: [Replay revealed](docs/assets/screenshots/replay_revealed_desktop.png) ·
+[Mapper groups](docs/assets/screenshots/structure_mapper_desktop.png) ·
+[Validation](docs/assets/screenshots/validation_desktop.png) ·
+[Data](docs/assets/screenshots/data_desktop.png) ·
+[mobile 390 px](docs/assets/screenshots/structure_mobile_390x844.png). All captures use the
+synthetic showcase only.
+
 Four deterministic demonstration presets are available in the sidebar (quiet period, stress
 transition, matched warning, missed/late warning); each is bound to a verified date and the
-`synthetic` fixture id. The interface keeps a neutral canvas, teal market series and amber
+`synthetic` fixture id (frozen in `showcase/presets.json`). The frozen synthetic showcase has no
+credited TDA alert, so the matched slot is a clearly labelled late-warning **teaching example** that
+is excluded from the evaluation, as the specification permits. The interface keeps a neutral canvas, teal market series and amber
 threshold/alerts, distinguishes signals by symbol and text, stacks at mobile width, exposes table
 equivalents and keyboard controls, honours reduced motion, and reuses fixed graph positions across
 date changes. Cached date-change p95 is measured against the 500 ms budget by

@@ -83,6 +83,13 @@ print("config_hash:", DEFAULT_CONFIG.config_hash())
         print(result.stderr, file=sys.stderr)
         return result.returncode
     result = subprocess.run(
+        [str(PYTHON), "scripts/build_presets.py"], cwd=ROOT, capture_output=True, text=True
+    )
+    print(result.stdout, end="")
+    if result.returncode != 0:
+        print(result.stderr, file=sys.stderr)
+        return result.returncode
+    result = subprocess.run(
         [str(PYTHON), "scripts/build_showcase.py", "--verify"],
         cwd=ROOT,
         capture_output=True,

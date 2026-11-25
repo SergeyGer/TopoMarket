@@ -16,6 +16,7 @@
     "reports/evaluation-showcase.json": "9a676712f2462b5c979ade85441d218099dfc8e26029f70e007c2ab3d4ec4c9f",
     "import_manifest.json": "10d3a53bb939e89ad1e3e0ce4d65a58cc751ef27f321c671e416c33b5c3828e4",
     "parser_reports.json": "6cec2d8251dc817684a01fe9120b082cd845b1eb63cd567045ac3444f6a087f5",
-    "normalized/schemas.json": "15504e7d5ea766903a66ab0e3641f34b4dc70401250d7a6c59604a1383307109"
+    "normalized/schemas.json": "15504e7d5ea766903a66ab0e3641f34b4dc70401250d7a6c59604a1383307109",
+    "presets.json": "8bc77a61d94cbd60afcd1f2aac390e1f3f37f05add6117354cfeb9c77da814f3"
   }
 }

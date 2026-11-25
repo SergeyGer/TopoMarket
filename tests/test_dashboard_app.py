@@ -39,8 +39,8 @@ class _FakeUI:
                 options = args[1]
                 index = kwargs.get("index", 0)
                 return options[index]
-            if name == "slider":
-                return kwargs.get("value", 0)
+            if name in {"slider", "select_slider"}:
+                return kwargs.get("value")
             if name in {"button", "checkbox"}:
                 return kwargs.get("key") in self._buttons
             if name == "text_input":

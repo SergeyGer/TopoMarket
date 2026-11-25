@@ -138,7 +138,7 @@ def test_streamlit_app_smoke_run() -> None:
     sidebar_radios = {widget.label for widget in app_test.sidebar.radio}
     assert "Mode" in sidebar_radios
     assert "Network view" in sidebar_radios
-    sidebar_sliders = {widget.label for widget in app_test.sidebar.slider}
+    sidebar_sliders = {widget.label for widget in app_test.sidebar.select_slider}
     assert "Selected session" in sidebar_sliders
 
     # The landing screen renders the network and the shared timeline sections.

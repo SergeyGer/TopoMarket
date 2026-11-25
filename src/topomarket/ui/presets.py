@@ -20,7 +20,7 @@ from __future__ import annotations
 
 import json
 from collections.abc import Mapping, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Any
 
@@ -73,6 +73,7 @@ class Preset:
     fixture_id: str | None = None
     verified: bool = False
     reason: str | None = None
+    teaching: bool = False
 
     def as_dict(self) -> dict[str, Any]:
         return {
@@ -85,6 +86,7 @@ class Preset:
             "fixture_id": self.fixture_id,
             "verified": self.verified,
             "reason": self.reason,
+            "teaching": self.teaching,
         }
 
 
@@ -132,6 +134,7 @@ def load_frozen_presets(path: Path) -> list[Preset]:
                 fixture_id=str(fixture_id) if fixture_id else None,
                 verified=bool(record.get("verified", True)),
                 reason=record.get("reason"),
+                teaching=bool(record.get("teaching", False)),
             )
         )
     return presets
@@ -258,11 +261,19 @@ def derive_presets(data: Any) -> list[Preset]:
                 break
     alerts = _evaluation_alerts(data)
     matched = [alert["date"] for alert in alerts if alert["status"] == "matched"]
+    late = [alert["date"] for alert in alerts if alert["status"] == "late"]
     missed = _missed_onsets(data)
     missed_date = _latest(missed)
     if missed_date is None:
-        late = [alert["date"] for alert in alerts if alert["status"] == "late"]
         missed_date = _latest(late)
+    matched_date = _latest(matched)
+    teaching = False
+    if matched_date is None and late:
+        # The frozen synthetic showcase has no alert that the revised evaluator
+        # credits; the storyboard fallback is a clearly labelled late-warning
+        # teaching example that is not part of the evaluation.
+        matched_date = _latest(late)
+        teaching = True
     experiments = {
         "quiet": (quiet_date, ("score below threshold", "sparse correlation network")),
         "stress_transition": (
@@ -270,8 +281,10 @@ def derive_presets(data: Any) -> list[Preset]:
             ("dense correlation network", "score near or above threshold"),
         ),
         "matched_warning": (
-            matched[-1] if matched else None,
-            ("matched warning", "complete outcome"),
+            matched_date,
+            ("late alert", "decline already under way")
+            if teaching
+            else ("matched warning", "complete outcome"),
         ),
         "missed_warning": (missed_date, ("missed decline", "no early warning credited")),
     }
@@ -279,17 +292,26 @@ def derive_presets(data: Any) -> list[Preset]:
     for preset_id in PRESET_ORDER:
         date, expected = experiments[preset_id]
         verified = bool(date and date in session_dates)
+        is_teaching = teaching and preset_id == "matched_warning"
         presets.append(
             Preset(
                 preset_id=preset_id,
-                label=PRESET_LABELS[preset_id],
+                label=(
+                    "Late warning (teaching example)" if is_teaching else PRESET_LABELS[preset_id]
+                ),
                 date=date if verified else None,
                 mode="live" if preset_id == "quiet" else "replay",
                 expected=expected if verified else (),
-                description=PRESET_DESCRIPTIONS[preset_id],
+                description=(
+                    "A late alert used as a labelled teaching example; it is not part of the "
+                    "frozen evaluation."
+                    if is_teaching
+                    else PRESET_DESCRIPTIONS[preset_id]
+                ),
                 fixture_id=fixture_id,
                 verified=verified,
                 reason=None if verified else _preset_reason(preset_id, date),
+                teaching=is_teaching,
             )
         )
     return presets
@@ -314,11 +336,9 @@ def build_presets(data: Any) -> dict[str, Any]:
         frozen = load_frozen_presets(showcase_root / FROZEN_PRESETS_FILENAME)
         session_dates = set(getattr(data, "session_dates", ()) or ())
         presets = [
-            Preset(
-                **{
-                    **preset.__dict__,
-                    "verified": bool(preset.date and preset.date in session_dates),
-                }
+            replace(
+                preset,
+                verified=bool(preset.date and preset.date in session_dates),
             )
             for preset in frozen
         ]
@@ -363,6 +383,7 @@ def find_preset(data: Any, preset_id: str) -> Preset | None:
                 fixture_id=record["fixture_id"],
                 verified=record["verified"],
                 reason=record["reason"],
+                teaching=bool(record.get("teaching", False)),
             )
     return None
 

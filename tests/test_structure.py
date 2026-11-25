@@ -66,9 +66,7 @@ def test_network_payload_matches_the_selected_map_date(payload) -> None:
 
 
 def test_network_positions_are_fixed_across_dates(data) -> None:
-    first = build_structure_payload(
-        data, DashboardSelection(screen="structure", date="2019-04-01")
-    )
+    first = build_structure_payload(data, DashboardSelection(screen="structure", date="2019-04-01"))
     second = build_structure_payload(
         data, DashboardSelection(screen="structure", date="2020-03-13")
     )
@@ -137,10 +135,23 @@ def test_timeline_vix_gaps_stay_going_concern_gaps(tmp_path) -> None:
                 "sp500_close": "100.0",
                 "vix_close": "" if key in {5, 9} else "15.0",
                 "sp500_log_return": "0.001",
-                **{f"ind_{code}_return": "0.001" for code in (
-                    "nodur", "durbl", "manuf", "enrgy", "chems", "buseq",
-                    "telcm", "utils", "shops", "hlth", "money", "other",
-                )},
+                **{
+                    f"ind_{code}_return": "0.001"
+                    for code in (
+                        "nodur",
+                        "durbl",
+                        "manuf",
+                        "enrgy",
+                        "chems",
+                        "buseq",
+                        "telcm",
+                        "utils",
+                        "shops",
+                        "hlth",
+                        "money",
+                        "other",
+                    )
+                },
             }
         )
     fixture = DashboardData(

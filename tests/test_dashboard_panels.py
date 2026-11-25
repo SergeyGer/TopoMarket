@@ -130,8 +130,18 @@ def test_handcrafted_short_data_directory_is_handled_gracefully(tmp_path: Path) 
                 **{
                     f"ind_{code}_return": "0.001"
                     for code in (
-                        "nodur", "durbl", "manuf", "enrgy", "chems", "buseq",
-                        "telcm", "utils", "shops", "hlth", "money", "other",
+                        "nodur",
+                        "durbl",
+                        "manuf",
+                        "enrgy",
+                        "chems",
+                        "buseq",
+                        "telcm",
+                        "utils",
+                        "shops",
+                        "hlth",
+                        "money",
+                        "other",
                     )
                 },
             }

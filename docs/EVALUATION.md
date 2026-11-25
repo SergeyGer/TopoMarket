@@ -97,7 +97,8 @@ exits with status `2`.
   daily series (the alert-only value previously quoted was 0.1625). VIX average precision 0.0677
   (1 alert, 0 false) and realized volatility 0.0704 (1 alert, 0 false); event prevalence 0.0314.
   The frozen policies remain the 99th percentile of each method's validation readings (TDA 99.60,
-  VIX 62.94, realized volatility 0.7583) with unchanged policy hashes. The evidence rule yields
+  VIX 62.94, realized volatility 0.7583); the selected cutoffs and percentiles are unchanged from
+  the previous release. The evidence rule yields
   `"Experimental market anomaly"`: the lower 95% paired bound on the episode-recall gain is not
   above zero (0.0) and TDA's false-alert rate is above the VIX comparator's (0.0).
 - The public synthetic fixture (`showcase/`, seed 4242) records the same schema but its own
@@ -120,7 +121,8 @@ percentiles (from 99.0 for all three); the paired holdout TDA result changes fro
 1/9 episode to 0/9 because the alert set changes with the lower threshold. The EV01 requirement says
 to preserve the frozen validation cutoffs and holdout reporting, so this fix is **intentionally
 deferred**: v0.9.0 keeps calibration selection byte-identical to the previous release (99th
-percentile policies with unchanged policy hashes). The defect is tracked as a follow-up
+percentile cutoffs and policies; the policy hash strings also bind the topology config hash, which
+v0.9.0 updates, so only the hash strings change). The defect is tracked as a follow-up
 recalibration review; a future release may fix the recall computation, re-freeze the cutoffs and
 regenerate the reports with the corrected selection evidence.
 

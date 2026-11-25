@@ -29,7 +29,13 @@ Public tests cover the new payload builders and chart builders for the Structure
   badge and the sidebar controls (`tests/test_app.py::test_streamlit_app_smoke_run`).
 - `app.default_selection()` picks a warmed-up stress-transition scene; each preset date is verified
   to have at least 60 preceding sessions (`tests/test_presets.py`).
-- The fixture contains 5,109 scored sessions and a TDA alert with a complete outcome. Network
+- The fixture contains scored sessions and TDA alerts with complete outcomes; the four presets are
+  frozen in `showcase/presets.json` and verified against the fixture (`scripts/build_presets.py`).
+- Desktop layout measured with headless Chromium at 1440x900: the first chart (correlation network)
+  occupies y=342..895, i.e. fully above the fold
+  (`docs/assets/screenshots/capture_measurements.json`,
+  `docs/assets/screenshots/structure_desktop_1440x900.png`). Mobile capture at 390x844:
+  `structure_mobile_390x844.png` (panels stack, inspector below the map). Network
   edges, legend, and three time-series panels are populated on the first render.
 - Plain-text fallback: `python app.py -- --profile demo` returns 0 and prints the four-screen
   summary.
@@ -92,9 +98,11 @@ Public tests cover the new payload builders and chart builders for the Structure
   <https://topomarket-juhbvrgk2k67pnr6qbpfmc.streamlit.app/> (see `docs/DEPLOYMENT.md`).
 - The pinned Cloud dependency definition (`requirements.txt`) is verified by the `cloud-smoke` CI
   job: install, import, plain demo and Streamlit health endpoint on Python 3.12.
-- Signed-out desktop/mobile checks and two-session isolation require the app to be publicly
-  viewable; the owner must change the Cloud sharing setting first. Tracked as the remaining item in
-  the deployment checklist.
+- Desktop/mobile capture evidence against the local release candidate:
+  `docs/assets/screenshots/` (structure desktop/mobile, mapper, replay blind/revealed, validation,
+  data) with the above-the-fold measurement JSON. Signed-out hosted checks and two-session
+  isolation require the app to be publicly viewable; the owner must change the Cloud sharing
+  setting first. Tracked as the remaining item in the deployment checklist.
 
 ## A07 Demo video (pending)
 
