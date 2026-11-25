@@ -206,3 +206,18 @@ def test_chart_cache_skips_second_figure_build() -> None:
     assert builds["count"] == 1
     image_calls = [call for call in ui.calls if call[0] == "image"]
     assert len(image_calls) == 1
+
+
+def test_screen_payloads_tolerant_of_legacy_cache() -> None:
+    """A brief old-module/new-shell deployment must not break the page."""
+
+    import app
+    from topomarket.ui.dashboard import DashboardSelection
+
+    class LegacyCache:
+        def get(self, selection):  # legacy signature: no screens keyword
+            return {"structure": {"screen": "structure"}, "replay": {"screen": "replay"}}
+
+    selection = DashboardSelection(screen="structure", mode="replay", date="2020-02-24")
+    payloads = app._screen_payloads(LegacyCache(), selection)
+    assert set(payloads) == {"structure"}
