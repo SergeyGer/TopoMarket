@@ -8,7 +8,8 @@ Community Cloud app still required authentication for anonymous viewers at the t
 
 Environment: Python 3.12.3, project `.venv`, Playwright Chromium headless at 1440x900 and 390x844,
 synthetic `showcase/` fixture (snapshot `showcase-synthetic`, seed 4242, 5,673 sessions
-2005-01-03..2026-09-30). No genuine market data appears in any artifact.
+2005-01-03..2026-09-30). No genuine market data appears in any artifact. The hosted checks were run
+against the public Community Cloud URL on commit `a558454` (release `v1.0.0`).
 
 ## Test and evidence inventory
 
@@ -19,7 +20,8 @@ synthetic `showcase/` fixture (snapshot `showcase-synthetic`, seed 4242, 5,673 s
 | Release checks | `topomarket release-check` | passed |
 | Showcase fixture | `scripts/build_showcase.py --verify` | 8 files verified |
 | Dependency licenses | `scripts/audit_dependency_licenses.py` | 79 packages, 0 GPL/AGPL |
-| Browser acceptance | `docs/measurements/browser_evidence.json` | A01/A02/A03/A06 checks all true (see below) |
+| Browser acceptance (local) | `docs/measurements/browser_evidence.json` | A01/A02/A03 checks all true (see below) |
+| Browser acceptance (hosted) | `docs/measurements/hosted_evidence.json` | A06 **passes signed-out**: boot, presets, inspectors, Mapper edge, explanation, Replay, Validation, Data, mobile, two sessions |
 | Browser performance | `docs/measurements/browser_performance.json` | cached date-change p95 **409 ms** (target 500 ms) |
 | Desktop/mobile captures | `docs/assets/screenshots/`, `docs/measurements/browser_*.png` | synthetic only |
 | Demo video | `docs/video/build_report.json`, release assets | 60.0 s H.264/AAC master + reviewed SRT |
@@ -78,25 +80,27 @@ synthetic `showcase/` fixture (snapshot `showcase-synthetic`, seed 4242, 5,673 s
 - The calibration-recall defect found by the audit is documented as deferred (it would move the
   frozen cutoffs) and tracked in issue #37.
 
-## A06 Hosted release (local equivalent complete; hosted signed-out checks pending)
+## A06 Hosted release (verified signed-out)
 
 - Community Cloud app: <https://topomarket-juhbvrgk2k67pnr6qbpfmc.streamlit.app/> - created by the
-  owner, deploys from `main` with root `app.py`, pinned `requirements.txt` and Python 3.12; the CI
-  `cloud-smoke` job verifies the exact Cloud dependency definition (install, import, plain demo,
-  Streamlit health endpoint).
-- Local signed-out-equivalent browser checks (fresh anonymous contexts) pass: default boot, presets,
-  graph inspection, Mapper edge highlight, alert explanation, blind Replay -> Reveal -> reset,
-  Validation wording/sample size/false-alert rate and read-only Data screen
-  (`docs/measurements/browser_evidence.json`).
-- Two independent browser sessions are state-isolated; the mobile 390x844 layout has no horizontal
-  overflow and shows the synthetic label; keyboard tab stops reach 11 interactive controls with
-  visible focus outlines; text tokens are WCAG AA contrast-checked by `tests/test_theme.py`.
-- Browser cached date-change performance: p50 374 ms, **p95 409 ms** over 100 cached preset changes
-  against the 500 ms target (first-visit/new-date p95 546 ms recorded separately).
-- **Blocked item:** anonymous HTTP requests to the app URL still receive a `303` redirect to
-  `share.streamlit.io/-/auth/app` even after the owner selected "This app is public and searchable";
-  the owner must press **Save changes** and, if needed, **Reboot app** before the hosted signed-out
-  checks and two-session check can be recorded (see `docs/DEPLOYMENT.md`).
+  owner, deploys from `main` (release commit `a558454`), root `app.py`, pinned `requirements.txt` and
+  Python 3.12; the CI `cloud-smoke` job verifies the exact Cloud dependency definition (install,
+  import, plain demo, Streamlit health endpoint).
+- Hosted anonymous checks against the live URL (`docs/measurements/hosted_evidence.json`,
+  screenshots `docs/measurements/hosted_*.png`) - the app renders inside the Community Cloud iframe:
+  - default boot with title, synthetic label, correlation summary, two charts and **release 1.0.0**
+    visible, cold start **7.2 s** on the Cloud host;
+  - presets quiet/stress, industry inspector, Mapper edge highlight with shared portfolios,
+    Takens/H1 explanation, blind Replay -> Reveal (origin, 10% boundary, lowest close, first breach),
+    Validation wording/false-alert rate/sample size and read-only Data screen;
+  - mobile 390x844 with no horizontal overflow and the synthetic label;
+  - keyboard tab stops reach the app controls;
+  - **two independent anonymous browser sessions are state-isolated** (one on a quiet preset, the
+    other still on the default stress date).
+- A rolling-deploy incompatibility observed immediately after the first v1.0.0 merge (new `app.py`
+  with briefly cached older `topomarket` modules) was fixed in #41 and the hosted checks above pass
+  on the retagged release commit.
+- Deployment log: `docs/DEPLOYMENT.md`.
 
 ## A07 Demo video
 
@@ -115,9 +119,9 @@ synthetic `showcase/` fixture (snapshot `showcase-synthetic`, seed 4242, 5,673 s
 
 ## Known deviations and follow-ups
 
-- The demo video was recorded from the local v1.0.0 release candidate because hosted anonymous access
-  was still gated; re-record with `tools/video/build_demo_video.py --app-url <public URL>` once the
-  sharing setting propagates.
-- Hosted signed-out verification (A06) remains the only unblocked acceptance item outside the
-  repository owner's Cloud consoles.
+- The demo video was recorded from the local v1.0.0 release candidate; the hosted app is now
+  verified publicly viewable, so a re-record with
+  `tools/video/build_demo_video.py --app-url <public URL>` is optional (same commit/fixture).
+- Deferred calibration-recall review stays tracked in #37 as a follow-up change with a new frozen
+  policy.
 - The deferred calibration-recall fix (#37) is scheduled for a follow-up recalibration review.

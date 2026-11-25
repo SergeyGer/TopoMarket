@@ -142,4 +142,4 @@ The repository owner (not automatable in this checkout):
 | v0.8.3 / PR #36 | upgrade plan, social preview assets, license and data-notice audit, issue #10 closed | delivered |
 | v0.9.0 | build steps 1-2: authoritative replay date, independent calendars, corrected evaluation, Structure/Replay experience, Cloud dependency definition (CL01/CL02 partial) | delivered |
 | v0.9.2 | frozen demonstration presets, captioned demo video, SRT and editable production files | delivered |
-| v1.0.0 | hosted verification, README/Wiki links, final tagged release | release candidate delivered (version 1.0.0, acceptance matrix in `docs/ACCEPTANCE_v1.0.md`, browser performance/evidence in `docs/measurements/`); final tag pending hosted anonymous access |
+| v1.0.0 | hosted verification, README/Wiki links, final tagged release | **delivered** - tag/release `v1.0.0` (commit `a558454`), hosted signed-out checks pass, acceptance matrix in `docs/ACCEPTANCE_v1.0.md`, browser/local evidence in `docs/measurements/` |

@@ -1,0 +1,105 @@
+{
+  "measured_at_utc": "2026-11-25T15:11:56Z",
+  "url": "https://topomarket-juhbvrgk2k67pnr6qbpfmc.streamlit.app/",
+  "anonymous": true,
+  "browser": "Playwright Chromium headless",
+  "app_iframe_url_contains": "~/+/",
+  "cold_start_ms": 7192.0,
+  "default_boot": {
+    "title_present": true,
+    "synthetic_label_present": true,
+    "correlation_summary_present": true,
+    "release_identity_visible": true,
+    "chart_count": 2
+  },
+  "presets": {
+    "Quiet period": true,
+    "Stress transition": true
+  },
+  "graph_inspection": {
+    "member_inspector_visible": true
+  },
+  "mapper": {
+    "edge_picker_present": true,
+    "edge_highlight_visible": true
+  },
+  "score_explanation": {
+    "takens_section": true,
+    "h1_section": true,
+    "teaching_label": true
+  },
+  "replay": {
+    "blind_hint": true,
+    "revealed": true,
+    "origin_visible": true,
+    "boundary_visible": true,
+    "lowest_visible": true,
+    "breach_visible": true
+  },
+  "validation": {
+    "wording_present": true,
+    "false_alert_rate_present": true,
+    "sample_size_present": true
+  },
+  "data": {
+    "calendars_present": true,
+    "read_only_public": true
+  },
+  "keyboard_focus": {
+    "tab_stops": 14,
+    "inputs": 13,
+    "focus_styles": [
+      "auto 1px",
+      "none 3px"
+    ],
+    "sample": [
+      {
+        "tag": "A",
+        "role": null,
+        "label": null,
+        "outline": "none 3px"
+      },
+      {
+        "tag": "BUTTON",
+        "role": null,
+        "label": "Collapse sidebar",
+        "outline": "none 3px"
+      },
+      {
+        "tag": "INPUT",
+        "role": "combobox",
+        "label": "Screen",
+        "outline": "none 3px"
+      },
+      {
+        "tag": "INPUT",
+        "role": null,
+        "label": null,
+        "outline": "auto 1px"
+      },
+      {
+        "tag": "BUTTON",
+        "role": null,
+        "label": "Help for Selected session",
+        "outline": "none 3px"
+      },
+      {
+        "tag": "INPUT",
+        "role": null,
+        "label": "Selected session",
+        "outline": "auto 1px"
+      }
+    ]
+  },
+  "mobile": {
+    "viewport": "390x844",
+    "no_horizontal_overflow": true,
+    "synthetic_label_present": true,
+    "structure_heading_present": true
+  },
+  "session_isolation": {
+    "session_a_preset_applied": true,
+    "session_b_default_unchanged": true,
+    "isolated": true
+  }
+}

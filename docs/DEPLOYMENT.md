@@ -71,14 +71,13 @@ Record the date, URL, branch, full SHA and Python version with the result.
 - [ ] Version identity in the app sidebar matches the tested release tag.
 - [ ] Two independent browser sessions do not share selection state.
 
-The app must be publicly viewable before the signed-out checks can complete. The owner reported
-selecting **"This app is public and searchable"** in App settings -> Sharing, but anonymous HTTP
-requests still receive a 303 redirect to `share.streamlit.io/-/auth/app` (checked repeatedly on
-2026-11-25, including after v0.9.0 was merged). Action required from the owner: press **Save
-changes** in the App settings -> Sharing dialog and, if the setting does not take effect within
-about ten minutes, use **Reboot app** from the app menu. Then run the checklist above and record
-the result in this log. Local release-candidate evidence for the same screens is in
-`docs/assets/screenshots/`.
+The app is publicly viewable after the owner saved **"This app is public and searchable"**. Note that
+anonymous HTTP requests still traverse a 303 handshake via `share.streamlit.io/-/auth/app` before the
+app shell renders in an iframe; that is the Community Cloud viewer flow, not a privacy gate, and a
+headless browser reaches the app without credentials. Signed-out browser checks must target the app
+iframe (`.../~/+/`) rather than the outer document. The verified run is recorded above and in
+`docs/measurements/hosted_evidence.json`. If a deployment shows a transient module-mismatch error,
+redeploy/reboot; the shell also tolerates a rolling deploy (see #41).
 
 ## Rollback
 
@@ -94,4 +93,4 @@ the result in this log. Local release-candidate evidence for the same screens is
 | 2026-11-25 | app created | `main` at v0.8.2 baseline | app created by owner; anonymous access currently restricted (sharing setting) |
 | 2026-11-25 | v0.9.0 | `4f3a1c6` (main) | badge/version 0.9.0 deployed by the owner's Cloud app; anonymous access still redirects to login |
 | 2026-11-25 | v0.9.2 | video/docs release | demo video recorded locally from the release candidate because anonymous hosted access was still gated; hosted checks pending |
-| 2026-11-25 | v1.0.0 | release candidate (1.0.0) | local signed-out-equivalent checks, session isolation, mobile/keyboard and cached performance evidence recorded (`docs/ACCEPTANCE_v1.0.md`, `docs/measurements/`); hosted signed-out check still blocked by the sharing setting |
+| 2026-11-25 | v1.0.0 | `a558454` (main, tag `v1.0.0`) | **hosted signed-out verification passed**: anonymous checks (boot, presets, inspectors, Mapper edge, explanation, blind Replay/Reveal, Validation, read-only Data, mobile 390x844, two isolated sessions) recorded in `docs/measurements/hosted_evidence.json`; cold start 7.2 s; release assets and README links verified |
