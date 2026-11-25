@@ -3,6 +3,33 @@
 Release notes per implementation step. TopoMarket identifies releases by step number and semantic
 version; no release dates or schedules are published in repository content.
 
+## v1.0.0 - Public release: structure, replay, cloud and demo video
+
+Final release of the TopoMarket Upgrade and Demo Video Specification. See
+`docs/ACCEPTANCE_v1.0.md` for the A01-A07 evidence matrix and `docs/UPGRADE.md` for the scope.
+
+- **Public experience (v0.9.0).** Authoritative selected session with blind-replay integrity,
+  independent S&P 500/VIX/industry calendars and source status, corrected chronological evaluation,
+  Structure/Replay/Validation/Data screens, frozen demonstration presets and the synthetic showcase
+  as the default public demo.
+- **Cloud packaging (v0.9.0/v0.9.2).** Pinned Python 3.12 `requirements.txt` for Streamlit Community
+  Cloud, no-flag `streamlit run app.py`, CI `cloud-smoke` job, and the Streamlit deployment contract
+  in `docs/DEPLOYMENT.md`.
+- **Demo video (v0.9.2).** 60 s 1920x1080 30 fps H.264/AAC master with reviewed English SRT,
+  verified claims, editable production files and a re-runnable pipeline.
+- **Performance (v1.0.0).** The shell keeps loaded data, screen payloads and rendered chart PNGs in
+  session state; the Mapper window is built only when its view is visible; a browser measurement on
+  the release candidate records **cached date-change p95 409 ms over 100 changes** against the
+  500 ms target, with the first-visit/new-date and cold-start timings recorded separately
+  (`docs/measurements/browser_performance.json`).
+- **Evidence and notices.** Browser acceptance evidence and screenshots under `docs/measurements/`
+  and `docs/assets/screenshots/`; MIT license and dependency audit (0 GPL/AGPL) documented in
+  `NOTICE.md`/`docs/DEPENDENCY_LICENSES.md`; all published artifacts use the synthetic showcase only.
+- **Known follow-ups.** Hosted signed-out verification and the final hosted smoke record depend on
+  enabling anonymous access in the Cloud app settings; the deferred calibration-recall review is
+  tracked in #37.
+- No private data, credentials, ledgers or release dates are committed.
+
 ## v0.9.2 - Demo video and production assets
 
 - **One-minute demo video (VD02).** 1920x1080 / 30 fps / H.264 High / AAC 48 kHz stereo master

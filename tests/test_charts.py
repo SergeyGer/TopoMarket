@@ -23,6 +23,14 @@ def structure_payload(data):
 
 
 @pytest.fixture(scope="module")
+def mapper_payload(data):
+    selection = DashboardSelection(
+        screen="structure", mode="replay", date="2020-03-13", network_view="mapper"
+    )
+    return build_screen_payloads(data, selection)["structure"]
+
+
+@pytest.fixture(scope="module")
 def replay_payload(data):
     selection = DashboardSelection(screen="replay", mode="replay", date="2020-02-24")
     return build_screen_payloads(data, selection)["replay"]
@@ -50,8 +58,8 @@ def test_correlation_network_figure_draws_nodes_edges_and_legend(structure_paylo
     assert len(png) > 10_000
 
 
-def test_mapper_figure_has_one_band_tick_per_interval(structure_payload) -> None:
-    mapper = structure_payload["mapper"]
+def test_mapper_figure_has_one_band_tick_per_interval(mapper_payload) -> None:
+    mapper = mapper_payload["mapper"]
     figure = charts.mapper_figure(mapper, selected_node_id=mapper["selected_node_id"])
     axes = figure.axes[0]
     assert len(axes.get_xticks()) == len(mapper["bands"])
@@ -129,8 +137,8 @@ def test_empty_payloads_are_explicit_instead_of_blank() -> None:
     _png_bytes(figure)
 
 
-def test_mapper_figure_uses_deterministic_band_columns(structure_payload) -> None:
-    mapper = structure_payload["mapper"]
+def test_mapper_figure_uses_deterministic_band_columns(mapper_payload) -> None:
+    mapper = mapper_payload["mapper"]
     for node in mapper["nodes"]:
         assert node["x"] == float(node["band_index"])
     figure = charts.mapper_figure(mapper)

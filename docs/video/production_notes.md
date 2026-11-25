@@ -9,14 +9,14 @@ from the README.
 
 | Item | Value |
 | --- | --- |
-| Release | `v0.9.2` (video asset release; final `v1.0.0` links to the same master) |
-| Captured from | The v0.9.0 release candidate (`4f3a1c6`, tag `v0.9.0`) plus the v0.9.2 UI state-key/edge-picker fixes, running locally with the bundled synthetic showcase |
+| Release | `v1.0.0` (video master attached to the final release; `v0.9.2` keeps the earlier cut) |
+| Captured from | The v1.0.0 release candidate (version 1.0.0 build, running locally with the bundled synthetic showcase) |
 | Hosted app | <https://topomarket-juhbvrgk2k67pnr6qbpfmc.streamlit.app/> (owner enabled "public and searchable" in App settings; at capture time anonymous requests still redirected to the Streamlit login, so the hosted re-record remains pending - see "Known deviations") |
 | Fixture | `showcase-synthetic`, seed 4242, 5,673 synthetic sessions 2005-01-03..2026-09-30 |
 | Presets | `showcase/presets.json` (quiet 2020-08-18, stress 2020-02-24, late-warning teaching example 2025-03-10, missed 2025-03-06) |
 | Data policy | Synthetic data only; no genuine market data, provider downloads, credentials or private files appear in the footage |
 | Social preview | `docs/assets/social_preview.png` (uploaded to the repository by the owner) |
-| Master | `TopoMarket_demo_60s.mp4` (H.264 High, 1920x1080, 30 fps, AAC 48 kHz stereo, 60.0 s, 5.9 MB) |
+| Master | `TopoMarket_demo_60s.mp4` (H.264 High, 1920x1080, 30 fps, AAC 48 kHz stereo, 60.0 s, 5.6 MB) |
 | Captions | `TopoMarket_demo_60s.srt` (11 cues, reviewed spellings) |
 | Editable source | `docs/video/storyboard.json`, `docs/video/narration.md`, `tools/video/build_demo_video.py`, plus the packaged source recordings/narration WAV release assets |
 
@@ -41,7 +41,7 @@ regenerated evaluation report (`showcase/reports/evaluation-showcase.json`).
 
 - 1920x1080, 30 fps, H.264 High `yuv420p`, AAC LC 48 kHz stereo, duration **60.000 s** (within
   the 60 +/- 2 s tolerance).
-- Integrated loudness **-15.8 LUFS** (target approximately -16 LUFS), true peak **-3.97 dBTP**
+- Integrated loudness **-16.15 LUFS** (input) / about -16 LUFS normalised (target approximately -16 LUFS), true peak **-4.40 dBTP**
   (limit -1 dBTP); voice-only mix, no music.
 - Opening card is the 1280x640 social preview fitted to 16:9 without stretching or cropping
   meaningful labels; end card holds for the full five seconds.

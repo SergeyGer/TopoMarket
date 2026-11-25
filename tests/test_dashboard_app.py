@@ -175,3 +175,34 @@ def test_parser_defaults_to_the_public_demo() -> None:
     parsed = app.parse_args([])
     assert parsed.profile == "demo"
     assert parsed.data_dir is None
+
+
+def test_chart_cache_skips_second_figure_build() -> None:
+    """A cached navigation must not rebuild the matplotlib figure (CL02)."""
+
+    import app
+
+    from topomarket.ui import charts
+
+    ui = _FakeUI()
+    builds = {"count": 0}
+
+    def factory():
+        builds["count"] += 1
+        return charts.correlation_network_figure(
+            {
+                "available": True,
+                "cutoff": 0.8,
+                "pairs_qualifying": 1,
+                "pairs_total": 66,
+                "window": {"start": "2020-01-01", "end": "2020-02-24"},
+                "nodes": [],
+                "edges": [],
+            }
+        )
+
+    app._render_figure(ui, factory, caption="", alt_text="test", cache_key="test:key")
+    app._render_figure(ui, factory, caption="", alt_text="test", cache_key="test:key")
+    assert builds["count"] == 1
+    image_calls = [call for call in ui.calls if call[0] == "image"]
+    assert len(image_calls) == 1

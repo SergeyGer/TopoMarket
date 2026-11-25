@@ -119,6 +119,20 @@ class DashboardData:
             self.price_rows = self.rows
         if not self.industry_rows:
             self.industry_rows = self.rows
+        members: list[str] = []
+        for row in self.rows:
+            for key in row:
+                if key.startswith("ind_") and key.endswith("_return"):
+                    code = key[len("ind_") : -len("_return")]
+                    if code not in members:
+                        members.append(code)
+        self._members_cache: tuple[str, ...] = tuple(members)
+
+    @property
+    def members(self) -> tuple[str, ...]:
+        """Industry codes present in the loaded rows (computed once)."""
+
+        return self._members_cache
 
     @property
     def date_index(self) -> dict[str, int]:
@@ -598,24 +612,39 @@ def _data_payload(data: DashboardData, selection: DashboardSelection) -> dict[st
 
 
 def build_screen_payloads(
-    data: DashboardData, selection: DashboardSelection
+    data: DashboardData,
+    selection: DashboardSelection,
+    screens: Sequence[str] | None = None,
 ) -> dict[str, dict[str, Any]]:
-    """Build all four screen payloads for a selection."""
+    """Build the requested screen payloads for a selection (all by default).
+
+    The shell requests only the visible screen so a date change rebuilds a single
+    payload set; callers that need the full four-screen matrix (tests, plain-text
+    fallback) omit ``screens``.
+    """
 
     if not isinstance(data, DashboardData):
         raise DashboardDataError("build_screen_payloads requires DashboardData")
     if not isinstance(selection, DashboardSelection):
         raise DashboardDataError("build_screen_payloads requires DashboardSelection")
     selected = data.selected_date(selection)
-    payloads = {
-        "structure": build_structure_payload(data, selection),
-        "replay": build_replay_payload(data, selection),
-        "validation": _validation_payload(data, selection),
-        "data": _data_payload(data, selection),
+    requested = tuple(screens) if screens is not None else SCREENS
+    builders = {
+        "structure": lambda: build_structure_payload(data, selection),
+        "replay": lambda: build_replay_payload(data, selection),
+        "validation": lambda: _validation_payload(data, selection),
+        "data": lambda: _data_payload(data, selection),
     }
-    payloads["structure"]["selected"] = selected
-    for screen in SCREENS:
-        payloads.setdefault(screen, {"screen": screen, "title": SCREEN_TITLES[screen]})
+    payloads: dict[str, dict[str, Any]] = {}
+    for screen in requested:
+        builder = builders.get(screen)
+        payloads[screen] = (
+            builder()
+            if builder is not None
+            else {"screen": screen, "title": SCREEN_TITLES.get(screen, screen)}
+        )
+    if "structure" in payloads:
+        payloads["structure"]["selected"] = selected
     return payloads
 
 
@@ -644,15 +673,27 @@ class PanelCache:
             self.data.data_signature,
         )
 
-    def get(self, selection: DashboardSelection) -> dict[str, dict[str, Any]]:
-        key = self.selection_key(selection)
+    def get(
+        self,
+        selection: DashboardSelection,
+        screens: Sequence[str] | None = None,
+    ) -> dict[str, dict[str, Any]]:
+        """Build (or return cached) payloads for the requested screens."""
+
+        requested = tuple(screens) if screens is not None else SCREENS
+        key = (*self.selection_key(selection), requested)
         if key in self._payload_cache:
             self.hits += 1
             return self._payload_cache[key]
         self.misses += 1
-        payloads = build_screen_payloads(self.data, selection)
+        payloads = build_screen_payloads(self.data, selection, screens=requested)
         self._payload_cache[key] = payloads
         return payloads
+
+    def get_screen(self, selection: DashboardSelection) -> dict[str, dict[str, Any]]:
+        """Return the payload for the currently visible screen only."""
+
+        return self.get(selection, screens=(selection.screen,))
 
     payloads = get
 

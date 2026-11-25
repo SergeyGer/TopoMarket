@@ -700,13 +700,19 @@ def build_structure_payload(
     if not network["available"] and map_date != selected:
         network = build_correlation_network(industry_rows, selected, window=window, cutoff=cutoff)
     view = getattr(selection, "view", None) or "correlation"
-    mapper = build_mapper_view(
-        data,
-        map_date,
-        selected_node=getattr(selection, "node", None),
-        selected_edge=getattr(selection, "edge", None),
-        selected_member=getattr(selection, "member", None),
-    )
+    if str(getattr(selection, "network_view", "correlation")) == "mapper":
+        mapper = build_mapper_view(
+            data,
+            map_date,
+            selected_node=getattr(selection, "node", None),
+            selected_edge=getattr(selection, "edge", None),
+            selected_member=getattr(selection, "member", None),
+        )
+    else:
+        # The correlation view does not render Mapper groups; defer the expensive
+        # Mapper window until the visitor switches views.
+        mapper = _empty_mapper_view(map_date, "Switch to the Mapper view to build the groups.")
+        mapper["deferred"] = True
     timeline = build_timeline(data, selected)
     selected_is_alert = any(
         marker.get("date") == selected for marker in timeline.get("alert_markers") or ()

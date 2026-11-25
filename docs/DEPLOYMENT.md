@@ -94,3 +94,4 @@ the result in this log. Local release-candidate evidence for the same screens is
 | 2026-11-25 | app created | `main` at v0.8.2 baseline | app created by owner; anonymous access currently restricted (sharing setting) |
 | 2026-11-25 | v0.9.0 | `4f3a1c6` (main) | badge/version 0.9.0 deployed by the owner's Cloud app; anonymous access still redirects to login |
 | 2026-11-25 | v0.9.2 | video/docs release | demo video recorded locally from the release candidate because anonymous hosted access was still gated; hosted checks pending |
+| 2026-11-25 | v1.0.0 | release candidate (1.0.0) | local signed-out-equivalent checks, session isolation, mobile/keyboard and cached performance evidence recorded (`docs/ACCEPTANCE_v1.0.md`, `docs/measurements/`); hosted signed-out check still blocked by the sharing setting |

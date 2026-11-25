@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
-  "release": "v0.9.2",
-  "recorded_release_identity": "0.9.2 (sidebar label in footage)",
+  "release": "v1.0.0",
+  "recorded_release_identity": "1.0.0 (sidebar label in footage)",
   "master": {
     "file": "TopoMarket_demo_60s.mp4",
-    "sha256": "16571f7c586d67a1f4d597311cd91a2e03a38a9bfcf140c818f231fadc770b69",
-    "size_bytes": 5923492
+    "sha256": "a1175d0b20ff0e8bc3e21a8d806ab7470353bdea0a4678786208e70a83490b1a",
+    "size_bytes": 5585443
   },
   "captions": {
     "file": "TopoMarket_demo_60s.srt",
@@ -15,11 +15,11 @@
   },
   "narration_master": {
     "file": "narration.wav",
-    "sha256": "3b27729703659ac7efeea777dd0ada3626c841732ba36618bc82e7768d30d830"
+    "sha256": "3968657bb431b0c0b9cfcf25bb99b9ac6a951152c84e4ee85e7ac887835740ad"
   },
   "production_source": {
     "file": "TopoMarket_demo_production_source.zip",
-    "sha256": "51b98c3cc2595f8bc78fa1816ea64c2506b63f98012f54461143c84336e9603c"
+    "sha256": "92a43357a6dc48eaa4de7203975f0807e82f09788592b7bdc2cf7d2d97538409"
   },
   "video": {
     "codec": "h264",
@@ -28,19 +28,19 @@
     "height": 1080,
     "pix_fmt": "yuv420p",
     "frame_rate": "30/1",
-    "bit_rate": "654271"
+    "bit_rate": "610429"
   },
   "audio": {
     "codec": "aac",
     "profile": "LC",
     "sample_rate": 48000,
     "channels": 2,
-    "bit_rate": "134201"
+    "bit_rate": "133825"
   },
   "duration_seconds": 60.0,
   "loudness": {
     "measured_integrated_lufs": -16.15,
-    "measured_true_peak_dbtp": -4.32,
+    "measured_true_peak_dbtp": -4.4,
     "measured_lra": 5.7,
     "target": {
       "integrated_lufs": -16.0,
@@ -58,17 +58,17 @@
       "name": "structure",
       "duration_s": 9.5,
       "trim_skip_s": 1.8,
-      "recording": "page@b14b8251df18d4cb3f33a643acf5ad12.webm",
-      "recording_sha256": "0865dec454efe4942602422c1d267f2689551c845c332e3969be4070ae9cbc41",
+      "recording": "page@e2387d19e0a3e66903fe71622becaad0.webm",
+      "recording_sha256": "09ba8dd60d6eb8741ce08de00b6304b11599e9ee3ea290f00fbb3fccaf84b928",
       "actions": [
         {
-          "t": 0.17,
+          "t": 0.148,
           "x": 118,
           "y": 765,
           "label": "button_regex"
         },
         {
-          "t": 4.803,
+          "t": 4.771,
           "x": 130,
           "y": 821,
           "label": "button_regex"
@@ -79,16 +79,16 @@
       "name": "mapper",
       "duration_s": 11.0,
       "trim_skip_s": 1.0,
-      "recording": "page@08fdaacbfaaca125a06678ef9375895a.webm",
-      "recording_sha256": "20484247d43c2eca9b5053b7e10839daee325527019ca6671527848272305ad9",
+      "recording": "page@d057087d86539d886bd544f5479f7533.webm",
+      "recording_sha256": "4153e9d037082bdd0cd9775668da1e05e14e3e6f1e64b24a1cab8cf7609ae0c2",
       "actions": [
         {
-          "t": 1.751,
+          "t": 1.724,
           "click": true,
           "label": "select_option"
         },
         {
-          "t": 6.279,
+          "t": 6.824,
           "click": true,
           "label": "select_edge"
         }
@@ -98,11 +98,11 @@
       "name": "alert",
       "duration_s": 12.0,
       "trim_skip_s": 1.0,
-      "recording": "page@9db2cb83c24f0a967d7dec072163202f.webm",
-      "recording_sha256": "4a6e9f14314203cadcb575a958cc7f9407029f6a5132d4d8b6c9222dfb9c3b7e",
+      "recording": "page@1f2a6d2af8d341f1d1b49bb87410eada.webm",
+      "recording_sha256": "7572a0c078432253a84900c7842e04ee167cd2325002df92906bea2e6c9b1892",
       "actions": [
         {
-          "t": 0.148,
+          "t": 0.147,
           "x": 150,
           "y": 884,
           "label": "button_regex"
@@ -113,22 +113,22 @@
       "name": "replay",
       "duration_s": 11.0,
       "trim_skip_s": 3.2,
-      "recording": "page@f2add179387aa7c736584680a57921c0.webm",
-      "recording_sha256": "8bee3d67e4eedf12dd4097c1ac746f0c82072b86887c87ea8b32cc78f1c38d87",
+      "recording": "page@371442c40dc0b2385c80b800faa9dd65.webm",
+      "recording_sha256": "5dbb2108a42abf774222b86f06bb1054fb0d1cd9aadf147928ceb5d818a0d5f9",
       "actions": [
         {
-          "t": 0.155,
+          "t": 0.202,
           "x": 150,
           "y": 884,
           "label": "button_regex"
         },
         {
-          "t": 1.684,
+          "t": 1.612,
           "click": true,
           "label": "select_option"
         },
         {
-          "t": 4.914,
+          "t": 4.828,
           "x": 115,
           "y": 1060,
           "label": "button_regex"
@@ -139,11 +139,11 @@
       "name": "validation",
       "duration_s": 5.0,
       "trim_skip_s": 3.4,
-      "recording": "page@524a035c1dbec75033950f85aa0dddd6.webm",
-      "recording_sha256": "912160e50a9822e21b5a8120f83451969560067b3dbb4b8d7329d3bc90c1aaf5",
+      "recording": "page@8a27686c441573cd0dbf205d49dc743c.webm",
+      "recording_sha256": "f86578767fd8cfb69767b3145ab5e1d0afb2f720d0d6696915a57c83fd9f0147",
       "actions": [
         {
-          "t": 0.921,
+          "t": 0.917,
           "click": true,
           "label": "select_option"
         }
@@ -161,6 +161,6 @@
     "synthetic": true,
     "seed": 4242,
     "hosted_app": "https://topomarket-juhbvrgk2k67pnr6qbpfmc.streamlit.app/",
-    "hosted_anonymous_access_at_capture": "pending (redirected to login); recorded from the local 0.9.2 release candidate instead"
+    "hosted_anonymous_access_at_capture": "pending (redirected to login); recorded from the local v1.0.0 release candidate instead"
   }
 }

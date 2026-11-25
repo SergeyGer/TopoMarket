@@ -69,7 +69,17 @@ Streamlit (`topomarket.ui.dashboard`).
 ## Performance
 
 Cached date changes must stay within p95 <= 500 ms over 100 changes; the cold public startup is
-measured separately and the reference run records it in the payload. `topomarket.ui.performance` provides
+measured separately. The shell keeps the loaded data and the panel cache in session state and caches
+each rendered chart as PNG bytes per payload identity, so a cached date change does not rebuild the
+payload or the matplotlib figure.
+
+Reference measurement on the release candidate (Playwright Chromium headless, 1440x900):
+**cached preset date-change p95 409 ms / p50 374 ms over 100 changes** (target 500 ms), while a first
+visit to a new date measures p95 546 ms (payload build + chart rendering, recorded separately).
+`docs/measurements/browser_performance.json` holds the measurements and
+`docs/measurements/browser_evidence.json` the functional browser checks (boot, presets, inspectors,
+Mapper edge, explanation, Replay blind/reveal/reset, Validation, Data, session isolation, mobile,
+keyboard focus). `topomarket.ui.performance` provides
 `measure_cached_date_changes` and `measure_dashboard_startup`; both return the measured values plus
 Python/platform/package/NumPy/Ripser versions and build metadata. Public tests assert both limits;
 the opt-in private acceptance exercises the real 9,250-row snapshot for replay, keyboard and data
