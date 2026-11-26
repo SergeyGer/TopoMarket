@@ -39,7 +39,6 @@ from topomarket.report import (
 from topomarket.topology import (
     ScoreError,
     compute_topology_scores,
-    load_daily_rows,
     load_topology_config,
     write_scores_csv,
 )
@@ -806,10 +805,11 @@ def _run_industry(
 
     requested = Path(data_dir).expanduser()
     target = _resolve_snapshot_dir(requested)
-    try:
-        rows = load_daily_rows(target)
-    except ScoreError as exc:
-        print(f"error: {exc}", file=sys.stderr)
+    from topomarket.data.signals import load_industry_signal_rows
+
+    rows = load_industry_signal_rows(target)
+    if not rows:
+        print(f"error: no industry rows found in {target}", file=sys.stderr)
         return 2
 
     try:
@@ -866,10 +866,11 @@ def _run_topology(
         config = load_topology_config(config_path=Path(config_path).expanduser(), allow_custom=True)
     else:
         config = load_topology_config()
-    try:
-        rows = load_daily_rows(target)
-    except ScoreError as exc:
-        print(f"error: {exc}", file=sys.stderr)
+    from topomarket.data.signals import load_price_signal_rows
+
+    rows = load_price_signal_rows(target)
+    if not rows:
+        print(f"error: no ordered price rows found in {target}", file=sys.stderr)
         return 2
     series = compute_topology_scores(rows, config)
     if out is not None:
@@ -877,7 +878,19 @@ def _run_topology(
     if emit_json:
         print(json.dumps(series.as_dict(), indent=2, sort_keys=True))
         return 0
+    from topomarket.data.signals import load_signal_calendars
+
+    calendars = load_signal_calendars(target)
     print(f"Data directory: {target}")
+    print(
+        "Signal calendars: price as of {} | industry as of {} | VIX as of {}".format(
+            calendars["as_of"]["price"],
+            calendars["as_of"]["industry"],
+            calendars["as_of"]["vix"],
+        )
+    )
+    if calendars["joint_fallback"]:
+        print("  (joint tda_daily fallback: no split signal tables in this snapshot)")
     print(f"Config hash: {series.config_hash}")
     print(f"Exploratory: {series.exploratory}")
     print(f"Cache key: {series.cache_key}")
@@ -912,6 +925,11 @@ def _run_evaluation(
     )
     from topomarket.analysis.ledger import ledger_digest
     from topomarket.data.identity import resolve_snapshot_identity
+    from topomarket.data.signals import (
+        load_evaluation_rows,
+        load_price_signal_rows,
+        load_signal_calendars,
+    )
     from topomarket.topology import compute_topology_scores, load_topology_config
 
     requested = Path(data_dir).expanduser()
@@ -924,9 +942,11 @@ def _run_evaluation(
             file=sys.stderr,
         )
         return 2
-    rows = load_daily_rows(target)
+    calendars = load_signal_calendars(target)
+    rows = load_evaluation_rows(target)
+    price_rows = load_price_signal_rows(target)
     config = load_topology_config()
-    series = compute_topology_scores(rows, config)
+    series = compute_topology_scores(price_rows, config)
     report = build_evaluation_report(
         rows,
         score_series=series,
@@ -940,6 +960,16 @@ def _run_evaluation(
             "source": identity["source"],
             "manifest_digest": identity["manifest_digest"],
             "data_dir": identity["data_dir"],
+            "signal_calendars": {
+                "as_of": calendars["as_of"],
+                "sources": {
+                    "price": calendars["price_source"],
+                    "industry": calendars["industry_source"],
+                    "vix": calendars["vix_source"],
+                },
+                "reasons": calendars["reasons"],
+                "joint_fallback": calendars["joint_fallback"],
+            },
         },
     )
     if report_out is not None:
@@ -952,6 +982,15 @@ def _run_evaluation(
     print(f"Data directory: {target}")
     print(f"Snapshot: {report.get('snapshot_id') or 'unknown'}")
     print(f"Rows: {report['row_count']} ({report['data_start']} .. {report['data_end']})")
+    print(
+        "Signal calendars: price as of {} | industry as of {} | VIX as of {}".format(
+            calendars["as_of"]["price"],
+            calendars["as_of"]["industry"],
+            calendars["as_of"]["vix"],
+        )
+    )
+    if calendars["joint_fallback"]:
+        print("  (joint tda_daily fallback: no split signal tables in this snapshot)")
     print(f"Episodes: {report['episode_count']} (resolved {report['resolved_episode_count']})")
     print(f"Primary method: {primary} | comparator: {report['comparator_method']}")
     print(f"Wording: {report['evidence']['wording']}")

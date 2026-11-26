@@ -83,6 +83,15 @@ Final sign-off requires the owner-seeded private suite and the public checks on 
   CLI evaluation carries the identity + provenance into the report and ledger; direct-directory and
   manifest-fallback tests added. R1 remains.
 
+- **R1 (in review):** new `topomarket.data.signals` loads independent price/industry/VIX calendars
+  with an explicit joint-`tda_daily` fallback for old synthetic snapshots; `topology`, `evaluate` and
+  `industries` CLIs use their own calendars; evaluation rows are the price calendar left-joined with
+  VIX by date; reports/CLI expose separate as-of dates, sources and fallback reasons in
+  `snapshot_provenance.signal_calendars`. Acceptance tests append price/VIX dates past industry
+  coverage and mutate only industry data, asserting price scores and evaluation reports are
+  byte-identical. The refreshed-snapshot dashboard view of split calendars is a follow-up under
+  U4/docs if needed; default synthetic data keeps the joint fallback.
+
 ## Owner actions pending
 
 - **Private seed:** provide `TOPOMARKET_SEED_DIR` locally (outside Git) so the corrected private
