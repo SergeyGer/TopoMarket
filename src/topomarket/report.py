@@ -31,6 +31,7 @@ from topomarket.data.adapters import (
     PARSER_REPORTS_FILENAME,
     RAW_HASHES_FILENAME,
 )
+from topomarket.data.manifest import path_text
 from topomarket.ui.overview import inspect_data_directory
 
 REPORT_SCHEMA_VERSION = 1
@@ -502,8 +503,8 @@ def build_data_report(
     total_rows = sum(row_counts.values())
     return {
         "schema_version": REPORT_SCHEMA_VERSION,
-        "data_dir": str(directory),
-        "path": str(directory),
+        "data_dir": path_text(directory),
+        "path": path_text(directory),
         "profile": profile,
         "data_source": data_source,
         "exists": status["exists"],

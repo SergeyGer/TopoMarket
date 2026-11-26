@@ -111,6 +111,9 @@ def test_private_default_is_pushed_outside_a_fake_checkout(
     fake_repo.mkdir()
     monkeypatch.setattr(profiles, "REPOSITORY_ROOT", fake_repo)
     monkeypatch.setenv("HOME", str(fake_repo / "home"))
+    # Windows does not read HOME for the default home directory; isolate the
+    # platform variable too so the fallback chain is deterministic on Windows CI.
+    monkeypatch.setenv("USERPROFILE", str(fake_repo / "home"))
     monkeypatch.delenv("XDG_DATA_HOME", raising=False)
     monkeypatch.setenv("TMPDIR", str(fake_repo / "tmp"))
     monkeypatch.delenv("TEMP", raising=False)

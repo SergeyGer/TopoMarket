@@ -14,7 +14,7 @@ from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
-from .manifest import compute_snapshot_id
+from .manifest import compute_snapshot_id, path_text
 from .refresh import active_snapshot_id, resolve_active_data_dir
 
 IMPORT_MANIFEST = "import_manifest.json"
@@ -85,7 +85,7 @@ def resolve_snapshot_identity(data_dir: Path | str) -> dict[str, Any]:
         "snapshot_id": snapshot_id,
         "source": source,
         "manifest_digest": manifest_digest,
-        "data_dir": str(target),
+        "data_dir": path_text(target),
     }
 
 

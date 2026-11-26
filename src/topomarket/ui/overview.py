@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Any
 
 from topomarket.data import latest_snapshot, list_snapshots, read_manifest
-from topomarket.data.manifest import ManifestError
+from topomarket.data.manifest import ManifestError, path_text
 from topomarket.profiles import PROFILE_NAMES, load_profile
 
 TITLE = "TopoMarket"
@@ -183,7 +183,7 @@ def inspect_data_directory(data_dir: Path | str) -> dict[str, Any]:
 
     directory = Path(data_dir).expanduser()
     status: dict[str, Any] = {
-        "path": str(directory),
+        "path": path_text(directory),
         "exists": directory.is_dir(),
         "is_dir": directory.is_dir(),
         "files": [],
@@ -290,7 +290,7 @@ def build_overview(
         "is_private": resolved.is_private,
         "data_source": resolved.data_source,
         "data_source_label": data_source_label(resolved),
-        "data_dir": str(resolved.data_dir),
+        "data_dir": path_text(resolved.data_dir),
         "latest_data_date": latest,
         "latest_date": latest,
         "latest_data_date_label": latest_label,

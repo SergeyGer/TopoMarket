@@ -1,0 +1,22 @@
+{
+  "url": "https://sergeyger.github.io/TopoMarket/watch/index.html",
+  "signed_out": true,
+  "checks": {
+    "page_loaded": true,
+    "video_element": true,
+    "captions_track": true,
+    "plays_inline_signed_out": true,
+    "captions_visible_at_16s": true,
+    "captions_visible_at_52s": true,
+    "duration_60s": true,
+    "mobile_no_horizontal_overflow": true
+  },
+  "details": {
+    "playing": true,
+    "t16": "Mean correlation rises from 0.791 to 0.911.",
+    "t52": "Experimental: TDA 0 of 3, VIX 1 of 3.",
+    "duration": 60,
+    "mode": "showing",
+    "caption_note": "At 00:16 the caption reads \"Mean correlation rises from 0.791 to 0.911\", matching the two-window comparison frame; at 00:52 it reads \"Experimental: TDA 0 of 3, VIX 1 of 3\", matching the results frame."
+  }
+}

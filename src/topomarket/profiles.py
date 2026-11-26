@@ -20,6 +20,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from .data.manifest import path_text
+
 PROFILE_NAMES: tuple[str, ...] = ("demo", "private")
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 PACKAGE_ROOT = Path(__file__).resolve().parent
@@ -121,8 +123,8 @@ class Profile:
             "name": self.name,
             "description": self.description,
             "data_source": self.data_source,
-            "data_dir": str(self.data_dir),
-            "output_dir": str(self.output_dir),
+            "data_dir": path_text(self.data_dir),
+            "output_dir": path_text(self.output_dir),
             "cache_dir": str(self.cache_dir),
             "random_seed": self.random_seed,
             "private_data": self.private_data,
