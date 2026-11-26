@@ -51,7 +51,15 @@
    the source snapshot id.
 7. **Bootstrap** - paired moving-block bootstrap over 60-session test blocks on the shared
    eligible dates, 1,000 replicates, identical block draws for all methods, fixed seed in the
-   report; report 95% percentile intervals and valid replicate counts.
+   report; report 95% percentile intervals and valid replicate counts. **v1.2 (R2):** blocks are
+   drawn *with replacement* on the eligible test sequence, concatenated and trimmed to N positions;
+   every drawn position keeps its multiplicity and the same index weights are applied to each
+   method's frozen onset/credited-onset/false-alert indicators. The exposure denominator is always
+   N positions, so overlapping blocks can no longer shrink the sample. Rows with no event give an
+   undefined recall for that replicate (valid-replicate counts make this explicit); false-alert
+   rates use the fixed N exposure. The algorithm identity is
+   `provenance.bootstrap_algorithm = moving_block_with_replacement_v2`; intervals computed under
+   this rule are versioned against the retained v1.1 report.
 8. **Evidence wording** - `"Experimental market anomaly"` by default; the forecast is presented as
    an experiment. `"Historical early-warning evidence"` only when at least five evaluable held-out
    episodes exist, the lower 95% paired interval for the episode-recall gain against the comparator
@@ -105,6 +113,15 @@ exits with status `2`.
   numbers: 4 episodes, 3 evaluable held-out episodes, 3,306 common eligible sessions, TDA recall
   0/3 with average precision 0.0154, VIX recall 1/3 with average precision 0.1187, realized
   volatility recall 0/3 with average precision 0.0556, and `"Experimental market anomaly"`.
+
+## Snapshot identity at the CLI (v1.2 R3)
+
+`topomarket evaluate` now resolves one non-empty identity before running: active snapshot pointer,
+then the direct snapshot's `refresh_manifest.json`, then `import_manifest.json` (and its content
+digest). The identity and its source/manifest digest are carried into the report, policies,
+provenance and private ledger rows; conflicting identity sources fail visibly with a clear error
+instead of emitting an empty snapshot id. Tests cover direct-directory and active-snapshot forms,
+content-digest fallback, conflicting sources and the CLI report provenance.
 
 ## F01 correction: calibration recall (v1.1)
 

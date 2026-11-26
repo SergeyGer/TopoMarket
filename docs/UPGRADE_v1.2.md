@@ -71,6 +71,18 @@ Final sign-off requires the owner-seeded private suite and the public checks on 
   duplicate bootstrap block), linked from README/Wiki/app Help.
 - Film: record the **public deployment** after signed-out smoke; manifest must not say localhost.
 
+## Progress log
+
+- **R2 (in review):** paired bootstrap now draws blocks with replacement, concatenates/trims to N,
+  keeps position multiplicity and applies identical index weights to each method's frozen event
+  indicators; exposure denominator fixed at N; algorithm identity stored in report provenance;
+  deterministic and duplicate-block/absent-event/shared-draw tests added; synthetic showcase report
+  regenerated (gain interval valid replicates 952, TDA false-rate interval 0.38–1.37/year).
+- **R3 (in review):** new `topomarket.data.identity.resolve_snapshot_identity` resolves the active
+  pointer, refresh manifest, import manifest and content digest; conflicts raise a visible error;
+  CLI evaluation carries the identity + provenance into the report and ledger; direct-directory and
+  manifest-fallback tests added. R1 remains.
+
 ## Owner actions pending
 
 - **Private seed:** provide `TOPOMARKET_SEED_DIR` locally (outside Git) so the corrected private

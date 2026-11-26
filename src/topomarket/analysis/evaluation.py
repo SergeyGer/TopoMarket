@@ -59,6 +59,10 @@ TEST_START = "2014-01-01"
 DEVELOPMENT_START = "1990-01-01"
 BOOTSTRAP_BLOCK_SESSIONS = 60
 BOOTSTRAP_REPLICATES = 1_000
+#: Version of the paired bootstrap semantics.  v1.2 fixes multiplicity loss: blocks
+#: are drawn with replacement, concatenated and trimmed to N positions, and the
+#: same index weights are applied to every method's frozen event indicators.
+BOOTSTRAP_ALGORITHM = "moving_block_with_replacement_v2"
 DEFAULT_SEED = 42
 
 #: Version of the evaluation report schema/metadata (v1.1 adds provenance and
@@ -137,6 +141,29 @@ def _all_episode_onsets(evaluation: AlertEvaluation) -> set[str]:
     return onsets
 
 
+def _weighted_event_total(weights: Mapping[str, int], events: set[str]) -> int:
+    """Weighted count of frozen event dates under one bootstrap draw (R2 rule)."""
+
+    return sum(weight for date, weight in weights.items() if date in events)
+
+
+def _draw_block_positions(
+    rng: random.Random,
+    *,
+    starts: Sequence[int],
+    block_count: int,
+    block: int,
+    position_count: int,
+) -> list[int]:
+    """Draw moving blocks with replacement and trim to the eligible length (R2)."""
+
+    positions: list[int] = []
+    for _block in range(block_count):
+        start = starts[rng.randrange(0, len(starts))]
+        positions.extend(range(start, start + block))
+    return positions[:position_count]
+
+
 def _block_bootstrap(
     *,
     primary: AlertEvaluation,
@@ -148,16 +175,30 @@ def _block_bootstrap(
     block_sessions: int = BOOTSTRAP_BLOCK_SESSIONS,
     replicates: int = BOOTSTRAP_REPLICATES,
 ) -> dict[str, BootstrapInterval]:
-    """Paired moving-block bootstrap over the test eligible dates."""
+    """Paired moving-block bootstrap over the test eligible dates.
+
+    Corrected in v1.2 (R2): blocks are drawn **with replacement** on the eligible
+    test sequence, concatenated and trimmed back to the original length N.  Every
+    drawn position keeps its multiplicity; the same position weights are applied
+    to each method's frozen event indicators (episode onsets, credited onsets and
+    false alerts).  The exposure denominator is always N positions, so overlapping
+    blocks can no longer silently shrink the sample.  No events in a draw gives an
+    undefined recall for that replicate (recorded through ``valid_replicates``);
+    false-alert rates use the fixed N exposure.
+    """
     if replicates < 1:
         raise EvaluationError("bootstrap replicates must be >= 1")
     start_index = next(index for index, date in enumerate(dates) if date >= test_start)
     end_index = max(index for index, date in enumerate(dates) if date <= test_end)
     period_indices = list(range(start_index, end_index + 1))
-    if len(period_indices) < 2:
+    position_count = len(period_indices)
+    if position_count < 2:
         raise EvaluationError("not enough sessions for a bootstrap")
-    block = max(2, min(int(block_sessions), len(period_indices)))
-    block_count = max(1, int(math.ceil(len(period_indices) / block)))
+    block = max(2, min(int(block_sessions), position_count))
+    block_count = max(1, int(math.ceil(position_count / block)))
+    starts = [period_indices[offset] for offset in range(0, position_count - block + 1)]
+    if not starts:  # pragma: no cover - position_count >= block guarantees one start
+        starts = [period_indices[0]]
     # Deterministic statistical bootstrap, not a cryptographic use.
     rng = random.Random(int(seed))  # nosec B311
 
@@ -185,33 +226,42 @@ def _block_bootstrap(
     comparator_recalls: list[float] = []
     primary_rates: list[float] = []
     comparator_rates: list[float] = []
+    exposure_years = position_count / ANNUALIZATION
     for _ in range(replicates):
-        sampled: set[int] = set()
-        for _block in range(block_count):
-            offset = rng.randrange(0, max(1, len(period_indices) - block + 1))
-            start = period_indices[offset]
-            sampled.update(range(start, min(start + block, end_index + 1)))
-        sampled_dates = {dates[index] for index in sampled}
-        sampled_count = len(sampled_dates)
-        if sampled_count == 0:
-            continue
-        tda_total = len(primary_onsets & sampled_dates)
-        tda_matched = len(primary_matched & sampled_dates)
-        comp_total = len(comparator_onsets & sampled_dates)
-        comp_matched = len(comparator_matched & sampled_dates)
-        tda_false = len(primary_false & sampled_dates)
-        comp_false = len(comparator_false & sampled_dates)
+        trimmed = _draw_block_positions(
+            rng,
+            starts=starts,
+            block_count=block_count,
+            block=block,
+            position_count=position_count,
+        )
+        weights: dict[int, int] = {}
+        for position in trimmed:
+            weights[position] = weights.get(position, 0) + 1
+        weighted: dict[str, int] = {}
+        for position, weight in weights.items():
+            date = dates[period_indices[position - period_indices[0]]]
+            weighted[date] = weighted.get(date, 0) + weight
+
+        tda_total = _weighted_event_total(weighted, primary_onsets)
+        tda_matched = _weighted_event_total(weighted, primary_matched)
+        comp_total = _weighted_event_total(weighted, comparator_onsets)
+        comp_matched = _weighted_event_total(weighted, comparator_matched)
+        tda_false = _weighted_event_total(weighted, primary_false)
+        comp_false = _weighted_event_total(weighted, comparator_false)
         tda_recall = tda_matched / tda_total if tda_total else None
         comp_recall = comp_matched / comp_total if comp_total else None
-        tda_rate = tda_false / (sampled_count / ANNUALIZATION)
-        comp_rate = comp_false / (sampled_count / ANNUALIZATION)
+        tda_rate = tda_false / exposure_years if exposure_years else None
+        comp_rate = comp_false / exposure_years if exposure_years else None
         if tda_recall is not None:
             primary_recalls.append(tda_recall)
-        primary_rates.append(tda_rate)
+        if tda_rate is not None:
+            primary_rates.append(tda_rate)
         if comparator is not None:
             if comp_recall is not None:
                 comparator_recalls.append(comp_recall)
-            comparator_rates.append(comp_rate)
+            if comp_rate is not None:
+                comparator_rates.append(comp_rate)
             if tda_recall is not None and comp_recall is not None:
                 gains.append(tda_recall - comp_recall)
 
@@ -522,6 +572,7 @@ def build_evaluation_report(
     baseline_report: Mapping[str, Any] | None = None,
     report_version: str = REPORT_VERSION,
     calibration_version: str = CALIBRATION_VERSION,
+    snapshot_provenance: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Run the full deterministic evaluation pipeline and return the report."""
     materialised = [dict(row) for row in rows]
@@ -708,6 +759,7 @@ def build_evaluation_report(
             "code_revision": _code_revision(),
             "package_version": __version__,
             "snapshot_id": snapshot_id or ledger_snapshot_id,
+            "snapshot_provenance": dict(snapshot_provenance or {}),
             "config_hash": config_hash,
             "seed": int(seed),
             "label_contract": {
@@ -718,6 +770,9 @@ def build_evaluation_report(
                 "validation_end": VALIDATION_END,
                 "test_start": TEST_START,
             },
+            "bootstrap_algorithm": BOOTSTRAP_ALGORITHM,
+            "bootstrap_block_sessions": BOOTSTRAP_BLOCK_SESSIONS,
+            "bootstrap_replicates": BOOTSTRAP_REPLICATES,
             "calibration_hashes": {
                 method: calibration.calibration_hash for method, calibration in calibrations.items()
             },
