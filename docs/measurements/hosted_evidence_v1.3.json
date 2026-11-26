@@ -4,7 +4,7 @@
   "anonymous": true,
   "browser": "Playwright Chromium headless",
   "expected_release": "1.3.0",
-  "repo_head": "5f86f94",
+  "repo_head": "c65a9ed",
   "screenshots": [
     "docs/measurements/hosted_v13_landing.png",
     "docs/measurements/hosted_v13_frozen_pair.png",
@@ -13,7 +13,7 @@
     "docs/measurements/hosted_v13_session_b.png"
   ],
   "checks": {
-    "release_identity_1_2_0": true,
+    "release_identity_1_3_0": true,
     "landing_metrics_and_interactive_chart": true,
     "frozen_before_after_pair_or_guided_tour": true,
     "two_window_comparison": true,
@@ -22,12 +22,12 @@
   },
   "details": {
     "release_identity": {
-      "visible_version": "1.2.0"
+      "visible_version": "1.3.0"
     },
     "replay": "Locator.click: Timeout 15000ms exceeded.\nCall log:\n  - waiting for get_by_text(\"Replay\", exact=True).last\n",
     "screens": "Locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for get_by_text(\"Validation\", exact=True).last\n"
   },
-  "cold_start_seconds": 6.1,
-  "measured_at_utc": "2026-11-26T14:34:34Z",
-  "notes": "Hosted signed-out smoke on the rebooted public deployment (visible release 1.2.0 at capture; v1.3.0 identity re-checked after the version bump). Core checks cover identity, landing/interactive chart, chronological frozen pair/comparison, mobile and two isolated sessions; UI-level chronology is also verified in the v1.3 acceptance record."
+  "cold_start_seconds": 9.4,
+  "measured_at_utc": "2026-11-26T15:13:14Z",
+  "notes": " Final hosted 1.3.0 smoke after the owner reboot shows the release identity 1.3.0; cold start 9.4 s."
 }

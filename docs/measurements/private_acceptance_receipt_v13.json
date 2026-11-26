@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "release": "v1.3.0",
+  "tested_commit": "c65a9ed",
+  "tested_commit_description": "merge of v1.3.0 release PR #95 (main at tag v1.3.0)",
+  "measured_at_utc": "2026-11-26T15:14:03Z",
+  "environment": "Linux, Python 3.12.3, project .venv, TOPOMARKET_SEED_DIR set (owner-supplied)",
+  "snapshot_id": "5ca5aac2a08921adf567e9e14d16230fe1bb276c4e0a4788b9485b0d8e2f3b7e",
+  "import_source": "owner-supplied private seed; import-manifest identity recomputed on the tested commit",
+  "totals": {
+    "collected": 701,
+    "passed": 701,
+    "failed": 0,
+    "skipped": 0,
+    "duration_seconds": 1276.46,
+    "duration_human": "21:16"
+  },
+  "skip_reasons": [],
+  "a7_status": {
+    "status": "passed",
+    "note": "A7 dashboard/replay/calendar/keyboard/performance checks passed with the owner seed"
+  },
+  "private_data_policy": "No private rows, seed contents, file digests or detailed reports are committed; raw logs/import/exports stay outside the repository under the owner's home directory. Only this aggregate receipt is published.",
+  "log_location": "outside the repository (owner's private results directory)"
+}

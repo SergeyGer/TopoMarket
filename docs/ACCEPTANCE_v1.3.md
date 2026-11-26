@@ -64,15 +64,16 @@ and Mapper node checks) is recorded at release time.
       00:52 verified against the frame content; watch page links versioned v1.3.0 assets (#86/#87).
 - [x] v1.3.0 tagged and published with 9 assets; version bump/frozen artifacts, Linux (py3.11/3.12) and
       Windows CI, release checks, dependency audit, CodeQL and cloud smoke green (#87).
-- [ ] Owner film sign-off (open until recorded).
-- [ ] Sanitised private-suite receipt on the selected v1.3.0 commit: the full owner-seeded rerun on
-      `c65a9ed` is still in progress (the environment is slow); the previous full run on the same
-      remediation candidate produced 697 passed/4 failed, and the four failures were the frozen-2008
-      private-snapshot `PresetError` now fixed, so the receipt is appended after the rerun completes.
-- [ ] Hosted v1.3.0 identity re-check: after the v1.3.0 merge the Cloud deployment still reported
-      release 1.2.0 (the corrected UI is deployed and previously smoke-tested 10/10); a dashboard
-      reboot/redeploy is the documented owner action, then the hosted evidence is refreshed with the
-      1.3.0 identity.
+- [ ] Owner film sign-off (the film is recorded and published; sign-off remains open until the owner
+      confirms).
+- [x] Sanitised private-suite receipt on the selected v1.3.0 commit: **701 passed, 0 failed,
+      0 skipped** (21:16) with the owner seed on `c65a9ed`; snapshot identity `5ca5aac2…`;
+      aggregate only in `docs/measurements/private_acceptance_receipt_v13.json`, detailed
+      logs/imports outside the repository.
+- [x] Hosted v1.3.0 identity re-check after the owner reboot: signed-out smoke shows
+      `release 1.3.0`, landing/interactive chart, chronological frozen pair and comparison, mobile
+      without overflow, two isolated sessions; cold start 9.4 s in
+      `docs/measurements/hosted_evidence_v1.3.json`.
 
 ## Known limitations / owner actions
 
