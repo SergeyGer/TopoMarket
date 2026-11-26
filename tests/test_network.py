@@ -110,7 +110,9 @@ def test_edges_are_the_positive_pairs_above_the_cutoff(rows) -> None:
     as_of = "2020-02-24"
     network = build_correlation_network(rows, as_of)
     expected = [
-        pair for pair in network["pairs"] if pair["correlation"] >= DEFAULT_CORRELATION_CUTOFF
+        {key: value for key, value in pair.items() if key != "correlation_full"}
+        for pair in network["pairs"]
+        if pair["correlation_full"] >= DEFAULT_CORRELATION_CUTOFF
     ]
     assert network["edges"] == expected
     assert network["pairs_qualifying"] == len(expected)
