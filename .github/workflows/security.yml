@@ -41,7 +41,7 @@ jobs:
           # notes), not credentials. They are intentionally documented here
           # instead of being flagged as secrets.
           git ls-files -z \
-            | grep -zvE '^(config/topology\.json|src/topomarket/topology/topology\.json|showcase/.*\.json|docs/reports/.*\.json|docs/video/build_report\.json)$' \
+            | grep -zvE '^(config/topology\.json|src/topomarket/topology/topology\.json|showcase/.*\.json|docs/reports/.*\.json|docs/measurements/.*\.json|docs/video/build_report\.json)$' \
             | xargs -0 -r python -m detect_secrets scan > /tmp/secrets.json
           python - <<'PY'
           import json

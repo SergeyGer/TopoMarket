@@ -60,6 +60,13 @@ Epic **#88**, milestone **Release v1.3**.
   private receipt `docs/measurements/private_acceptance_receipt_v13.json`; direct-inspection controls
   made lazy to preserve the rerun budget. Acceptance draft `docs/ACCEPTANCE_v1.3.md` added.
 
+## Owner actions completed
+
+- Private-seeded suite/receipt: **701 passed / 0 failed / 0 skipped** on `c65a9ed` (aggregate receipt in
+  `docs/measurements/private_acceptance_receipt_v13.json`; detailed reports outside the repo).
+- Film owner approval recorded (26 November 2026, https://youtu.be/8Xyp-BDM88Q).
+- Streamlit Cloud rebooted and hosted v1.3.0 identity verified (cold start 9.4 s).
+
 ## Owner actions pending
 
 - **Private seed run/receipt** on the chosen release candidate (`TOPOMARKET_SEED_DIR`), sanitised

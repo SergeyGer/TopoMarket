@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "release": "v1.3.0",
+  "tag": "v1.3.0",
+  "tag_commit": "c65a9ed",
+  "final_evidence_merge": "d688a42",
+  "generating_revisions": {
+    "film_cut": "0baf9c2 (clean checkout declared package 1.2.0; deployed public app displayed 1.2.0)",
+    "film_working_tree_builder_sha256": "7e6f6b79f23ad059af45077a0ccdd331385d753386fefe232f509d992b145b99",
+    "bundled_public_report": "package 1.3.0 with code revision 0baf9c2 (report identity reconciled here; the source tree at 0baf9c2 declared 1.2.0)",
+    "timing_evidence": "f40b1f3 (predates the lazy-control merge; v1.3.1 rerun in progress)"
+  },
+  "deployed_versions": {
+    "hosted_at_film_capture": "1.2.0",
+    "hosted_after_reboot": "1.3.0"
+  },
+  "media_digests": {
+    "TopoMarket_demo_60s.mp4": {
+      "sha256": "803d51d61911497a99f2e83b653da0afee244c958d8cb31ea27d3ce4437c322a",
+      "size_bytes": 3950723
+    },
+    "TopoMarket_demo_60s_captioned.mp4": {
+      "sha256": "a3b150ae8048c9e3dc79deccde2f1f10b616fda8cb0f24ad89b10741f248a14c",
+      "size_bytes": 4108645
+    },
+    "TopoMarket_demo_60s.srt": {
+      "sha256": "1f6322b46455e2622a9332521ec77e6057803adfe6cf7f15c9638f06853268f4",
+      "size_bytes": 1270
+    },
+    "TopoMarket_demo_60s_narration.wav": {
+      "sha256": "6c93ec29300b86d96b7016088087068b48c76ca9cd0bf06f472c43b904d8f269",
+      "size_bytes": 11520078
+    },
+    "TopoMarket_demo_production_source.zip": {
+      "sha256": "2732a7b5439fa5c0f22fba6f1811e4f0dbe3523456dde610ae272b7ac065fedd",
+      "size_bytes": 51935999
+    }
+  },
+  "film_manifest": {
+    "build_report_sha256": "62140582743d89f8c18b12748e1a2a713b52db60a59b6ed77ee40fe2e3847c35",
+    "capture_source": "public_deployment",
+    "capture_environment": "hosted_public",
+    "captured_at_utc": "2026-11-26T14:31:34Z",
+    "visible_release": "1.2.0",
+    "fixture": "showcase-synthetic"
+  },
+  "report_identity_note": "Public report regenerated through the release procedure carries snapshot import-manifest source+digest, independent-calendar metadata and code revision. The package-version-bound config hash changes with the v1.3.0 bump; the report identity fields are the authoritative pair for the bundled report, while the tagged release is c65a9ed.",
+  "owner_approval": {
+    "approved": true,
+    "date": "2026-11-26",
+    "youtube": "https://youtu.be/8Xyp-BDM88Q",
+    "master_digest": "803d51d61911497a99f2e83b653da0afee244c958d8cb31ea27d3ce4437c322a"
+  }
+}

@@ -1266,21 +1266,21 @@ def render_structure_screen(
     if str(selection.network_view) == "mapper":
         _call(ui, "subheader", "Mapper groups")
         selection = _render_mapper_node_buttons(ui, mapper, selection)
-        _render_figure(
+        mapper_event = _render_interactive_or_static(
             ui,
-            lambda: charts.mapper_figure(
+            lambda: interactive.mapper_figure(
                 mapper,
                 selected_node_id=mapper.get("selected_node_id"),
                 selected_edge_id=(mapper.get("selected_edge") or {}).get("edge_id"),
             ),
+            key="tm_mapper_chart",
             caption=str(mapper.get("position_rule") or ""),
             alt_text=str(mapper.get("table_alternative") or "Mapper groups")[:4000],
-            cache_key=(
-                f"mapper:{map_obs.get('date') or selection.date}:"
-                f"{mapper.get('selected_node_id')}:"
-                f"{(mapper.get('selected_edge') or {}).get('edge_id')}"
-            ),
         )
+        if interactive is not None:
+            tapped = interactive.mapper_selection(mapper_event)
+            if tapped and tapped != str(selection.node or ""):
+                selection = _commit_interactive_selection(ui, selection.replace(node=tapped))
         selected_node_id = mapper.get("selected_node_id")
         if selected_node_id:
             selected_node = next(
