@@ -606,3 +606,82 @@ def test_report_records_a_silent_policy_and_still_reports_scores(
     assert metrics["average_precision"] is not None
     assert metrics["average_precision_sessions"] == report["common_eligible_dates"]["session_count"]
     assert report["primary_method"] == "tda"
+
+
+def test_r2_bootstrap_draws_keep_positions_and_multiplicity() -> None:
+    """R2: blocks are drawn with replacement, trimmed to N and keep multiplicity."""
+
+    import random as random_module
+    from types import SimpleNamespace
+
+    from topomarket.analysis.evaluation import (
+        BOOTSTRAP_ALGORITHM,
+        _block_bootstrap,
+        _draw_block_positions,
+    )
+
+    starts = list(range(0, 30, 20))
+    positions = _draw_block_positions(
+        random_module.Random(42), starts=starts, block_count=4, block=20, position_count=60
+    )
+    assert len(positions) == 60
+    assert all(0 <= position < 60 for position in positions)
+
+    class ConstantRng:
+        def randrange(self, low, high):
+            return 0
+
+    repeated = _draw_block_positions(
+        ConstantRng(), starts=starts, block_count=4, block=20, position_count=60
+    )
+    assert len(repeated) == 60
+    assert repeated.count(0) == 3  # same 20-position block fills the trimmed 60 positions
+    assert repeated.count(0) > 1  # multiplicity retained instead of collapsing to a set
+
+    def fake(**kwargs):
+        return SimpleNamespace(
+            matched=kwargs.get("matched", []),
+            missed_episodes=kwargs.get("missed", []),
+            false_alerts=kwargs.get("false", []),
+        )
+
+    dates = [f"2020-01-{day:02d}" for day in range(1, 25)]
+    primary = fake(
+        matched=[{"episode_onset": dates[10]}],
+        missed=[{"episode_onset": dates[15]}],
+        false=[dates[0], dates[1]],
+    )
+    comparator = fake(
+        matched=[{"episode_onset": dates[10]}],
+        missed=[{"episode_onset": dates[15]}],
+        false=[dates[0], dates[1]],
+    )
+    result = _block_bootstrap(
+        primary=primary,
+        comparator=comparator,
+        dates=dates,
+        test_start=dates[0],
+        test_end=dates[-1],
+        seed=42,
+        block_sessions=6,
+        replicates=50,
+    )
+    assert result["tda_false_alerts_per_year"].valid_replicates == 50
+    assert result["episode_recall_gain"].lower == 0.0
+    assert result["episode_recall_gain"].upper == 0.0
+    assert result["episode_recall_gain"].lower == result["episode_recall_gain"].upper
+    assert BOOTSTRAP_ALGORITHM == "moving_block_with_replacement_v2"
+
+    no_events = fake()
+    absent = _block_bootstrap(
+        primary=no_events,
+        comparator=None,
+        dates=dates,
+        test_start=dates[0],
+        test_end=dates[-1],
+        seed=42,
+        block_sessions=6,
+        replicates=20,
+    )
+    assert absent["tda_episode_recall"].valid_replicates == 0
+    assert absent["tda_false_alerts_per_year"].valid_replicates == 20

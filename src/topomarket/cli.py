@@ -911,11 +911,19 @@ def _run_evaluation(
         write_evaluation_report,
     )
     from topomarket.analysis.ledger import ledger_digest
-    from topomarket.data.refresh import active_snapshot_id
+    from topomarket.data.identity import resolve_snapshot_identity
     from topomarket.topology import compute_topology_scores, load_topology_config
 
     requested = Path(data_dir).expanduser()
-    target = _resolve_snapshot_dir(requested)
+    identity = resolve_snapshot_identity(requested)
+    target = Path(identity["data_dir"])
+    if not identity["snapshot_id"]:
+        print(
+            "error: could not resolve a snapshot identity for "
+            f"{requested}; provide an active snapshot or an import/refresh manifest",
+            file=sys.stderr,
+        )
+        return 2
     rows = load_daily_rows(target)
     config = load_topology_config()
     series = compute_topology_scores(rows, config)
@@ -923,11 +931,16 @@ def _run_evaluation(
         rows,
         score_series=series,
         config_hash=str(config.config_hash),
-        snapshot_id=active_snapshot_id(requested) or "",
+        snapshot_id=str(identity["snapshot_id"]),
         seed=seed,
         include_ablations=ablations,
         ledger_path=Path(ledger).expanduser() if ledger is not None else None,
-        ledger_snapshot_id=active_snapshot_id(requested) or "",
+        ledger_snapshot_id=str(identity["snapshot_id"]),
+        snapshot_provenance={
+            "source": identity["source"],
+            "manifest_digest": identity["manifest_digest"],
+            "data_dir": identity["data_dir"],
+        },
     )
     if report_out is not None:
         write_evaluation_report(report, Path(report_out).expanduser())
