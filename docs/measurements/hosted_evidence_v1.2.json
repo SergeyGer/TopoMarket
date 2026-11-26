@@ -1,15 +1,22 @@
 {
   "schema_version": 1,
-  "app_url": "https://topomarket-juhbvrgk2k67pnr6qbpfmc.streamlit.app/~/+/",
+  "app_url": "https://topomarket-juhbvrgk2k67pnr6qbpfmc.streamlit.app/",
   "anonymous": true,
   "browser": "Playwright Chromium headless",
+  "measured_at_utc": "2026-11-26T11:26:30Z",
+  "repo_head": "e40d742",
   "expected_release": "1.2.0",
-  "repo_head": "5f86f94",
   "screenshots": [
     "docs/measurements/hosted_v12_landing.png",
     "docs/measurements/hosted_v12_frozen_pair.png",
     "docs/measurements/hosted_v12_comparison.png",
+    "docs/measurements/hosted_v12_replay_blind.png",
+    "docs/measurements/hosted_v12_replay_revealed.png",
+    "docs/measurements/hosted_v12_replay_outcome.png",
+    "docs/measurements/hosted_v12_validation.png",
+    "docs/measurements/hosted_v12_data.png",
     "docs/measurements/hosted_v12_mobile.png",
+    "docs/measurements/hosted_v12_session_a.png",
     "docs/measurements/hosted_v12_session_b.png"
   ],
   "checks": {
@@ -17,16 +24,176 @@
     "landing_metrics_and_interactive_chart": true,
     "frozen_before_after_pair_or_guided_tour": true,
     "two_window_comparison": true,
+    "blind_replay_no_outcome": true,
+    "reveal_shows_outcome_inline_or_replay": true,
+    "validation_evidence_cards": true,
+    "data_calendars": true,
     "mobile_no_horizontal_overflow": true,
     "two_isolated_sessions": true
   },
   "details": {
     "release_identity": {
-      "visible_version": "1.2.0"
+      "visible_version": "1.2.0",
+      "sidebar_line": "Profile: demo \u00b7 release 1.2.0"
     },
-    "replay": "Locator.click: Timeout 15000ms exceeded.\nCall log:\n  - waiting for get_by_text(\"Replay\", exact=True).last\n",
-    "screens": "Locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for get_by_text(\"Validation\", exact=True).last\n"
+    "landing": {
+      "title": true,
+      "synthetic_fixture": true,
+      "metrics": true,
+      "interactive_chart": true
+    },
+    "guided_first_stop": {
+      "guided_step_1": true,
+      "left_date_2008_08_29": true,
+      "right_date_2008_10_10": true,
+      "left_29_of_66": true,
+      "right_66_of_66": true,
+      "retrospective_label": true,
+      "cutoff_0_80": true,
+      "mean_0_791": true,
+      "mean_0_911": true,
+      "observed_2020_comparison": true,
+      "sidebar_tour_state": "Guided step 1/5: Synthetic market shift. Frozen retrospective example: 29/66 pairs on 2008-08-29 \u2192 66/66 on 2008-10-10 (+37, none removed) after the 2008-09-16 onset."
+    },
+    "comparison": {
+      "heading": true,
+      "window_a_date": true,
+      "window_b_date": true,
+      "counts": true,
+      "change": true,
+      "mean_pair": true,
+      "comparison_chart": true,
+      "observed_window_dates": [
+        "2008-08-29",
+        "2008-10-10"
+      ]
+    },
+    "replay": {
+      "blind": {
+        "replay_title": true,
+        "blind_hint": true,
+        "no_outcome": true,
+        "selected_2025_03_10": true,
+        "percentile_100": true,
+        "threshold_100": true
+      },
+      "revealed": {
+        "outcome_present": true,
+        "origin_305_998": true,
+        "boundary_275_398": true,
+        "lowest_299_830": true,
+        "decline_2_02": true,
+        "first_breach_none": true,
+        "no_10_percent_claim": true
+      },
+      "error": null
+    },
+    "blind_replay_default_2020_02_24": {
+      "blind_hint": true,
+      "no_outcome": true,
+      "selected_2020_02_24": true
+    },
+    "validation": {
+      "experimental_wording": true,
+      "wording_experiment": true,
+      "holdout_recall_card": true,
+      "average_precision": true,
+      "false_alerts": true,
+      "chart": true,
+      "limitations": true
+    },
+    "data": {
+      "three_calendar_rows": true,
+      "price_calendar": true,
+      "vix_calendar": true,
+      "industry_calendar": true,
+      "dataframe_rendered": true,
+      "read_only": true,
+      "as_of_dates": {
+        "price": "2026-09-30",
+        "vix": "2026-09-30",
+        "industry": "2026-09-30",
+        "observation": "visual review of hosted_v12_data.png"
+      },
+      "as_of_dates_distinct": false,
+      "synthetic_fixture_note": "Three independent calendar rows are rendered; the synthetic showcase fixture gives all three the same 2005-01-03..2026-09-30 extent, so the as-of dates are equal on this public fixture."
+    },
+    "mobile": {
+      "no_horizontal_overflow": true,
+      "release_visible": true,
+      "synthetic_label": true
+    },
+    "session_isolation": {
+      "session_a_guided_step_1": true,
+      "session_a_selected_2008_10_10": true,
+      "session_a_modified": true,
+      "session_b_guided_not_started": true,
+      "session_b_default_2020_02_24": true,
+      "isolated": true
+    }
   },
-  "cold_start_seconds": 5.8,
-  "measured_at_utc": "2026-11-26T11:17:25Z"
+  "app_errors": [],
+  "cold_start_seconds": 7.93,
+  "visible_version": "1.2.0",
+  "fixture_id": "showcase-synthetic",
+  "deployed_commit": "e40d742c",
+  "deployed_commit_note": "The app does not expose a git SHA. The visible release is 1.2.0, matching the v1.2.0 candidate commit e40d742 (the deploy also includes docs-only commits through repo HEAD ea93bf4 at capture time).",
+  "browser_errors": {
+    "console_error_count": 25,
+    "page_error_count": 0,
+    "messages": [
+      "console.error: Failed to load resource: the server responded with a status of 404 ()",
+      "console.error: Failed to load resource: the server responded with a status of 403 ()",
+      "console.error: Failed to load resource: the server responded with a status of 404 ()",
+      "console.error: Failed to load resource: the server responded with a status of 404 ()",
+      "console.error: Failed to load resource: the server responded with a status of 404 ()",
+      "console.error: Failed to load resource: the server responded with a status of 404 ()",
+      "console.error: Failed to load resource: the server responded with a status of 404 ()",
+      "console.error: Failed to load resource: the server responded with a status of 404 ()",
+      "console.error: Failed to load resource: the server responded with a status of 404 ()",
+      "console.error: Failed to load resource: the server responded with a status of 404 ()",
+      "console.error: Failed to load resource: the server responded with a status of 404 ()",
+      "console.error: Failed to load resource: the server responded with a status of 403 ()",
+      "console.error: Failed to load resource: the server responded with a status of 404 ()",
+      "console.error: Failed to load resource: the server responded with a status of 404 ()",
+      "console.error: Failed to load resource: the server responded with a status of 404 ()",
+      "console.error: Failed to load resource: the server responded with a status of 404 ()",
+      "console.error: Failed to load resource: the server responded with a status of 404 ()",
+      "console.error: Failed to load resource: the server responded with a status of 404 ()",
+      "console.error: Failed to load resource: the server responded with a status of 403 ()",
+      "console.error: Failed to load resource: the server responded with a status of 404 ()",
+      "console.error: Failed to load resource: the server responded with a status of 404 ()",
+      "console.error: Failed to load resource: the server responded with a status of 404 ()",
+      "console.error: Failed to load resource: the server responded with a status of 404 ()",
+      "console.error: Failed to load resource: the server responded with a status of 404 ()",
+      "console.error: Failed to load resource: the server responded with a status of 404 ()"
+    ]
+  },
+  "summary": {
+    "passed": [
+      "blind_replay_no_outcome",
+      "data_calendars",
+      "frozen_before_after_pair_or_guided_tour",
+      "landing_metrics_and_interactive_chart",
+      "mobile_no_horizontal_overflow",
+      "release_identity_1_2_0",
+      "reveal_shows_outcome_inline_or_replay",
+      "two_isolated_sessions",
+      "two_window_comparison",
+      "validation_evidence_cards"
+    ],
+    "failed": []
+  },
+  "notes": "Signed-out evidence captured from the public Community Cloud app on release 1.2.0 (visible sidebar identity), after the earlier stale 1.1.0 deployment was rebooted. Fresh browser sessions were used for each section. All listed checks were observed on the live app; the 2025-03-10 teaching example shows the blind replay and the revealed outcome inline. The data screen renders three independent calendar rows; the synthetic showcase fixture gives all three the same 2005-01-03..2026-09-30 extent, so the as-of dates are equal on this public fixture (recorded explicitly). Browser console errors are limited to Streamlit Cloud static-asset 404/403 requests; there were no page errors.",
+  "release_commit": "e40d742",
+  "repo_head_at_capture": "ea93bf4",
+  "deployment": {
+    "expected_release": "1.2.0",
+    "visible_release": "1.2.0",
+    "status": "verified",
+    "release_commit": "e40d742",
+    "repo_head_at_capture": "ea93bf4",
+    "redeployed": true,
+    "earlier_incident": "At 10:40 UTC the same URL still served release 1.1.0 and crashed on the 2025-03-10 teaching example with FrozenConfigurationError; screenshots hosted_v12_app_error.png and hosted_v12_teaching_preset_error.png preserve that earlier failure. The owner rebooted the Community Cloud app; the 11:26 UTC capture serves release 1.2.0 and all checks pass."
+  }
 }
