@@ -156,8 +156,9 @@ def test_guided_steps_sequence_and_application() -> None:
         "Replay it blind",
     ]
     assert steps[0]["compare"] is True
-    assert steps[0]["compare_date"] == "2008-08-29"
-    assert steps[0]["date"] == "2008-10-10"
+    # Chronological window A is the earlier date; the comparison is +37 (not -37).
+    assert steps[0]["date"] == "2008-08-29"
+    assert steps[0]["compare_date"] == "2008-10-10"
     dates = [step["date"] for step in steps]
     assert all(dates)
     assert dates[0] < dates[1], "stress transition must follow the quiet window"

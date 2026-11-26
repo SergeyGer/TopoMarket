@@ -67,10 +67,11 @@ def test_matched_warning_is_credited_or_a_labelled_teaching_example(data) -> Non
         return
     if preset.teaching:
         # The frozen synthetic showcase has no credited TDA alert; the fallback is a
-        # labelled late-warning teaching example that is not part of the evaluation.
+        # labelled recorded late alert that remains inside the frozen evaluation with zero credit.
         assert preset.date in {str(value) for value in metrics.get("post_onset_alerts") or ()}
-        assert "teaching" in preset.label.lower()
-        assert "not part of the frozen evaluation" in preset.description
+        assert "late alert" in preset.label.lower()
+        assert "part of the frozen evaluation as a late alert" in preset.description
+        assert "zero" in preset.description
     else:
         matched_dates = {entry.get("alert_date") for entry in metrics.get("matched") or ()}
         assert preset.date in matched_dates
@@ -104,7 +105,7 @@ def test_preset_payload_has_a_table_alternative(data) -> None:
     assert "Quiet period" in text
     assert "Fixture" in text
     if find_preset(data, "matched_warning") and find_preset(data, "matched_warning").teaching:
-        assert "Late warning" in text
+        assert "Recorded late alert" in text
 
 
 def test_frozen_presets_file_is_loaded_when_present(tmp_path: Path) -> None:

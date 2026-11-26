@@ -394,8 +394,9 @@ def derive_presets(data: Any) -> list[Preset]:
     teaching = False
     if matched_date is None and late:
         # The frozen synthetic showcase has no alert that the revised evaluator
-        # credits; the storyboard fallback is a clearly labelled late-warning
-        # teaching example that is not part of the evaluation.
+        # credits, but late alerts remain part of the frozen evaluation.  The
+        # 2025-03-10 preset is a recorded post-onset late alert with zero
+        # early-warning credit; it is not "outside" the evaluation.
         matched_date = _latest(late)
         teaching = True
     experiments = {
@@ -420,15 +421,14 @@ def derive_presets(data: Any) -> list[Preset]:
         presets.append(
             Preset(
                 preset_id=preset_id,
-                label=(
-                    "Late warning (teaching example)" if is_teaching else PRESET_LABELS[preset_id]
-                ),
+                label=("Recorded late alert" if is_teaching else PRESET_LABELS[preset_id]),
                 date=date if verified else None,
                 mode="live" if preset_id == "quiet" else "replay",
                 expected=expected if verified else (),
                 description=(
-                    "A late alert used as a labelled teaching example; it is not part of the "
-                    "frozen evaluation."
+                    "The 2025-03-10 alert is part of the frozen evaluation as a late alert: the "
+                    "episode began on 2025-03-06 and the alert fired after onset, so its "
+                    "early-warning credit is zero."
                     if is_teaching
                     else PRESET_DESCRIPTIONS[preset_id]
                 ),
@@ -445,13 +445,12 @@ def derive_presets(data: Any) -> list[Preset]:
                         else PRESET_LABELS[preset_id]
                     )
                 ),
-                review_label=(
-                    "Late warning (teaching example)" if is_teaching else PRESET_LABELS[preset_id]
-                ),
+                review_label=("Recorded late alert" if is_teaching else PRESET_LABELS[preset_id]),
                 blind_description=PRESET_BLIND_DESCRIPTIONS[preset_id],
                 review_description=(
-                    "A late alert used as a labelled teaching example; it is not part of the "
-                    "frozen evaluation."
+                    "The 2025-03-10 alert is part of the frozen evaluation as a late alert: the "
+                    "episode began on 2025-03-06 and the alert fired after onset, so its "
+                    "early-warning credit is zero."
                     if is_teaching
                     else PRESET_DESCRIPTIONS[preset_id]
                 ),

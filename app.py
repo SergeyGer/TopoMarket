@@ -191,6 +191,7 @@ def selection_from_state(state: Mapping[str, Any], data: DashboardData) -> Dashb
     run = _state_value(state, "tm_run", None) or None
     network_view = _state_value(state, "tm_network_view", DEFAULT_NETWORK_VIEW)
     edge = _state_value(state, "tm_edge", None) or None
+    node = _state_value(state, "tm_node", None) or None
     return DashboardSelection(
         screen=screen,
         mode=mode,
@@ -200,6 +201,7 @@ def selection_from_state(state: Mapping[str, Any], data: DashboardData) -> Dashb
         run=run,
         network_view=network_view,
         edge=edge,
+        node=node,
         **_context_kwargs(context),
     )
 
@@ -213,6 +215,7 @@ def _persist_selection(state: dict[str, Any], selection: DashboardSelection) -> 
     state["tm_run"] = selection.run
     state["tm_network_view"] = str(selection.network_view)
     state["tm_edge"] = selection.edge
+    state["tm_node"] = selection.node
 
 
 def apply_action_to_state(
@@ -463,7 +466,8 @@ def _apply_widgets(
                 _call(
                     sidebar,
                     "caption",
-                    "Teaching example, not part of the frozen evaluation.",
+                    "Recorded late alert inside the frozen evaluation: episode onset 2025-03-06; "
+                    "zero early-warning credit.",
                 )
 
     if selection.screen == "structure":
@@ -777,8 +781,10 @@ def _guided_steps(
                 "Frozen retrospective example: 29/66 pairs on 2008-08-29 -> 66/66 on "
                 "2008-10-10 (+37, none removed) after the 2008-09-16 onset."
             ),
-            "date": change.get("right_date"),
-            "compare_date": change.get("left_date"),
+            # Window A is the earlier date, window B the later date: the guided
+            # comparison renders a chronological +37 change, matching the caption.
+            "date": change.get("left_date"),
+            "compare_date": change.get("right_date"),
             "compare": True,
             "mode": "live",
             "screen": "structure",
@@ -1199,9 +1205,11 @@ def _render_mapper_node_buttons(
             key=f"tm_mapper_node::{node['node_id']}",
             help=members,
         ):
-            first = (node.get("member_codes") or [None])[0]
-            if first:
-                selection = _commit_interactive_selection(ui, selection.with_member(str(first)))
+            # Carry the exact Mapper node id so two groups sharing the same industry
+            # code can never resolve to the wrong group (audit v1.2.0 remediation).
+            selection = _commit_interactive_selection(
+                ui, selection.replace(node=str(node["node_id"]))
+            )
     return selection
 
 
@@ -1234,8 +1242,9 @@ def render_structure_screen(
             _call(
                 ui,
                 "warning",
-                "Teaching example (late warning): shown for demonstration only and not part of "
-                "the frozen evaluation.",
+                "Recorded late alert: the episode began on 2025-03-06; the alert fired on "
+                "2025-03-10 and is included in the frozen evaluation as a late alert with zero "
+                "early-warning credit.",
             )
     map_obs = payload.get("map_observation") or {}
     if map_obs.get("stale"):
@@ -1266,6 +1275,24 @@ def render_structure_screen(
                 f"{(mapper.get('selected_edge') or {}).get('edge_id')}"
             ),
         )
+        selected_node_id = mapper.get("selected_node_id")
+        if selected_node_id:
+            selected_node = next(
+                (
+                    item
+                    for item in mapper.get("nodes") or ()
+                    if item.get("node_id") == selected_node_id
+                ),
+                None,
+            )
+            if selected_node:
+                names = ", ".join(member["label"] for member in selected_node.get("members") or ())
+                _call(
+                    ui,
+                    "markdown",
+                    f"**Selected Mapper group {selected_node_id} · "
+                    f"{selected_node.get('member_count', 0)} members:** {names}",
+                )
         selected_edge = mapper.get("selected_edge") or None
         if selected_edge:
             shared = ", ".join(
@@ -1551,6 +1578,15 @@ def render_structure_screen(
                 "Retrospective outcome added inline. Hiding it restores the blind payload, "
                 "including hover and accessibility text.",
             )
+        replay_alert = (payload.get("replay") or {}).get("alert") or {}
+        if replay_alert.get("status") == "late":
+            _call(
+                ui,
+                "warning",
+                f"Recorded late alert: the episode began on {replay_alert.get('episode_onset')}; "
+                f"the alert fired on {selection.date} and is included in the frozen evaluation "
+                "as a late alert with zero early-warning credit.",
+            )
     score_text = (
         "unavailable"
         if score.get("value") is None
@@ -1660,6 +1696,20 @@ def render_replay_screen(
         _call(
             ui, "caption", f"Evidence wording: {evidence.get('wording')} (experiment, not advice)."
         )
+
+    if alert.get("status") == "late" and not payload.get("blind"):
+        outcome = payload.get("outcome") or {}
+        decline = outcome.get("max_decline_pct")
+        onset = alert.get("episode_onset") or "2025-03-06"
+        _call(
+            ui,
+            "warning",
+            f"Recorded late alert: the episode began on {onset}; the alert fired on "
+            f"{selection.date} and is included in the frozen evaluation as a late alert with "
+            f"zero early-warning credit. The largest decline over the next 20 sessions was "
+            f"{'n/a' if decline is None else f'{float(decline):.2f}%'}, below the 10% target.",
+        )
+    return selection
 
 
 def render_validation_screen(
