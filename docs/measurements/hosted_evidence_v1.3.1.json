@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "app_url": "https://topomarket-juhbvrgk2k67pnr6qbpfmc.streamlit.app/",
+  "expected_release": "1.3.0",
+  "checks": {
+    "release_identity": true,
+    "dashboard_renders": true,
+    "chronological_comparison": true,
+    "blind_replay_no_outcome": true,
+    "reveal_shows_computed_target": false,
+    "validation_evidence": true,
+    "data_calendars": false,
+    "mobile_no_overflow": true,
+    "two_isolated_sessions": true
+  },
+  "details": {
+    "version": "1.3.0",
+    "mapper_error": "Locator.click: Timeout 8000ms exceeded.\nCall log:\n  - waiting for get_by_text(\"Structure\", exact=True).last\n"
+  },
+  "measured_at_utc": "2026-11-26T16:49:10Z"
+}
