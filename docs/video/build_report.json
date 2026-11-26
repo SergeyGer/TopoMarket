@@ -1,11 +1,11 @@
 {
   "schema_version": 3,
   "release": "v1.3.0",
-  "recorded_release_identity": "v1.3.0 remediation candidate; visible app release 1.2.0 (package version bump tracked as #87)",
+  "recorded_release_identity": "v1.3.0 release; public app visible 1.2.0 at capture (deployed 0baf9c2); local release candidate 03fd380 sets the package version to 1.3.0.",
   "master": {
     "file": "TopoMarket_demo_60s.mp4",
-    "sha256": "59b583a4fe908db06791bfcf8f7158a04a22be574a243b793291c9e270447d2b",
-    "size_bytes": 4041160
+    "sha256": "803d51d61911497a99f2e83b653da0afee244c958d8cb31ea27d3ce4437c322a",
+    "size_bytes": 3950723
   },
   "captions": {
     "file": "TopoMarket_demo_60s.srt",
@@ -16,8 +16,8 @@
   },
   "captioned_playback": {
     "file": "TopoMarket_demo_60s_captioned.mp4",
-    "sha256": "0189ad76cc1302a775b038ac91591b1f04544809b3a0acab96451794da7c2be0",
-    "size_bytes": 4228094,
+    "sha256": "a3b150ae8048c9e3dc79deccde2f1f10b616fda8cb0f24ad89b10741f248a14c",
+    "size_bytes": 4108645,
     "note": "Reviewed SRT burned in at 9 pt with MarginV=8; captions sit below the evidence footer and clear of the end-card URL."
   },
   "narration_master": {
@@ -32,7 +32,7 @@
     "height": 1080,
     "pix_fmt": "yuv420p",
     "frame_rate": "30/1",
-    "bit_rate": 360513
+    "bit_rate": 348455
   },
   "audio": {
     "codec": "aac",
@@ -59,19 +59,19 @@
   },
   "provenance": {
     "release": "v1.3.0",
-    "recorded_release_identity": "v1.3.0 remediation candidate; visible app release 1.2.0 (package version bump tracked as #87)",
+    "recorded_release_identity": "v1.3.0 remediation candidate; public app visible release 1.2.0 at capture (deployed code 0baf9c2); local candidate 03fd380 bumps the package to 1.3.0",
     "source": "public_deployment",
     "public_url": "https://topomarket-juhbvrgk2k67pnr6qbpfmc.streamlit.app/",
     "public_direct_url": "https://topomarket-juhbvrgk2k67pnr6qbpfmc.streamlit.app/~/+/",
-    "recorded_at_utc": "2026-11-26T14:04:50Z",
+    "recorded_at_utc": "2026-11-26T14:31:34Z",
     "visible_release": "1.2.0",
     "fixture_id": "showcase-synthetic",
-    "code_revision": "b119e7c5e54eac499056fe3d6e395710e4d83c20",
-    "code_revision_note": "Clean HEAD b119e7c5e54eac499056fe3d6e395710e4d83c20 for app.py; the actual checked-in builder is the working-tree revision identified by provenance.builder.sha256.",
+    "code_revision": "0baf9c2fc089a40424ee2499d05b95b1128404dc",
+    "code_revision_note": "Hosted capture from the public deployment at origin/main 0baf9c2fc089a40424ee2499d05b95b1128404dc (visible release 1.2.0). Local HEAD 03fd38088b053506956fc0923a2997fe3891cd90 is the v1.3.0 release candidate (package version bump) and was not the deployed app at capture.",
     "worktree_patch_sha256": "",
-    "capture_environment": "local_build_fallback",
-    "recorded_from": "Identical local v1.3 build (documented fallback; public URL retained)",
-    "deviation": "Public deployment was stale/broken in three fresh signed-out browser sessions (2026-11-26T13:49:02Z..13:49:16Z). Each loaded the shell with visible release 1.2.0, fixture showcase-synthetic, then rendered AttributeError instead of the dashboard; Window A 2008-08-29 could not be reached. The final cut therefore records the identical local v1.3 build at code revision b119e7c5e54eac499056fe3d6e395710e4d83c20 (clean app.py) with the working-tree builder whose sha256 is fc9763bed32ef96b0cd87c94d8189d947c2e7592532b48e5870f3fe022f82ad3. The public URL, UTC, visible version, fixture and commit are retained; this is a documented deviation from the intended public capture, not a claim that the public app was recorded. The cut uses the identical local v1.3 build at commit b119e7c5; re-record command: tools/video/build_demo_video.py --app-url <public URL>.",
+    "capture_environment": "hosted_public",
+    "recorded_from": "Public deployment",
+    "deviation": "None; hosted capture from the public deployment succeeded. The 13:49Z probes found the previous deployment broken; the owner refresh resolved it before the 14:31:34Z capture.",
     "public_probe": {
       "public_url": "https://topomarket-juhbvrgk2k67pnr6qbpfmc.streamlit.app/~/+/",
       "attempts": [
@@ -124,65 +124,72 @@
       "summary": {
         "attempts": 3,
         "all_failed": true,
+        "resolved": true,
         "visible_release": "1.2.0",
         "fixture": "showcase-synthetic",
-        "failure": "AttributeError instead of the dashboard",
+        "failure": "AttributeError instead of the dashboard (pre-refresh)",
         "app_heading_visible": false,
         "window_a_aug_visible": false
-      }
+      },
+      "resolved": true,
+      "resolution": "After the owner deploy (origin/main 0baf9c2), fresh signed-out sessions at 14:30Z rendered the dashboard; the hosted film capture started at 14:31:34Z."
     },
+    "code_revision_deployed": "0baf9c2fc089a40424ee2499d05b95b1128404dc",
+    "code_revision_local_head": "03fd38088b053506956fc0923a2997fe3891cd90",
     "public_probe_summary": {
       "attempts": 3,
       "all_failed": true,
+      "resolved": true,
       "visible_release": "1.2.0",
       "fixture": "showcase-synthetic",
-      "failure": "AttributeError instead of the dashboard",
+      "failure": "AttributeError instead of the dashboard (pre-refresh)",
       "app_heading_visible": false,
       "window_a_aug_visible": false
     },
     "builder": {
       "path": "tools/video/build_demo_video.py",
-      "sha256": "335a387a1b5004b54e233a765550484db7f186462218e4a5b05f24c3a4c87aea",
-      "revision_note": "Working-tree builder after b119e7c (final split scenes, topology date sync, tooltip suppression); to be committed with this delivery."
-    },
-    "hosted_url": "https://topomarket-juhbvrgk2k67pnr6qbpfmc.streamlit.app/",
-    "hosted_visible_release": "1.2.0",
-    "release_commit": "b119e7c5e54eac499056fe3d6e395710e4d83c20"
+      "sha256": "7e6f6b79f23ad059af45077a0ccdd331385d753386fefe232f509d992b145b99",
+      "revision_note": "Working-tree builder after 03fd380 (hosted capture, collapsed comparison sidebar, split Finance/Mapper and blind/reveal scenes, topology date sync, tooltip suppression, sanitized storyboard provenance); to be committed with this delivery."
+    }
   },
   "scenes": [
     {
       "name": "comparison",
       "duration_s": 13.0,
-      "trim_skip_s": 9.443,
-      "trim_start_s": 2.604,
-      "anchor": "wait:+37 (+56.1 pp)",
-      "recording": "page@49f807f4c5715b6b19ee70a6d0a0cbec.webm",
-      "recording_sha256": "6ef6a82cb4032fe93760f5764a1562dbb570b6a34392288b6c160ba7aad7b5e3",
+      "trim_skip_s": 10.873,
+      "trim_start_s": 6.24,
+      "anchor": "scroll_top",
+      "recording": "comparison_hosted_v2.webm",
+      "recording_sha256": "57960d9a0cd72a2badc3a32f4ccd0facd79e24b7dbdf32591900b21e1ab4c41b",
       "actions": [
         {
-          "t": 1.101,
+          "t": 2.314,
           "x": 102,
           "y": 1016,
           "label": "button:Guided: next step"
         },
         {
-          "t": 1.509,
+          "t": 2.769,
           "label": "wait:Guided step 1/5"
         },
         {
-          "t": 2.288,
+          "t": 3.199,
           "label": "wait:Window A \u00b7 2008-08-29"
         },
         {
-          "t": 2.545,
+          "t": 3.463,
           "label": "wait:Window B \u00b7 2008-10-10"
         },
         {
-          "t": 2.804,
+          "t": 3.724,
           "label": "wait:+37 (+56.1 pp)"
         },
         {
-          "t": 4.065,
+          "t": 5.432,
+          "label": "collapse_sidebar"
+        },
+        {
+          "t": 6.44,
           "label": "scroll_top"
         }
       ]
@@ -190,35 +197,35 @@
     {
       "name": "finance",
       "duration_s": 3.5,
-      "trim_skip_s": 11.657,
-      "trim_start_s": 6.25,
+      "trim_skip_s": 11.327,
+      "trim_start_s": 7.132,
       "anchor": "scroll_top",
-      "recording": "page@496d98e51c814ffe6f4ec1b5ee521d89.webm",
-      "recording_sha256": "28c9e113b8eb229f2e3c7435eaf801bdc00ded10d848407eeaacd36dbaf147b6",
+      "recording": "page@d72f8395309a5b405676833475291a08.webm",
+      "recording_sha256": "d5dd571c752c1a367843625fdab8b51e99f0726d1527d3490f2b56e061d5311d",
       "actions": [
         {
-          "t": 1.947,
+          "t": 2.878,
           "label": "open:Inspectors and advanced controls"
         },
         {
-          "t": 3.729,
+          "t": 4.703,
           "click": true,
           "label": "select:Industry member=money"
         },
         {
-          "t": 3.743,
+          "t": 4.716,
           "label": "wait:Selected portfolio: Finance \u00b7 11 qualifying pair(s)"
         },
         {
-          "t": 5.035,
+          "t": 5.907,
           "label": "close:Inspectors and advanced controls"
         },
         {
-          "t": 5.442,
+          "t": 6.315,
           "label": "scroll_sidebar_top"
         },
         {
-          "t": 6.45,
+          "t": 7.332,
           "label": "scroll_top"
         }
       ]
@@ -226,51 +233,51 @@
     {
       "name": "mapper",
       "duration_s": 4.5,
-      "trim_skip_s": 18.559,
-      "trim_start_s": 12.612,
+      "trim_skip_s": 19.357,
+      "trim_start_s": 14.659,
       "anchor": "wait:Highlighted edge node-01--node-02",
-      "recording": "page@712c4973da2026b345bb442a92ec44bd.webm",
-      "recording_sha256": "8c891cedf3dc1da21ca728f48dfec2b997c7f6436aec7bc55282946757c5e86e",
+      "recording": "page@3c002bf04b99424661f885e9195a191f.webm",
+      "recording_sha256": "1262dc2193cff874a67d2fd387881863cbe27afc00394b296d8a98b3369539e6",
       "actions": [
         {
-          "t": 1.946,
+          "t": 1.951,
           "label": "open:Inspectors and advanced controls"
         },
         {
-          "t": 3.782,
+          "t": 4.849,
           "click": true,
           "label": "select:Industry member=money"
         },
         {
-          "t": 4.018,
+          "t": 4.867,
           "label": "wait:Selected portfolio: Finance \u00b7 11 qualifying pair(s)"
         },
         {
-          "t": 5.233,
+          "t": 6.054,
           "label": "close:Inspectors and advanced controls"
         },
         {
-          "t": 5.639,
+          "t": 6.459,
           "label": "scroll_sidebar_top"
         },
         {
-          "t": 6.648,
+          "t": 7.465,
           "label": "scroll_top"
         },
         {
-          "t": 8.193,
+          "t": 9.032,
           "label": "radio:Mapper groups"
         },
         {
-          "t": 10.286,
+          "t": 11.659,
           "label": "wait:Selected Mapper group node-01"
         },
         {
-          "t": 12.801,
+          "t": 14.168,
           "label": "edge:node-01 -- node-02: Consumer durables, Energy, Chemicals, Wholesale & retail"
         },
         {
-          "t": 12.812,
+          "t": 14.859,
           "label": "wait:Highlighted edge node-01--node-02"
         }
       ]
@@ -278,54 +285,54 @@
     {
       "name": "topology",
       "duration_s": 12.0,
-      "trim_skip_s": 19.817,
-      "trim_start_s": 12.772,
+      "trim_skip_s": 18.072,
+      "trim_start_s": 13.712,
       "anchor": "scroll:Score explanation",
-      "recording": "topology_v2.webm",
-      "recording_sha256": "828944982130a6e54a5003182368726d1eb01b16253ac6d688bc7e92b4a3ef5f",
+      "recording": "page@99fe65f14477793181740acf81d41fc7.webm",
+      "recording_sha256": "e56dc1129210ed43e14517803cc3f2421f0ce0045be813c763878a8b5ae01457",
       "actions": [
         {
-          "t": 1.095,
+          "t": 2.153,
           "x": 144,
           "y": 762,
           "label": "button:Guided alert example"
         },
         {
-          "t": 1.529,
+          "t": 2.71,
           "label": "wait:Selected session: 2025-03-10"
         },
         {
-          "t": 3.077,
+          "t": 4.246,
           "x": 87,
           "y": 588,
           "label": "button:Next session"
         },
         {
-          "t": 4.138,
+          "t": 5.0,
           "label": "wait:Selected session: 2025-03-11"
         },
         {
-          "t": 4.869,
+          "t": 5.732,
           "x": 100,
           "y": 541,
           "label": "button:Previous session"
         },
         {
-          "t": 5.277,
+          "t": 6.279,
           "label": "wait:Selected session: 2025-03-10"
         },
         {
-          "t": 6.272,
+          "t": 7.215,
           "x": 144,
           "y": 762,
           "label": "button:Guided alert example"
         },
         {
-          "t": 6.689,
+          "t": 7.624,
           "label": "wait:Selected session: 2025-03-10"
         },
         {
-          "t": 12.772,
+          "t": 13.712,
           "label": "scroll:Score explanation"
         }
       ]
@@ -333,37 +340,37 @@
     {
       "name": "blind",
       "duration_s": 1.5,
-      "trim_skip_s": 11.145,
-      "trim_start_s": 5.239,
+      "trim_skip_s": 11.554,
+      "trim_start_s": 5.283,
       "anchor": "viewport:Alert state: Alert recorded",
-      "recording": "page@f6f1070537dede9c68134eeab2b05a9a.webm",
-      "recording_sha256": "9c50984fa33603a0f136510a4791eb7bc0ceb3ec43a2d97765e149a46f969623",
+      "recording": "page@610e311a7af64a1b2f6cbba46490b6f4.webm",
+      "recording_sha256": "1207e47b55768f7e3143080a7c789020c506c6bb9223247598ae8d4a364408ff",
       "actions": [
         {
-          "t": 1.085,
+          "t": 1.099,
           "x": 144,
           "y": 762,
           "label": "button:Guided alert example"
         },
         {
-          "t": 1.615,
+          "t": 1.668,
           "label": "wait:Selected session: 2025-03-10"
         },
         {
-          "t": 3.254,
+          "t": 3.312,
           "click": true,
           "label": "select:Screen=Replay"
         },
         {
-          "t": 3.269,
+          "t": 3.319,
           "label": "wait:Alert state: Alert recorded"
         },
         {
-          "t": 4.533,
+          "t": 4.577,
           "label": "scroll_top"
         },
         {
-          "t": 5.439,
+          "t": 5.483,
           "label": "viewport:Alert state: Alert recorded"
         }
       ]
@@ -371,51 +378,51 @@
     {
       "name": "reveal",
       "duration_s": 8.5,
-      "trim_skip_s": 15.682,
-      "trim_start_s": 9.829,
+      "trim_skip_s": 14.68,
+      "trim_start_s": 10.111,
       "anchor": "wait:Observed: the index stayed above",
-      "recording": "page@9ee8d57ba703cb2004d799d40f26f4f7.webm",
-      "recording_sha256": "a6f0754736d0a6ccf9e63f1c331b20f40f8ef547cff9dddff5fe8cd007e403f3",
+      "recording": "page@43a0034f1dfc45cff275d97698da3812.webm",
+      "recording_sha256": "033348f9c8f55adcb2f3a1747a677cb87ff7cf3d23fa9395611ef91ce6a88664",
       "actions": [
         {
-          "t": 1.078,
+          "t": 1.144,
           "x": 144,
           "y": 762,
           "label": "button:Guided alert example"
         },
         {
-          "t": 1.634,
+          "t": 1.57,
           "label": "wait:Selected session: 2025-03-10"
         },
         {
-          "t": 3.332,
+          "t": 5.023,
           "click": true,
           "label": "select:Screen=Replay"
         },
         {
-          "t": 3.346,
+          "t": 5.033,
           "label": "wait:Alert state: Alert recorded"
         },
         {
-          "t": 4.611,
+          "t": 6.296,
           "label": "scroll_top"
         },
         {
-          "t": 5.519,
+          "t": 7.204,
           "label": "viewport:Alert state: Alert recorded"
         },
         {
-          "t": 6.341,
+          "t": 8.029,
           "x": 115,
           "y": 857,
           "label": "button:Reveal next 20 sessions"
         },
         {
-          "t": 10.029,
+          "t": 10.311,
           "label": "wait:Observed: the index stayed above"
         },
         {
-          "t": 13.105,
+          "t": 13.385,
           "label": "scroll_contains:Observed: the index stayed above"
         }
       ]
@@ -656,18 +663,20 @@
   },
   "owner_actions": [
     "Owner sign-off on the final v1.3 cut.",
-    "Commit the working-tree tools/video/build_demo_video.py (sha256 fc9763bed32ef96b0cd87c94d8189d947c2e7592532b48e5870f3fe022f82ad3) so the checked-in builder matches the delivered film.",
+    "Commit the working-tree tools/video/build_demo_video.py (sha256 dc68c38386b8a501ced7f921c2c1205c4ab1afe880d792a94d89c8dc381b6831) so the checked-in builder matches the delivered film.",
     "Attach the final media (MP4, captioned MP4, SRT, narration.wav, production_source.zip) to the v1.3.0 release.",
-    "Push b119e7c and refresh the public Streamlit deployment; publish the v1.3.0 release so the Pages player resolves."
+    "Deploy/push 03fd380 to the public Streamlit app if the release must show the 1.3.0 version identity; the recorded public app showed 1.2.0 from 0baf9c2, while the UI fixes were present."
   ],
   "scene_issues_fixed": [
+    "Hosted capture from the public deployment after the owner refresh; fresh signed-out sessions showed the corrected guided comparison.",
     "Guided comparison captured in chronological order: Window A 2008-08-29 29/66 first, Window B 2008-10-10 66/66 second, +37 added, 0 removed; no reversed shot.",
-    "Topology sidebar date sync: forced Next/Previous and repeated preset click so the slider reads 2025-03-10 throughout the Takens/H1 shot (previous capture lagged at 2020-02-24).",
+    "Comparison sidebar collapsed in capture so the stale Streamlit slider label cannot contradict the 2008 dates shown in the header and cards.",
+    "Topology sidebar date sync: forced Next/Previous and repeated preset click so the slider reads 2025-03-10 throughout the Takens/H1 shot.",
     "Mapper edge timing: Finance (3.5 s) and Mapper (4.5 s) are separate scenes; node-01--node-02 edge and Consumer durables detail hold through the sentence.",
     "Replay reveal: blind (1.5 s) and reveal (8.5 s) are separate scenes, avoiding the Streamlit rerun fade and holding the 10% boundary and 2.02% cards.",
     "Streamlit hover tooltips hidden in capture.",
     "SRT cue 00:16 corrected to Window B 2008-10-10 66/66, 37 added, none removed.",
     "Captions lowered (MarginV=8) so the 00:52 cue clears the evidence footer; end-card URL remains clear and no caption is present at 00:59.5."
   ],
-  "contact_sheet_review": "4x3 contact sheet at 5 s intervals reviewed: opening card, chronological comparison, Finance, Mapper edge, topology plots (both visible), blind Replay, reveal cards/10% boundary, evidence figures and end card. No black or blank frames; blackdetect found 0 intervals. Captioned frames at 00:16/00:30/00:46/00:52 and 00:56/00:59.5 reviewed for text and URL clearance."
+  "contact_sheet_review": "4x3 contact sheet at 5 s intervals reviewed: opening card, hosted chronological comparison, Finance, Mapper edge, topology plots (both visible, date 2025-03-10), blind Replay, reveal cards/10% boundary, evidence figures and end card. No black or blank frames; blackdetect found 0 intervals. Captioned frames at 00:16/00:30/00:46/00:52 and 00:56/00:59.5 reviewed for text and URL clearance."
 }

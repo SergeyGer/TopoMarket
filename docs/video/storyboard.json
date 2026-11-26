@@ -49,29 +49,33 @@
       "narration": "Window A, 29 August 2008: 29 of 66 qualifying pairs.",
       "interactions": [
         {
-          "t": 1.101,
+          "t": 2.314,
           "x": 102,
           "y": 1016,
           "label": "button:Guided: next step"
         },
         {
-          "t": 1.509,
+          "t": 2.769,
           "label": "wait:Guided step 1/5"
         },
         {
-          "t": 2.288,
+          "t": 3.199,
           "label": "wait:Window A \u00b7 2008-08-29"
         },
         {
-          "t": 2.545,
+          "t": 3.463,
           "label": "wait:Window B \u00b7 2008-10-10"
         },
         {
-          "t": 2.804,
+          "t": 3.724,
           "label": "wait:+37 (+56.1 pp)"
         },
         {
-          "t": 4.065,
+          "t": 5.432,
+          "label": "collapse_sidebar"
+        },
+        {
+          "t": 6.44,
           "label": "scroll_top"
         }
       ]
@@ -85,69 +89,69 @@
       "narration": "Finance has eleven qualifying pairings.",
       "interactions": [
         {
-          "t": 1.947,
+          "t": 2.878,
           "label": "open:Inspectors and advanced controls"
         },
         {
-          "t": 3.729,
+          "t": 4.703,
           "click": true,
           "label": "select:Industry member=money"
         },
         {
-          "t": 3.743,
+          "t": 4.716,
           "label": "wait:Selected portfolio: Finance \u00b7 11 qualifying pair(s)"
         },
         {
-          "t": 5.035,
+          "t": 5.907,
           "label": "close:Inspectors and advanced controls"
         },
         {
-          "t": 5.442,
+          "t": 6.315,
           "label": "scroll_sidebar_top"
         },
         {
-          "t": 6.45,
+          "t": 7.332,
           "label": "scroll_top"
         },
         {
-          "t": 1.946,
+          "t": 1.951,
           "label": "open:Inspectors and advanced controls"
         },
         {
-          "t": 3.782,
+          "t": 4.849,
           "click": true,
           "label": "select:Industry member=money"
         },
         {
-          "t": 4.018,
+          "t": 4.867,
           "label": "wait:Selected portfolio: Finance \u00b7 11 qualifying pair(s)"
         },
         {
-          "t": 5.233,
+          "t": 6.054,
           "label": "close:Inspectors and advanced controls"
         },
         {
-          "t": 5.639,
+          "t": 6.459,
           "label": "scroll_sidebar_top"
         },
         {
-          "t": 6.648,
+          "t": 7.465,
           "label": "scroll_top"
         },
         {
-          "t": 8.193,
+          "t": 9.032,
           "label": "radio:Mapper groups"
         },
         {
-          "t": 10.286,
+          "t": 11.659,
           "label": "wait:Selected Mapper group node-01"
         },
         {
-          "t": 12.801,
+          "t": 14.168,
           "label": "edge:node-01 -- node-02: Consumer durables, Energy, Chemicals, Wholesale & retail"
         },
         {
-          "t": 12.812,
+          "t": 14.859,
           "label": "wait:Highlighted edge node-01--node-02"
         }
       ]
@@ -161,47 +165,47 @@
       "narration": "10 March 2025: a recorded alert at percentile 100, versus a frozen threshold of 100.",
       "interactions": [
         {
-          "t": 1.095,
+          "t": 2.153,
           "x": 144,
           "y": 762,
           "label": "button:Guided alert example"
         },
         {
-          "t": 1.529,
+          "t": 2.71,
           "label": "wait:Selected session: 2025-03-10"
         },
         {
-          "t": 3.077,
+          "t": 4.246,
           "x": 87,
           "y": 588,
           "label": "button:Next session"
         },
         {
-          "t": 4.138,
+          "t": 5.0,
           "label": "wait:Selected session: 2025-03-11"
         },
         {
-          "t": 4.869,
+          "t": 5.732,
           "x": 100,
           "y": 541,
           "label": "button:Previous session"
         },
         {
-          "t": 5.277,
+          "t": 6.279,
           "label": "wait:Selected session: 2025-03-10"
         },
         {
-          "t": 6.272,
+          "t": 7.215,
           "x": 144,
           "y": 762,
           "label": "button:Guided alert example"
         },
         {
-          "t": 6.689,
+          "t": 7.624,
           "label": "wait:Selected session: 2025-03-10"
         },
         {
-          "t": 12.772,
+          "t": 13.712,
           "label": "scroll:Score explanation"
         }
       ]
@@ -215,71 +219,71 @@
       "narration": "Blind replay.",
       "interactions": [
         {
-          "t": 1.085,
+          "t": 1.099,
           "x": 144,
           "y": 762,
           "label": "button:Guided alert example"
         },
         {
-          "t": 1.615,
+          "t": 1.668,
           "label": "wait:Selected session: 2025-03-10"
         },
         {
-          "t": 3.254,
+          "t": 3.312,
           "click": true,
           "label": "select:Screen=Replay"
         },
         {
-          "t": 3.269,
+          "t": 3.319,
           "label": "wait:Alert state: Alert recorded"
         },
         {
-          "t": 4.533,
+          "t": 4.577,
           "label": "scroll_top"
         },
         {
-          "t": 5.439,
+          "t": 5.483,
           "label": "viewport:Alert state: Alert recorded"
         },
         {
-          "t": 1.078,
+          "t": 1.144,
           "x": 144,
           "y": 762,
           "label": "button:Guided alert example"
         },
         {
-          "t": 1.634,
+          "t": 1.57,
           "label": "wait:Selected session: 2025-03-10"
         },
         {
-          "t": 3.332,
+          "t": 5.023,
           "click": true,
           "label": "select:Screen=Replay"
         },
         {
-          "t": 3.346,
+          "t": 5.033,
           "label": "wait:Alert state: Alert recorded"
         },
         {
-          "t": 4.611,
+          "t": 6.296,
           "label": "scroll_top"
         },
         {
-          "t": 5.519,
+          "t": 7.204,
           "label": "viewport:Alert state: Alert recorded"
         },
         {
-          "t": 6.341,
+          "t": 8.029,
           "x": 115,
           "y": 857,
           "label": "button:Reveal next 20 sessions"
         },
         {
-          "t": 10.029,
+          "t": 10.311,
           "label": "wait:Observed: the index stayed above"
         },
         {
-          "t": 13.105,
+          "t": 13.385,
           "label": "scroll_contains:Observed: the index stayed above"
         }
       ]
@@ -306,16 +310,16 @@
   "final_filename": "TopoMarket_demo_60s.mp4",
   "captions_filename": "TopoMarket_demo_60s.srt",
   "captioned_playback_filename": "TopoMarket_demo_60s_captioned.mp4",
-  "recorded_from": "Identical local v1.3 build (documented fallback; public URL retained)",
+  "recorded_from": "Public deployment",
   "provenance": {
     "public_url": "https://topomarket-juhbvrgk2k67pnr6qbpfmc.streamlit.app/",
-    "recorded_at_utc": "2026-11-26T14:04:50Z",
+    "recorded_at_utc": "2026-11-26T14:31:34Z",
     "visible_release": "1.2.0",
     "fixture_id": "showcase-synthetic",
-    "capture_environment": "local_build_fallback",
-    "recorded_from": "Identical local v1.3 build (documented fallback; public URL retained)",
+    "capture_environment": "hosted_public",
+    "recorded_from": "Public deployment",
     "code_revision": "see docs/video/build_report.json (full revision and digests)",
     "builder": "tools/video/build_demo_video.py (digest in build_report.json)",
-    "deviation": "Public deployment was stale/broken in three fresh signed-out attempts; the local fallback, public URL, UTC, visible version, fixture and commit are documented in build_report.json."
+    "deviation": "None; hosted capture from the public deployment."
   }
 }
