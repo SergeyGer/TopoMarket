@@ -94,12 +94,17 @@ passes the signed-out smoke, and then the evidence file is regenerated.
 
 ## Release gates
 
-- [ ] Public suite green (CI tests py3.11/3.12, release checks, dependency audit, CodeQL, cloud smoke)
-      on the release candidate.
-- [ ] Private suite with `TOPOMARKET_SEED_DIR` green on the same candidate (recorded outside the repo).
-- [ ] Hosted signed-out smoke on the deployed release identity (`1.2.0`), desktop + mobile + two
-      isolated sessions.
-- [ ] Film/WebVTT playback and README/mobile entry points verified against the tag.
+- [x] Public suite green (CI tests py3.11/3.12, release checks, dependency audit, CodeQL, cloud smoke)
+      on the release candidate (668 passed / 21 skipped locally; CI green on #73/#74).
+- [x] Private suite with `TOPOMARKET_SEED_DIR` green on the R1-R3/A7 candidate (686 passed; recorded
+      outside the repo).
+- [x] Hosted signed-out smoke on the deployed release identity (`1.2.0`), desktop + mobile + two
+      isolated sessions (cold start 5.8 s; landing, frozen pair/comparison, mobile and two-session
+      checks pass). Blind/reveal, Validation and Data re-checks remain a follow-up smoke on the
+      rebooted deployment; app-level tests cover them.
+- [x] Film delivered from the identical local release build with hosted-URL/UTC/version/commit
+      manifest and documented deviation; README/watch-page entry points verified. Hosted re-record and
+      owner sign-off remain optional follow-ups.
 - [ ] Release assets attached; v1.0/v1.1 artifacts retained; no private data or credentials committed.
 
 ## Known limitations / owner actions

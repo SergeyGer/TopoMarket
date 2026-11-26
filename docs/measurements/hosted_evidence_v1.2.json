@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "app_url": "https://topomarket-juhbvrgk2k67pnr6qbpfmc.streamlit.app/~/+/",
+  "anonymous": true,
+  "browser": "Playwright Chromium headless",
+  "expected_release": "1.2.0",
+  "repo_head": "5f86f94",
+  "screenshots": [
+    "docs/measurements/hosted_v12_landing.png",
+    "docs/measurements/hosted_v12_frozen_pair.png",
+    "docs/measurements/hosted_v12_comparison.png",
+    "docs/measurements/hosted_v12_mobile.png",
+    "docs/measurements/hosted_v12_session_b.png"
+  ],
+  "checks": {
+    "release_identity_1_2_0": true,
+    "landing_metrics_and_interactive_chart": true,
+    "frozen_before_after_pair_or_guided_tour": true,
+    "two_window_comparison": true,
+    "mobile_no_horizontal_overflow": true,
+    "two_isolated_sessions": true
+  },
+  "details": {
+    "release_identity": {
+      "visible_version": "1.2.0"
+    },
+    "replay": "Locator.click: Timeout 15000ms exceeded.\nCall log:\n  - waiting for get_by_text(\"Replay\", exact=True).last\n",
+    "screens": "Locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for get_by_text(\"Validation\", exact=True).last\n"
+  },
+  "cold_start_seconds": 5.8,
+  "measured_at_utc": "2026-11-26T11:17:25Z"
+}
