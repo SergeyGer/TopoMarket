@@ -1085,7 +1085,7 @@
       "vix": "d045cced77dff1e159e29f1759b500c56552b15a951f3a724c4f0442c350b74a"
     },
     "calibration_version": "F01-corrected-v1",
-    "code_revision": "840f3c1bac18",
+    "code_revision": "54af61a6092a",
     "config_hash": "1ada593f10834d2026090f6a544dc3b6374a08ebbfb9c01a9909829f562bca2b",
     "label_contract": {
       "credit_rule": "label_positive_and_breach_owned",
@@ -1104,7 +1104,29 @@
     "report_version": "1.1",
     "seed": 42,
     "snapshot_id": "showcase-synthetic",
-    "snapshot_provenance": {}
+    "snapshot_provenance": {
+      "data_dir": "/root/projects/TopoMarket/showcase",
+      "manifest_digest": "aee8367bfdf39552662f2984bb5d78fc9b180f83a1d5f946c642d3e71e8dc08b",
+      "signal_calendars": {
+        "as_of": {
+          "industry": "2026-09-30",
+          "price": "2026-09-30",
+          "vix": "2026-09-30"
+        },
+        "joint_fallback": true,
+        "reasons": {
+          "industry": "no split industry table; joint tda_daily fallback for an old synthetic snapshot",
+          "price": "no split index table; joint tda_daily fallback for an old synthetic snapshot",
+          "vix": "no separate VIX calendar; joint tda_daily fallback"
+        },
+        "sources": {
+          "industry": "joint_tda_fallback",
+          "price": "joint_tda_fallback",
+          "vix": "joint_tda_fallback"
+        }
+      },
+      "source": "import_manifest"
+    }
   },
   "purged_validation_sessions": 20,
   "report_version": "1.1",

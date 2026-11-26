@@ -198,7 +198,7 @@
     <ul class="context">
       <li><strong>Structure.</strong> Twelve industry portfolios are nodes; an edge means their trailing 60-session returns correlate at &rho; &ge; 0.80. The film contrasts dated synthetic windows, then opens the Mapper view of shared portfolios.</li>
       <li><strong>Warning.</strong> A separate score embeds 60 daily S&amp;P 500 log returns in three delay coordinates (56 points), measures the longest persistent H&#8321; loop, and ranks its deviation from trailing history as a percentile. The threshold is frozen before evaluation.</li>
-      <li><strong>Replay and evidence.</strong> Blind Replay hides the outcome until you reveal the next 20 sessions. The public holdout is synthetic, so the honest result is weak: TDA warned before 0 of 3 episodes, VIX before 1 of 3. See the <a href="https://github.com/SergeyGer/TopoMarket/blob/main/docs/EVALUATION.md">evaluation rules</a> and the <a href="https://github.com/SergeyGer/TopoMarket/blob/main/docs/ACCEPTANCE_v1.1.md">validation evidence</a>.</li>
+      <li><strong>Replay and evidence.</strong> Blind Replay hides the outcome until you reveal the next 20 sessions. The public holdout is synthetic, so the honest result is weak: TDA warned before 0 of 3 episodes, VIX before 1 of 3. See the <a href="https://github.com/SergeyGer/TopoMarket/blob/main/docs/EVALUATION.md">evaluation rules</a> and the <a href="https://github.com/SergeyGer/TopoMarket/blob/main/docs/ACCEPTANCE_v1.2.md">validation evidence</a>.</li>
     </ul>
   </section>
 
@@ -212,17 +212,17 @@
           <tr><th scope="col">Cue time</th><th scope="col">Scene</th><th scope="col">Narration</th></tr>
         </thead>
         <tbody>
-          <tr><td class="time">00:00:00.050&ndash;00:00:05.690</td><td class="scene">Opening card</td><td>TopoMarket visualizes market structure and tests whether topology can warn of sharp declines.</td></tr>
-          <tr><td class="time">00:00:06.050&ndash;00:00:10.275</td><td class="scene">Two-window comparison</td><td>These twelve industry portfolios contrast two market regimes.</td></tr>
-          <tr><td class="time">00:00:10.295&ndash;00:00:14.590</td><td class="scene">Two-window comparison</td><td>Watch how the network becomes far more connected under stress.</td></tr>
-          <tr><td class="time">00:00:18.050&ndash;00:00:20.806</td><td class="scene">Direct exploration</td><td>Explore the relationships directly.</td></tr>
-          <tr><td class="time">00:00:20.826&ndash;00:00:25.078</td><td class="scene">Mapper</td><td>Mapper connects groups that share industry portfolios.</td></tr>
-          <tr><td class="time">00:00:27.050&ndash;00:00:32.313</td><td class="scene">Alert explanation</td><td>A separate indicator studies the shape of recent S&amp;P 500 returns.</td></tr>
-          <tr><td class="time">00:00:32.333&ndash;00:00:35.734</td><td class="scene">Alert explanation</td><td>This percentile measures unusual behavior.</td></tr>
-          <tr><td class="time">00:00:39.050&ndash;00:00:41.451</td><td class="scene">Blind Replay</td><td>Now test the warning without hindsight.</td></tr>
-          <tr><td class="time">00:00:41.471&ndash;00:00:43.442</td><td class="scene">Reveal</td><td>Reveal the next twenty sessions.</td></tr>
-          <tr><td class="time">00:00:43.462&ndash;00:00:49.434</td><td class="scene">Reveal</td><td>The decline had already begun, and the next twenty sessions did not reach the ten percent target.</td></tr>
-          <tr><td class="time">00:00:50.050&ndash;00:00:54.610</td><td class="scene">Validation evidence</td><td>Forecasting remains experimental; compare it with the simpler benchmarks.</td></tr>
+          <tr><td class="time">00:00:00.050&ndash;00:00:05.378</td><td class="scene">Opening card</td><td>TopoMarket maps market structure and tests whether topology can warn of sharp declines.</td></tr>
+          <tr><td class="time">00:00:06.050&ndash;00:00:13.647</td><td class="scene">Two-window comparison</td><td>Frozen retrospective: 29 of 66 pairs on 2008-08-29; 66 of 66 on 2008-10-10.</td></tr>
+          <tr><td class="time">00:00:13.667&ndash;00:00:18.022</td><td class="scene">Two-window comparison</td><td>Mean correlation rises from 0.791 to 0.911.</td></tr>
+          <tr><td class="time">00:00:19.050&ndash;00:00:21.649</td><td class="scene">Direct exploration</td><td>Finance: eleven qualifying pairs.</td></tr>
+          <tr><td class="time">00:00:21.669&ndash;00:00:25.214</td><td class="scene">Mapper</td><td>Mapper groups portfolios by shared structure.</td></tr>
+          <tr><td class="time">00:00:27.050&ndash;00:00:32.167</td><td class="scene">Alert explanation</td><td>March 10, 2025: a late-warning teaching example at percentile 100.</td></tr>
+          <tr><td class="time">00:00:32.187&ndash;00:00:37.846</td><td class="scene">Alert explanation</td><td>Takens and H1 show the S&amp;P 500 return shape; the frozen threshold is 100.</td></tr>
+          <tr><td class="time">00:00:39.050&ndash;00:00:40.250</td><td class="scene">Blind Replay</td><td>Blind replay.</td></tr>
+          <tr><td class="time">00:00:40.270&ndash;00:00:46.976</td><td class="scene">Reveal</td><td>Reveal: the index stayed above the 10% boundary, with a 2.02% maximum decline.</td></tr>
+          <tr><td class="time">00:00:49.050&ndash;00:00:52.316</td><td class="scene">Reveal</td><td>Experimental: TDA 0 of 3, VIX 1 of 3.</td></tr>
+          <tr><td class="time">00:00:52.336&ndash;00:00:54.542</td><td class="scene">Results</td><td>Average precision is low.</td></tr>
           <tr><td class="time">00:00:55.050&ndash;00:00:58.602</td><td class="scene">End card</td><td>Explore the code and the live demo on GitHub.</td></tr>
         </tbody>
       </table>

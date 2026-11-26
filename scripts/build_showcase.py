@@ -122,21 +122,6 @@ def build(out: Path) -> dict:
     scores_path = out / "scores.csv"
     write_scores_csv(series, scores_path)
 
-    baseline_report = None
-    if BASELINE_REPORT.exists():
-        baseline_report = json.loads(BASELINE_REPORT.read_text(encoding="utf-8"))
-    report = build_evaluation_report(
-        rows,
-        score_series=series,
-        config_hash=str(config.config_hash),
-        snapshot_id=SNAPSHOT_ID,
-        seed=42,
-        include_ablations=False,
-        baseline_report=baseline_report,
-    )
-    report_path = reports / "evaluation-showcase.json"
-    write_evaluation_report(report, report_path)
-
     import_manifest = {
         "schema_version": 1,
         "snapshot_id": SNAPSHOT_ID,
@@ -152,6 +137,44 @@ def build(out: Path) -> dict:
         "synthetic": True,
         "private_data": False,
     }
+    # Populated input provenance for the public report (#81): carry the import-manifest
+    # identity/digest and the independent-calendar metadata recorded by the CLI path.
+    from topomarket.data.manifest import compute_snapshot_id
+    from topomarket.data.signals import load_signal_calendars
+
+    calendars = load_signal_calendars(out)
+    snapshot_provenance = {
+        "source": "import_manifest",
+        "manifest_digest": compute_snapshot_id(import_manifest),
+        "data_dir": str(out),
+        "signal_calendars": {
+            "as_of": calendars["as_of"],
+            "sources": {
+                "price": calendars["price_source"],
+                "industry": calendars["industry_source"],
+                "vix": calendars["vix_source"],
+            },
+            "reasons": calendars["reasons"],
+            "joint_fallback": calendars["joint_fallback"],
+        },
+    }
+
+    baseline_report = None
+    if BASELINE_REPORT.exists():
+        baseline_report = json.loads(BASELINE_REPORT.read_text(encoding="utf-8"))
+    report = build_evaluation_report(
+        rows,
+        score_series=series,
+        config_hash=str(config.config_hash),
+        snapshot_id=SNAPSHOT_ID,
+        seed=42,
+        include_ablations=False,
+        baseline_report=baseline_report,
+        snapshot_provenance=snapshot_provenance,
+    )
+    report_path = reports / "evaluation-showcase.json"
+    write_evaluation_report(report, report_path)
+
     (out / "import_manifest.json").write_text(
         json.dumps(import_manifest, indent=2) + "\n", encoding="utf-8"
     )

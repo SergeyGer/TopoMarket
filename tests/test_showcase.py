@@ -6,6 +6,8 @@ import hashlib
 import json
 from pathlib import Path
 
+import pytest
+
 from topomarket.analysis.evaluation import report_digest
 from topomarket.ui.dashboard import DashboardSelection, toggle_blind, toggle_reveal
 from topomarket.ui.panels import build_screen_payloads, load_dashboard_data
@@ -88,3 +90,33 @@ def test_showcase_scoring_and_report_are_deterministic() -> None:
     assert report["primary_method"] in report["methods"]
     assert report["evidence"]["wording"] == "Experimental market anomaly"
     assert report["seed"] == 42
+
+
+def test_public_report_has_populated_provenance() -> None:
+    """#81: the published synthetic report records its input identity and calendars."""
+
+    import json
+    from pathlib import Path
+
+    report = json.loads(
+        (
+            Path(__file__).resolve().parents[1]
+            / "showcase"
+            / "reports"
+            / "evaluation-showcase.json"
+        ).read_text(encoding="utf-8")
+    )
+    assert report["snapshot_id"] == "showcase-synthetic"
+    provenance = report["provenance"]
+    assert provenance["code_revision"]
+    snapshot = provenance["snapshot_provenance"]
+    assert snapshot["source"] == "import_manifest"
+    assert len(snapshot["manifest_digest"]) == 64
+    calendars = snapshot["signal_calendars"]
+    assert calendars["sources"]["price"] == "joint_tda_fallback"
+    assert calendars["as_of"]["price"]
+    assert provenance["bootstrap_algorithm"] == "moving_block_with_replacement_v2"
+    assert report["metrics"]["tda"]["episode_recall"] == 0.0
+    assert report["metrics"]["vix"]["episode_recall"] == pytest.approx(1 / 3)
+    assert report["metrics"]["tda"]["average_precision"] == pytest.approx(0.0154, abs=1e-4)
+    assert report["metrics"]["vix"]["average_precision"] == pytest.approx(0.1187, abs=1e-4)
