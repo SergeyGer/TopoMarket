@@ -363,6 +363,16 @@ def _apply_widgets(
 
     sidebar = _sidebar(ui)
     options: dict[str, Any] = {}
+    session_state = getattr(ui, "session_state", None)
+    if session_state is not None:
+        pending_sync = session_state.pop("tm_pending_ui_sync", None)
+        if isinstance(pending_sync, Mapping):
+            if pending_sync.get("screen") in SCREEN_LABELS:
+                session_state["tm_screen_label"] = SCREEN_LABELS[str(pending_sync["screen"])]
+            if pending_sync.get("mode") is not None:
+                session_state["tm_mode_label"] = (
+                    "replay" if str(pending_sync["mode"]) == REPLAY else "latest"
+                )
     _call(sidebar, "header", "TopoMarket")
     _call(sidebar, "caption", f"Profile: {data.profile} · release {__version__}")
     if data.snapshot_id:
@@ -418,14 +428,17 @@ def _apply_widgets(
             if alert_value and alert_value != alert_labels[0] and alert_value != applied:
                 selection = selection.with_date(str(alert_value)).replace(mode=REPLAY)
                 ui.session_state["tm_alert_jump_applied"] = alert_value
+                programmatic_date_change = True
         if _call(sidebar, "button", "◀ Previous session", key="tm_prev_session"):
             try:
                 selection = previous_session(selection)
+                programmatic_date_change = True
             except Exception:  # noqa: BLE001 - boundary keeps the selection unchanged
                 pass
         if _call(sidebar, "button", "Next session ▶", key="tm_next_session"):
             try:
                 selection = next_session(selection)
+                programmatic_date_change = True
             except Exception:  # noqa: BLE001 - boundary keeps the selection unchanged
                 pass
 
@@ -462,6 +475,7 @@ def _apply_widgets(
                     .replace(mode=record["mode"])
                     .replace(screen="structure")
                 )
+                programmatic_date_change = True
             if record.get("teaching") and not blind:
                 _call(
                     sidebar,
@@ -491,6 +505,7 @@ def _apply_widgets(
         if str(selection.network_view) == "mapper":
             selection = _apply_mapper_edge_selector(sidebar, data, selection)
 
+    programmatic_date_change = False
     if selection.screen == "structure" and presets.get("available"):
         _call(sidebar, "markdown", "**Guided tour**")
         steps = _guided_steps(presets, data)
@@ -508,6 +523,7 @@ def _apply_widgets(
             state[GUIDE_STEP_KEY] = step_index
             started = True
             selection = _apply_guided_step(selection, steps[step_index])
+            programmatic_date_change = True
             step = steps[step_index]
             if step.get("compare"):
                 state[COMPARE_TOGGLE_KEY] = True
@@ -639,6 +655,15 @@ def _apply_widgets(
     # Render the date caption after every date-changing control so it always
     # reflects the effective selection in the same rerun.
     _call(sidebar, "caption", f"Selected session: {selection.date}")
+    if programmatic_date_change:
+        _persist_selection(ui.session_state, selection)
+        ui.session_state["tm_pending_ui_sync"] = {
+            "screen": str(selection.screen),
+            "mode": str(selection.mode),
+        }
+        rerun = getattr(ui, "rerun", None)
+        if callable(rerun):
+            rerun()
     return selection, options
 
 
@@ -875,8 +900,16 @@ def _comparison_state(
         str(compare_date),
     }:
         comparison = dict(comparison)
-        comparison["label"] = "Retrospective synthetic example"
-        comparison["statement"] = str(frozen.get("statement") or comparison["statement"])
+        ordered = str(selection.date) == str(frozen.get("left_date")) and str(compare_date) == str(
+            frozen.get("right_date")
+        )
+        if ordered:
+            comparison["label"] = "Retrospective synthetic example"
+            comparison["statement"] = str(frozen.get("statement") or comparison["statement"])
+        else:
+            comparison["label"] = (
+                "Retrospective synthetic example (reverse-chronological selection)"
+            )
     if isinstance(cache, dict):
         cache[key] = comparison
     return comparison
@@ -1245,13 +1278,8 @@ def render_structure_screen(
                 "retrospective label.",
             )
         else:
-            _call(
-                ui,
-                "warning",
-                "Recorded late alert: the episode began on 2025-03-06; the alert fired on "
-                "2025-03-10 and is included in the frozen evaluation as a late alert with zero "
-                "early-warning credit.",
-            )
+            # The detailed late-alert notice is rendered once by the inline outcome.
+            pass
     map_obs = payload.get("map_observation") or {}
     if map_obs.get("stale"):
         _call(
@@ -1601,13 +1629,15 @@ def render_structure_screen(
                 "including hover and accessibility text.",
             )
         replay_alert = (payload.get("replay") or {}).get("alert") or {}
+        replay_outcome = (payload.get("replay") or {}).get("outcome") or {}
+        sentence = str(replay_outcome.get("threshold_sentence") or "")
         if replay_alert.get("status") == "late":
             _call(
                 ui,
                 "warning",
                 f"Recorded late alert: the episode began on {replay_alert.get('episode_onset')}; "
                 f"the alert fired on {selection.date} and is included in the frozen evaluation "
-                "as a late alert with zero early-warning credit.",
+                f"with zero early-warning credit. {sentence}".strip(),
             )
     score_text = (
         "unavailable"
@@ -1719,18 +1749,20 @@ def render_replay_screen(
             ui, "caption", f"Evidence wording: {evidence.get('wording')} (experiment, not advice)."
         )
 
-    if alert.get("status") == "late" and not payload.get("blind"):
+    if not payload.get("blind"):
         outcome = payload.get("outcome") or {}
-        decline = outcome.get("max_decline_pct")
-        onset = alert.get("episode_onset") or "2025-03-06"
-        _call(
-            ui,
-            "warning",
-            f"Recorded late alert: the episode began on {onset}; the alert fired on "
-            f"{selection.date} and is included in the frozen evaluation as a late alert with "
-            f"zero early-warning credit. The largest decline over the next 20 sessions was "
-            f"{'n/a' if decline is None else f'{float(decline):.2f}%'}, below the 10% target.",
-        )
+        sentence = str(outcome.get("threshold_sentence") or "")
+        if alert.get("status") == "late":
+            onset = alert.get("episode_onset") or "the recorded onset"
+            _call(
+                ui,
+                "warning",
+                f"Recorded late alert: the episode began on {onset}; the alert fired on "
+                f"{selection.date} and is included in the frozen evaluation with zero "
+                f"early-warning credit. {sentence}".strip(),
+            )
+        elif sentence:
+            _call(ui, "caption", sentence)
     return selection
 
 

@@ -124,7 +124,42 @@ def build_outcome(data: Any, selected: str) -> dict[str, Any] | None:
         "dates": [entry["date"] for entry in horizon],
         "closes": [entry["close"] for entry in horizon],
         "outcome_label": _outcome_label(pending, breach),
+        "threshold_sentence": _threshold_sentence(
+            pending=pending,
+            breach=breach,
+            max_decline=max_decline,
+            required_sessions=OUTCOME_HORIZON,
+            observed_sessions=len(horizon),
+        ),
     }
+
+
+def _threshold_sentence(
+    *,
+    pending: bool,
+    breach: Mapping[str, Any] | None,
+    max_decline: float | None,
+    required_sessions: int,
+    observed_sessions: int,
+) -> str:
+    """Derive the target sentence from the computed outcome (audit v1.3.0 #3)."""
+
+    decline = "n/a" if max_decline is None else f"{max_decline * 100.0:.2f}%"
+    if pending:
+        return (
+            f"Horizon incomplete: {observed_sessions} of {required_sessions} sessions observed; "
+            f"the decline so far is {decline}."
+        )
+    if breach is not None:
+        return (
+            f"Target reached: the index first closed at or below the 10% boundary on "
+            f"{breach['date']} and the maximum decline from the origin was {decline}, at least "
+            f"the 10% target over the {required_sessions}-session horizon."
+        )
+    return (
+        f"Target not reached: the maximum decline from the origin was {decline}, below the "
+        f"10% target over the full {required_sessions}-session horizon."
+    )
 
 
 def _outcome_label(pending: bool, breach: Mapping[str, Any] | None) -> str:
