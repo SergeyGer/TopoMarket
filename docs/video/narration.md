@@ -1,26 +1,25 @@
-# Narration script (v1.1 film)
+# Narration script (v1.3 film)
 
 Voice: `en-US-GuyNeural`, 48 kHz mono, normalised into the final mix at about -16 LUFS
-(integrated) with a true peak at or below -1.5 dBTP. Rate is adjusted per scene to fit the
-storyboard window. All claims are verified against the released synthetic fixture and the
-regenerated v1.1 evaluation report in `docs/video/production_notes.md`.
+with a true peak at or below -1.5 dBTP. Silence is trimmed; rate is adjusted per scene
+to fit the storyboard window.
 
 | Window | Scene | Narration |
 | --- | --- | --- |
-| 00:00-00:06 | Opening card | TopoMarket visualizes market structure and tests whether topology can warn of sharp declines. |
-| 00:06-00:18 | Two-window comparison | These twelve industry portfolios contrast two market regimes. Watch how the network becomes far more connected under stress. |
-| 00:18-00:27 | Direct exploration + Mapper | Explore the relationships directly. Mapper connects groups that share industry portfolios. |
-| 00:27-00:39 | Alert explanation | A separate indicator studies the shape of recent S and P five hundred returns. This percentile measures unusual behavior. |
-| 00:39-00:50 | Blind Replay -> Reveal | Now test the warning without hindsight. Reveal the next twenty sessions and see whether the index fell ten percent. The decline had already begun; the next twenty sessions did not reach the ten percent target. |
-| 00:50-00:55 | Validation evidence | Forecasting remains experimental. Compare the results with simpler benchmarks. |
-| 00:55-01:00 | End card | Explore the code and the live demo on GitHub. |
+| 00:00:00-00:00:06 | Opening card | TopoMarket maps market structure and tests whether topology can warn of sharp declines. |
+| 00:00:06-00:00:10 | Two-window comparison | Window A, 29 August 2008: 29 of 66 qualifying pairs. |
+| 00:00:10-00:00:16 | Two-window comparison | Window B, 10 October 2008: 66 of 66; 37 added, none removed. |
+| 00:00:16-00:00:19 | Two-window comparison label | Retrospective synthetic example. |
+| 00:00:19-00:00:21 | Finance selection | Finance has eleven qualifying pairings. |
+| 00:00:21-00:00:27 | Mapper groups | Mapper places Finance with Manufacturing and Chemicals; Consumer durables is shared across groups. |
+| 00:00:27-00:00:32 | Alert explanation | 10 March 2025: a recorded alert at percentile 100, versus a frozen threshold of 100. |
+| 00:00:32-00:00:39 | Alert explanation | The 56-point Takens embedding and the highlighted H1 interval show the shape of recent S&P 500 returns. |
+| 00:00:39-00:00:40 | Blind Replay | Blind replay. |
+| 00:00:40-00:00:45 | Reveal | Reveal: the index stayed above the 10% boundary; maximum decline, 2.02%. |
+| 00:00:45-00:00:49 | Reveal classification | Recorded late alert, included in the evaluation, zero early-warning credit. |
+| 00:00:49-00:00:55 | Synthetic holdout results | Three episodes: TDA 0 of 3; VIX 1 of 3. Average precision is low. |
+| 00:00:55-00:01:00 | End card | Explore the code and the live demo on GitHub. |
 
-Notes
-- The synthetic fixture's quiet preset is later than the stress transition, so the film uses the
-  specification's approved "contrast two market regimes" wording and makes no chronological
-  crisis-emergence claim.
-- The replay example is a clearly labelled late-warning teaching example outside the frozen
-  evaluation; the narration states the actual outcome (no 10% decline within the 20-session
-  horizon) rather than promising a successful prediction.
-- SRT captions are generated from this script and manually reviewed for TopoMarket, Mapper and
-  S&P 500 spellings; the captioned playback variant burns the reviewed cues into a social-ready MP4.
+The reviewed SRT in `docs/video/TopoMarket_demo_60s.srt` is the single source for
+`docs/watch/captions.vtt`, `docs/watch/transcript.md` and the inline watch-page
+transcript; regenerate them with `python scripts/build_watch_assets.py` after an edit.

@@ -1,3 +1,4 @@
+# ruff: noqa: E501 - long HTML/string literals in the storyboard payload
 #!/usr/bin/env python3
 """Build the TopoMarket v1.3.0 60-second demo film.
 
@@ -109,8 +110,7 @@ NARRATION = [
         "name": "alert",
         "start": 27.0,
         "text": (
-            "10 March 2025: a recorded alert at percentile 100, versus a frozen "
-            "threshold of 100."
+            "10 March 2025: a recorded alert at percentile 100, versus a frozen threshold of 100."
         ),
         "rate": 15,
         "window": 5.8,
@@ -135,18 +135,14 @@ NARRATION = [
     {
         "name": "reveal",
         "start": 40.3,
-        "text": (
-            "Reveal: the index stayed above the 10% boundary; maximum decline, 2.02%."
-        ),
+        "text": ("Reveal: the index stayed above the 10% boundary; maximum decline, 2.02%."),
         "rate": 20,
         "window": 4.9,
     },
     {
         "name": "late-alert",
         "start": 45.25,
-        "text": (
-            "Recorded late alert, included in the evaluation, zero early-warning credit."
-        ),
+        "text": ("Recorded late alert, included in the evaluation, zero early-warning credit."),
         "rate": 20,
         "window": 3.7,
     },
@@ -192,7 +188,8 @@ CUES = [
     (
         21.70,
         26.30,
-        "Mapper places Finance with Manufacturing and Chemicals; Consumer durables is shared across groups.",
+        "Mapper places Finance with Manufacturing and Chemicals; "
+        "Consumer durables is shared across groups.",
         "Mapper",
     ),
     (
@@ -204,7 +201,8 @@ CUES = [
     (
         32.60,
         38.30,
-        "The 56-point Takens embedding and the highlighted H1 interval show the shape of recent S&P 500 returns.",
+        "The 56-point Takens embedding and the highlighted H1 interval show the shape of recent "
+        "S&P 500 returns.",
         "Alert explanation",
     ),
     (39.05, 40.25, "Blind replay.", "Blind Replay"),
@@ -266,6 +264,7 @@ SCENES = [
             ("select_option", ("Industry member", "money")),
             ("wait_contains", "Selected portfolio: Finance · 11 qualifying pair(s)"),
             ("close_expander", "Inspectors and advanced controls"),
+            ("scroll_sidebar_top", None),
             ("scroll_top", None),
             ("sleep", 0.8),
         ],
@@ -282,6 +281,7 @@ SCENES = [
             ("select_option", ("Industry member", "money")),
             ("wait_contains", "Selected portfolio: Finance · 11 qualifying pair(s)"),
             ("close_expander", "Inspectors and advanced controls"),
+            ("scroll_sidebar_top", None),
             ("scroll_top", None),
             ("sleep", 0.5),
             ("radio", "Mapper groups"),
@@ -300,32 +300,58 @@ SCENES = [
         "actions": [
             ("sleep", 1.0),
             ("button_regex", r"Guided alert example"),
-            ("wait_contains", "Selected session 2025-03-10"),
-            ("sleep", 3.2),
+            ("wait_contains", "Selected session: 2025-03-10"),
+            ("sleep", 1.2),
+            ("button_regex", r"Next session"),
+            ("wait_contains", "Selected session: 2025-03-11"),
+            ("sleep", 0.4),
+            ("button_regex", r"Previous session"),
+            ("wait_contains", "Selected session: 2025-03-10"),
+            ("sleep", 0.6),
+            ("button_regex", r"Guided alert example"),
+            ("wait_contains", "Selected session: 2025-03-10"),
+            ("sleep", 4.5),
             ("scroll_align", "Score explanation"),
             ("sleep", 1.0),
         ],
     },
     {
-        "name": "replay",
-        "seconds": 10.0,
+        "name": "blind",
+        "seconds": 1.5,
         "pre_roll": 0.2,
         "anchor": "viewport:Alert state: Alert recorded",
         "actions": [
             ("sleep", 1.0),
             ("button_regex", r"Guided alert example"),
-            ("wait_contains", "Selected session 2025-03-10"),
+            ("wait_contains", "Selected session: 2025-03-10"),
             ("select_option", ("Screen", "Replay")),
             ("wait_contains", "Alert state: Alert recorded"),
             ("scroll_top", None),
             ("sleep", 0.9),
             ("wait_in_viewport", "Alert state: Alert recorded"),
-            ("sleep", 0.8),
+            ("sleep", 0.6),
+        ],
+    },
+    {
+        "name": "reveal",
+        "seconds": 8.5,
+        "pre_roll": 0.2,
+        "anchor": "wait:Observed: the index stayed above",
+        "actions": [
+            ("sleep", 1.0),
+            ("button_regex", r"Guided alert example"),
+            ("wait_contains", "Selected session: 2025-03-10"),
+            ("select_option", ("Screen", "Replay")),
+            ("wait_contains", "Alert state: Alert recorded"),
+            ("scroll_top", None),
+            ("sleep", 0.9),
+            ("wait_in_viewport", "Alert state: Alert recorded"),
+            ("sleep", 0.5),
             ("button_regex", r"Reveal next 20 sessions"),
             ("wait_contains", "Observed: the index stayed above"),
-            ("sleep", 0.3),
+            ("sleep", 1.5),
             ("scroll_contains", r"Observed: the index stayed above"),
-            ("sleep", 5.8),
+            ("sleep", 5.6),
         ],
     },
 ]
@@ -515,9 +541,7 @@ def start_streamlit():
     )
     for _ in range(120):
         try:
-            urllib.request.urlopen(
-                f"http://127.0.0.1:{PORT}/_stcore/health", timeout=2
-            ).read()
+            urllib.request.urlopen(f"http://127.0.0.1:{PORT}/_stcore/health", timeout=2).read()
             return proc, log
         except Exception:
             time.sleep(1)
@@ -528,6 +552,7 @@ def start_streamlit():
 HIDE_CSS = (
     "header, [data-testid='stToolbar'], [data-testid='stDecoration'], "
     "[data-testid='stStatusWidget'], [data-testid='stAppDeployButton'], "
+    "[data-testid='stTooltipContent'], div[role='tooltip'], "
     "#MainMenu, footer {visibility: hidden !important;} "
     "img {max-width: 100% !important; height: auto !important;} "
     "canvas {max-width: 100% !important;}"
@@ -583,9 +608,7 @@ def _scene_setup(root_getter, page, actions, events):
             elif kind == "open_expander":
                 root.get_by_text(payload, exact=True).first.click(force=True, timeout=30000)
                 page.wait_for_timeout(900)
-                events.append(
-                    {"t": round(time.perf_counter() - t0, 3), "label": f"open:{payload}"}
-                )
+                events.append({"t": round(time.perf_counter() - t0, 3), "label": f"open:{payload}"})
             elif kind == "close_expander":
                 root.get_by_text(payload, exact=True).first.click(force=True, timeout=30000)
                 page.wait_for_timeout(900)
@@ -622,9 +645,7 @@ def _scene_setup(root_getter, page, actions, events):
                         force=True, timeout=20000
                     )
                 except Exception:
-                    root.get_by_text(payload, exact=True).last.click(
-                        force=True, timeout=30000
-                    )
+                    root.get_by_text(payload, exact=True).last.click(force=True, timeout=30000)
                 page.wait_for_timeout(1000)
                 events.append(
                     {"t": round(time.perf_counter() - t0, 3), "label": f"radio:{payload}"}
@@ -635,9 +656,7 @@ def _scene_setup(root_getter, page, actions, events):
                     force=True, timeout=30000
                 )
                 page.wait_for_timeout(500)
-                root.get_by_role("option", name=option, exact=True).click(
-                    force=True, timeout=30000
-                )
+                root.get_by_role("option", name=option, exact=True).click(force=True, timeout=30000)
                 page.wait_for_timeout(700)
                 events.append(
                     {
@@ -647,9 +666,9 @@ def _scene_setup(root_getter, page, actions, events):
                     }
                 )
             elif kind == "select_edge":
-                root.get_by_role(
-                    "combobox", name="Highlight Mapper edge", exact=True
-                ).click(force=True, timeout=30000)
+                root.get_by_role("combobox", name="Highlight Mapper edge", exact=True).click(
+                    force=True, timeout=30000
+                )
                 page.wait_for_timeout(500)
                 options = root.get_by_role("option")
                 selected = None
@@ -670,9 +689,7 @@ def _scene_setup(root_getter, page, actions, events):
                 )
             elif kind == "wait_contains":
                 _wait_visible_text(root, payload, timeout=45000)
-                events.append(
-                    {"t": round(time.perf_counter() - t0, 3), "label": f"wait:{payload}"}
-                )
+                events.append({"t": round(time.perf_counter() - t0, 3), "label": f"wait:{payload}"})
                 page.wait_for_timeout(250)
             elif kind == "wait_in_viewport":
                 _wait_in_viewport(root, payload, timeout=45000)
@@ -685,18 +702,14 @@ def _scene_setup(root_getter, page, actions, events):
                 page.wait_for_timeout(250)
             elif kind == "scroll_align":
                 locator = root.get_by_text(payload, exact=True).first
-                locator.evaluate(
-                    "el => el.scrollIntoView({block: 'start', behavior: 'instant'})"
-                )
+                locator.evaluate("el => el.scrollIntoView({block: 'start', behavior: 'instant'})")
                 page.wait_for_timeout(1300)
                 events.append(
                     {"t": round(time.perf_counter() - t0, 3), "label": f"scroll:{payload}"}
                 )
             elif kind == "scroll_contains":
                 locator = root.get_by_text(re.compile(payload)).first
-                locator.evaluate(
-                    "el => el.scrollIntoView({block: 'start', behavior: 'instant'})"
-                )
+                locator.evaluate("el => el.scrollIntoView({block: 'start', behavior: 'instant'})")
                 page.wait_for_timeout(1300)
                 events.append(
                     {
@@ -707,8 +720,18 @@ def _scene_setup(root_getter, page, actions, events):
             elif kind == "scroll_top":
                 _scroll_main(root, 0)
                 page.wait_for_timeout(1000)
+                events.append({"t": round(time.perf_counter() - t0, 3), "label": "scroll_top"})
+            elif kind == "scroll_sidebar_top":
+                root.evaluate(
+                    """() => {const side = document.querySelector('[data-testid="stSidebar"]');
+                    if (side) side.scrollTo({top: 0, behavior: 'instant'});}"""
+                )
+                page.wait_for_timeout(400)
                 events.append(
-                    {"t": round(time.perf_counter() - t0, 3), "label": "scroll_top"}
+                    {
+                        "t": round(time.perf_counter() - t0, 3),
+                        "label": "scroll_sidebar_top",
+                    }
                 )
         except Exception as error:  # noqa: BLE001 - report and continue
             events.append(
@@ -809,9 +832,7 @@ def capture_app(app_url: str | None) -> dict:
                             document.body.style.background='#F8FAFC';}"""
                         )
                 else:
-                    page.wait_for_selector(
-                        "h1:has-text('TopoMarket research')", timeout=240000
-                    )
+                    page.wait_for_selector("h1:has-text('TopoMarket research')", timeout=240000)
                     page.wait_for_timeout(2600)
                     root = page
                 root.evaluate(
@@ -840,7 +861,8 @@ def capture_app(app_url: str | None) -> dict:
                     (
                         float(event["t"])
                         for event in events
-                        if anchor and anchor in str(event.get("label") or "")
+                        if anchor
+                        and anchor in str(event.get("label") or "")
                         and "error" not in event
                     ),
                     None,
@@ -905,9 +927,7 @@ def capture_app(app_url: str | None) -> dict:
                 proc.kill()
         if log is not None:
             log.close()
-    (WORK / "capture.json").write_text(
-        json.dumps(result, indent=2) + "\n", encoding="utf-8"
-    )
+    (WORK / "capture.json").write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
     return result
 
 
@@ -953,14 +973,18 @@ def render_evidence_card() -> Path:
           <div class="method">TDA score</div>
           <div class="big teal">0<span class="slash">/</span>3</div>
           <div class="warn">episodes warned</div>
-          <div class="pips"><span class="pip"></span><span class="pip"></span><span class="pip"></span></div>
+          <div class="pips">
+            <span class="pip"></span><span class="pip"></span><span class="pip"></span>
+          </div>
           <div class="small">Average precision <b>0.0154</b></div>
         </div>
         <div class="card">
           <div class="method">VIX level</div>
           <div class="big amber">1<span class="slash">/</span>3</div>
           <div class="warn">episodes warned</div>
-          <div class="pips"><span class="pip on"></span><span class="pip"></span><span class="pip"></span></div>
+          <div class="pips">
+            <span class="pip on"></span><span class="pip"></span><span class="pip"></span>
+          </div>
           <div class="small">Average precision <b>0.1187</b></div>
         </div>
       </div>
@@ -1074,9 +1098,7 @@ def build_segments(capture: dict, evidence_card: Path) -> dict:
     parts.append(still("evidence", evidence_card, 6.0))
     parts.append(still("end", end_card, END_SECONDS))
     list_path = seg / "concat.txt"
-    list_path.write_text(
-        "\n".join(f"file '{path}'" for path in parts) + "\n", encoding="utf-8"
-    )
+    list_path.write_text("\n".join(f"file '{path}'" for path in parts) + "\n", encoding="utf-8")
     base = seg / "base.mp4"
     run(
         [
@@ -1233,7 +1255,7 @@ def burn_captions(master: Path, srt: Path) -> Path:
     captioned = WORK / "TopoMarket_demo_60s_captioned.mp4"
     style = (
         "FontName=DejaVu Sans,FontSize=9,PrimaryColour=&H00FFFFFF,"
-        "OutlineColour=&H00000000,BorderStyle=1,Outline=1,Shadow=1,MarginV=24"
+        "OutlineColour=&H00000000,BorderStyle=1,Outline=1,Shadow=1,MarginV=8"
     )
     run(
         [
@@ -1437,6 +1459,8 @@ def make_storyboard(report: dict) -> dict:
         interactions = by_scene.get(name, [])
         if name == "mapper":
             interactions = by_scene.get("finance", []) + interactions
+        if name == "replay":
+            interactions = by_scene.get("blind", []) + by_scene.get("reveal", [])
         scenes.append(
             {
                 "id": name,
@@ -1450,7 +1474,8 @@ def make_storyboard(report: dict) -> dict:
         )
     return {
         "schema_version": 2,
-        "title": "TopoMarket v1.3 - corrected structure, recorded late alert and experimental evidence",
+        "title": "TopoMarket v1.3 - corrected structure, recorded late alert and "
+        "experimental evidence",
         "release": "v1.3.0",
         "repository_url": "https://github.com/SergeyGer/TopoMarket",
         "end_card_url": END_CARD_URL,
@@ -1481,7 +1506,21 @@ def make_storyboard(report: dict) -> dict:
         "captions_filename": "TopoMarket_demo_60s.srt",
         "captioned_playback_filename": "TopoMarket_demo_60s_captioned.mp4",
         "recorded_from": report["provenance"]["recorded_from"],
-        "provenance": report["provenance"],
+        "provenance": {
+            "public_url": report["provenance"]["public_url"],
+            "recorded_at_utc": report["provenance"]["recorded_at_utc"],
+            "visible_release": report["provenance"]["visible_release"],
+            "fixture_id": report["provenance"]["fixture_id"],
+            "capture_environment": report["provenance"]["capture_environment"],
+            "recorded_from": report["provenance"]["recorded_from"],
+            "code_revision": "see docs/video/build_report.json (full revision and digests)",
+            "builder": "tools/video/build_demo_video.py (digest in build_report.json)",
+            "deviation": (
+                "Public deployment was stale/broken in three fresh signed-out attempts; "
+                "the local fallback, public URL, UTC, visible version, fixture and commit "
+                "are documented in build_report.json."
+            ),
+        },
     }
 
 
@@ -1502,19 +1541,19 @@ never labelled as localhost. See `public_probe.json` for the three failed public
 | Item | Value |
 | --- | --- |
 | Release | `v1.3.0` (remediation candidate; package version bump tracked as #87) |
-| Visible app release | `{provenance['visible_release']}` (the checked-out package version at capture) |
-| Capture environment | `{provenance['capture_environment']}` |
-| Public app | <{provenance['public_url']}> |
-| Capture UTC | `{provenance['recorded_at_utc']}` |
-| Fixture | `{provenance['fixture_id']}`, seed 4242, 5,673 sessions 2005-01-03..2026-09-30 |
-| Code revision | `{provenance['code_revision'][:12]}` plus the working-tree `app.py` patch captured in the source ZIP |
+| Visible app release | `{provenance["visible_release"]}` (the checked-out package version at capture) |
+| Capture environment | `{provenance["capture_environment"]}` |
+| Public app | <{provenance["public_url"]}> |
+| Capture UTC | `{provenance["recorded_at_utc"]}` |
+| Fixture | `{provenance["fixture_id"]}`, seed 4242, 5,673 sessions 2005-01-03..2026-09-30 |
+| Code revision | `{provenance["code_revision"][:12]}` (clean `app.py`); builder sha256 `{provenance.get("builder", {}).get("sha256", "n/a")[:16]}` |
 | Master | `TopoMarket_demo_60s.mp4` - H.264 High 1920x1080 30 fps, AAC 48 kHz stereo, 60.000 s |
-| Captions | `TopoMarket_demo_60s.srt` - {report['captions']['cues']} cues; captioned playback `TopoMarket_demo_60s_captioned.mp4` |
+| Captions | `TopoMarket_demo_60s.srt` - {report["captions"]["cues"]} cues; captioned playback `TopoMarket_demo_60s_captioned.mp4` |
 | Delivery bundle | `production_source.zip` (scene recordings, TTS, narration, SRT, storyboard, builder, cards, capture manifest, app snapshot/patch, public probe) |
 
 ## Deviation from the public deployment
 
-{provenance['deviation']}
+{provenance["deviation"]}
 
 The public URL, UTC, visible version, fixture and commit are retained exactly as required. The
 manifest source is `public_deployment` (intended) with a documented local fallback; do not read the
@@ -1556,14 +1595,14 @@ fallback as a claim that the public app was recorded.
 
 - 60.000 s master (target 60 +/- 0.1 s); 1920x1080, 30 fps, H.264 High `yuv420p`; AAC LC 48 kHz
   stereo.
-- Integrated loudness **{report['loudness']['measured_integrated_lufs']} LUFS**, true peak
-  **{report['loudness']['measured_true_peak_dbtp']} dBTP** (limit -1.5 dBTP), LRA
-  {report['loudness']['measured_lra']}; two-pass loudnorm, linear=true.
-- {report['captions']['cues']} reviewed SRT cues; four audit checkpoints at 00:16, 00:30, 00:46 and
+- Integrated loudness **{report["loudness"]["measured_integrated_lufs"]} LUFS**, true peak
+  **{report["loudness"]["measured_true_peak_dbtp"]} dBTP** (limit -1.5 dBTP), LRA
+  {report["loudness"]["measured_lra"]}; two-pass loudnorm, linear=true.
+- {report["captions"]["cues"]} reviewed SRT cues; four audit checkpoints at 00:16, 00:30, 00:46 and
   00:52 resolve as follows:
 {cue_lines}
 - The end-card URL is clear of the final caption; the last cue ends at 00:58.600.
-- `ffmpeg blackdetect` found {report['blackdetect']['black_intervals']} black interval(s); frames at
+- `ffmpeg blackdetect` found {report["blackdetect"]["black_intervals"]} black interval(s); frames at
   every scene switch and the contact sheet (`contact.png`) were reviewed. No blank/loading frames in
   the accepted cut.
 - Captions and captioned playback verified at 60.000 s; frame review confirms burned captions and
@@ -1571,6 +1610,26 @@ fallback as a claim that the public app was recorded.
 - `tools/video/build_demo_video.py` is the actual checked-in builder used for this cut. It uses
   dynamic anchors (recorded event timestamps) so hosted/local load variation cannot drift the edit;
   `--app-url` remains supported for a hosted re-record.
+
+## Scene and cue issues fixed in this cut
+
+- **Guided comparison:** the captured A/B order is chronological (Window A 2008-08-29 29/66;
+  Window B 2008-10-10 66/66; +37/0); no reversed frame is present.
+- **Topology date sync:** after the preset click, Streamlit's sidebar slider lagged one render at
+  2020-02-24. The capture now forces a Next/Previous cycle and a repeated preset click, waits for
+  "Selected session: 2025-03-10", and only then scrolls; the sidebar reads 2025-03-10 throughout the
+  Takens/H1 shot.
+- **Mapper edge timing:** Finance and Mapper are separate edited scenes (3.5 s + 4.5 s), so the
+  node-01--node-02 edge and Consumer durables detail hold through the shared-portfolio sentence.
+- **Replay reveal:** blind Replay and reveal are separate scenes; the reveal scene starts once the
+  outcome exists, avoiding the rerun's faded overlay and holding the 10% boundary and 2.02% cards
+  through the late-alert sentence.
+- **Tooltips:** Streamlit hover tooltips are hidden in capture; the previous topology shot showed a
+  tooltip over the sidebar.
+- **Caption checkpoints:** 00:16 now reads "Window B, 10 October 2008: 66 of 66; 37 added, none
+  removed."; 00:30, 00:46 and 00:52 carry the percentile/late-alert/TDA-VIX wording.
+- **End-card clearance:** the last cue ends at 00:58.600, leaving
+  `github.com/SergeyGer/TopoMarket` clear; no caption is present at 00:59.5.
 
 ## Review checklist
 
@@ -1726,9 +1785,7 @@ def main(argv=None) -> int:
     if args.skip_narration and (WORK / "narration.json").is_file():
         narration = {
             entry["name"]: entry
-            for entry in json.loads(
-                (WORK / "narration.json").read_text(encoding="utf-8")
-            )
+            for entry in json.loads((WORK / "narration.json").read_text(encoding="utf-8"))
         }
     else:
         narration = prepare_tts()
@@ -1793,9 +1850,7 @@ def main(argv=None) -> int:
         capture["public_probe_screenshots"] = sorted(
             str(path) for path in WORK.glob("public_attempt*.png")
         )
-        (WORK / "capture.json").write_text(
-            json.dumps(capture, indent=2) + "\n", encoding="utf-8"
-        )
+        (WORK / "capture.json").write_text(json.dumps(capture, indent=2) + "\n", encoding="utf-8")
     for scene in capture.get("scenes", ()):
         for event in scene.get("events", ()):
             print("   action", scene["name"], event)
@@ -1981,12 +2036,8 @@ def main(argv=None) -> int:
     }
     storyboard = make_storyboard(report)
     notes = make_production_notes(report)
-    (WORK / "storyboard.json").write_text(
-        json.dumps(storyboard, indent=2) + "\n", encoding="utf-8"
-    )
-    (WORK / "build_report.json").write_text(
-        json.dumps(report, indent=2) + "\n", encoding="utf-8"
-    )
+    (WORK / "storyboard.json").write_text(json.dumps(storyboard, indent=2) + "\n", encoding="utf-8")
+    (WORK / "build_report.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     (WORK / "production_notes.md").write_text(notes, encoding="utf-8")
     if args.publish_docs:
         publish_docs(srt, storyboard, report, notes, narration)
