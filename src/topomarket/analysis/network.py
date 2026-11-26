@@ -328,9 +328,14 @@ def build_correlation_network(
                     "source": left_code,
                     "target": right_code,
                     "correlation": round(value, 6),
+                    # The qualification rule compares the full-precision value;
+                    # the six-decimal tag is display/provenance only.
+                    "correlation_full": value,
                 }
             )
-    edges = [dict(pair) for pair in pairs if pair["correlation"] >= cutoff]
+    edges = [dict(pair) for pair in pairs if pair["correlation_full"] >= cutoff]
+    for edge in edges:
+        edge.pop("correlation_full", None)
     degree: dict[str, int] = {code: 0 for code in INDUSTRY_CODES}
     for edge in edges:
         degree[edge["source"]] += 1
