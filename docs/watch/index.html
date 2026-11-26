@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Watch TopoMarket in 60 seconds</title>
+<meta name="description" content="The 60-second TopoMarket demo: market structure, an experimental topological warning, and an honest look at the evidence. Synthetic data only.">
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: #08111f;
+    --panel: #101d30;
+    --text: #e8eef7;
+    --muted: #a9b8cb;
+    --teal: #5eead4;
+    --teal-dark: #0f766e;
+    --amber: #fbbf24;
+    --line: #243449;
+    --focus: #fbbf24;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { background: var(--bg); }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 1rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+
+  a { color: var(--teal); }
+  a:hover { color: #99f6e4; }
+  a:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; border-radius: 4px; }
+
+  .skip {
+    position: absolute;
+    left: 0.75rem;
+    top: -10rem;
+    z-index: 10;
+    padding: 0.6rem 0.9rem;
+    background: var(--amber);
+    color: #111827;
+    font-weight: 700;
+    border-radius: 0 0 0.5rem 0.5rem;
+  }
+  .skip:focus { top: 0; }
+
+  .wrap { max-width: 960px; margin: 0 auto; padding: 1.5rem 1.25rem 4rem; }
+
+  header.site { border-bottom: 1px solid var(--line); padding-bottom: 1.25rem; margin-bottom: 1.75rem; }
+
+  .eyebrow {
+    margin: 0 0 0.35rem;
+    color: var(--amber);
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  h1 { margin: 0 0 0.4rem; font-size: clamp(1.9rem, 4.5vw, 2.8rem); line-height: 1.15; }
+
+  .lede { margin: 0.4rem 0 0; max-width: 68ch; color: var(--muted); }
+
+  .actions { display: flex; flex-wrap: wrap; gap: 0.6rem; margin: 1.1rem 0 0; padding: 0; list-style: none; }
+  .actions a {
+    display: inline-block;
+    padding: 0.55rem 0.85rem;
+    border: 1px solid var(--teal-dark);
+    border-radius: 0.5rem;
+    background: #0d2a2a;
+    color: #ccfbf1;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .actions a:hover { border-color: var(--teal); background: #123b3a; }
+
+  main section { margin: 2rem 0; }
+  h2 { margin: 0 0 0.75rem; font-size: 1.45rem; line-height: 1.25; }
+  h3 { margin: 1.5rem 0 0.5rem; font-size: 1.1rem; }
+
+  .video-frame { background: #000; border: 1px solid var(--line); border-radius: 0.75rem; overflow: hidden; }
+  video { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; background: #000; }
+
+  .meta { margin: 0.6rem 0 0; color: var(--muted); font-size: 0.9rem; }
+
+  .notice {
+    margin: 1.25rem 0 0;
+    padding: 0.8rem 1rem;
+    border-left: 4px solid var(--amber);
+    border-radius: 0 0.5rem 0.5rem 0;
+    background: #241d12;
+  }
+  .notice p { margin: 0; }
+
+  .downloads {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 0.6rem;
+    margin: 1rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .downloads a {
+    display: block;
+    padding: 0.75rem 0.9rem;
+    border: 1px solid var(--line);
+    border-radius: 0.6rem;
+    background: var(--panel);
+    color: var(--text);
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .downloads a:hover { border-color: var(--teal); }
+  .downloads small { display: block; margin-top: 0.15rem; color: var(--muted); font-weight: 400; }
+
+  .context { padding-left: 1.1rem; }
+  .context li { margin: 0.45rem 0; }
+
+  .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 0.6rem; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+  caption { padding: 0.65rem 0.75rem; color: var(--muted); text-align: left; }
+  th, td { padding: 0.55rem 0.7rem; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+  th { background: var(--panel); color: var(--muted); font-weight: 600; }
+  tbody tr:last-child td { border-bottom: 0; }
+  td.time { white-space: nowrap; color: var(--amber); font-variant-numeric: tabular-nums; }
+  td.scene { white-space: nowrap; color: var(--muted); }
+
+  footer { margin-top: 2.5rem; padding-top: 1rem; border-top: 1px solid var(--line); color: var(--muted); font-size: 0.9rem; }
+  footer p { margin: 0.35rem 0; }
+
+  @media (max-width: 600px) {
+    .wrap { padding: 1rem 0.9rem 3rem; }
+    .actions a { width: 100%; text-align: center; }
+    .table-wrap { border-radius: 0.4rem; }
+    table { font-size: 0.9rem; }
+    td.scene { white-space: normal; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { scroll-behavior: auto; }
+  }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="wrap">
+
+<header class="site">
+  <p class="eyebrow">TopoMarket &middot; synthetic demo</p>
+  <h1>Watch TopoMarket in 60 seconds</h1>
+  <p class="lede">How the shape of twelve industry portfolios changes under stress, whether a topological signal can warn of a 10% S&amp;P 500 fall within 20 sessions, and what the evidence actually shows.</p>
+  <ul class="actions">
+    <li><a href="https://topomarket-juhbvrgk2k67pnr6qbpfmc.streamlit.app/">Launch the demo</a></li>
+    <li><a href="https://github.com/SergeyGer/TopoMarket#readme">Project README</a></li>
+    <li><a href="https://github.com/SergeyGer/TopoMarket/releases/latest">Latest release</a></li>
+  </ul>
+</header>
+
+<main id="main">
+
+  <section aria-labelledby="film-title">
+    <h2 id="film-title">The film</h2>
+    <div class="video-frame">
+      <video controls preload="metadata" playsinline width="1920" height="1080"
+             poster="../assets/opening_card_16x9.png"
+             aria-label="TopoMarket 60-second demo film, with English captions">
+        <source src="https://github.com/SergeyGer/TopoMarket/releases/latest/download/TopoMarket_demo_60s.mp4" type="video/mp4">
+        <track kind="captions" src="captions.vtt" srclang="en" label="English" default>
+        Your browser cannot play this video.
+        <a href="https://github.com/SergeyGer/TopoMarket/releases/latest/download/TopoMarket_demo_60s.mp4">Download the MP4</a>
+        or read the <a href="#transcript">transcript</a>.
+      </video>
+    </div>
+    <p class="meta">60 seconds &middot; 1920&times;1080 &middot; English captions and transcript &middot; synthetic showcase only.</p>
+    <p class="meta">The film streams from the latest GitHub release. If you opened this page directly from disk and your browser blocks the local caption file, the transcript below covers the same narration.</p>
+    <div class="notice">
+      <p><strong>Experimental warning.</strong> On the bundled synthetic holdout, the topological (TDA) policy warned before <strong>0 of 3</strong> episodes and VIX before <strong>1 of 3</strong>. TopoMarket does not claim a working crash predictor; the early-warning result remains experimental. <a href="https://github.com/SergeyGer/TopoMarket#what-the-evidence-says">Read the evidence summary</a>.</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="downloads-title">
+    <h2 id="downloads-title">Downloads</h2>
+    <ul class="downloads">
+      <li><a href="https://github.com/SergeyGer/TopoMarket/releases/latest/download/TopoMarket_demo_60s.mp4">Master MP4<small>60-second film, 1920&times;1080, English audio</small></a></li>
+      <li><a href="https://github.com/SergeyGer/TopoMarket/releases/latest/download/TopoMarket_demo_60s.srt">English SRT<small>Reviewed subtitle source for the film</small></a></li>
+      <li><a href="https://github.com/SergeyGer/TopoMarket/releases/latest/download/TopoMarket_demo_60s_captioned.mp4">Captioned MP4<small>Burned-in captions for social playback</small></a></li>
+      <li><a href="captions.vtt">WebVTT captions<small>The caption track used by this page</small></a></li>
+      <li><a href="transcript.md">Transcript<small>Narration with scene and cue timings</small></a></li>
+    </ul>
+    <p class="meta">The player and the three release downloads use the stable asset names on the latest GitHub release: <code>TopoMarket_demo_60s.mp4</code>, <code>TopoMarket_demo_60s.srt</code> and <code>TopoMarket_demo_60s_captioned.mp4</code>. Editable sources: <a href="https://github.com/SergeyGer/TopoMarket/blob/main/docs/video/storyboard.json">storyboard</a>, <a href="https://github.com/SergeyGer/TopoMarket/blob/main/docs/video/narration.md">narration</a>, <a href="https://github.com/SergeyGer/TopoMarket/blob/main/tools/video/build_demo_video.py">build pipeline</a>.</p>
+  </section>
+
+  <section aria-labelledby="context-title">
+    <h2 id="context-title">What you are watching</h2>
+    <ul class="context">
+      <li><strong>Structure.</strong> Twelve industry portfolios are nodes; an edge means their trailing 60-session returns correlate at &rho; &ge; 0.80. The film contrasts dated synthetic windows, then opens the Mapper view of shared portfolios.</li>
+      <li><strong>Warning.</strong> A separate score embeds 60 daily S&amp;P 500 log returns in three delay coordinates (56 points), measures the longest persistent H&#8321; loop, and ranks its deviation from trailing history as a percentile. The threshold is frozen before evaluation.</li>
+      <li><strong>Replay and evidence.</strong> Blind Replay hides the outcome until you reveal the next 20 sessions. The public holdout is synthetic, so the honest result is weak: TDA warned before 0 of 3 episodes, VIX before 1 of 3. See the <a href="https://github.com/SergeyGer/TopoMarket/blob/main/docs/EVALUATION.md">evaluation rules</a> and the <a href="https://github.com/SergeyGer/TopoMarket/blob/main/docs/ACCEPTANCE_v1.1.md">validation evidence</a>.</li>
+    </ul>
+  </section>
+
+  <section id="transcript" aria-labelledby="transcript-title">
+    <h2 id="transcript-title">Transcript</h2>
+    <p>The reviewed English narration follows. Times are the caption cue timings for the 60-second cut.</p>
+    <div class="table-wrap">
+      <table>
+        <caption>TopoMarket 60-second demo: scene, cue time and narration</caption>
+        <thead>
+          <tr><th scope="col">Cue time</th><th scope="col">Scene</th><th scope="col">Narration</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="time">00:00:00.050&ndash;00:00:05.690</td><td class="scene">Opening card</td><td>TopoMarket visualizes market structure and tests whether topology can warn of sharp declines.</td></tr>
+          <tr><td class="time">00:00:06.050&ndash;00:00:10.275</td><td class="scene">Two-window comparison</td><td>These twelve industry portfolios contrast two market regimes.</td></tr>
+          <tr><td class="time">00:00:10.295&ndash;00:00:14.590</td><td class="scene">Two-window comparison</td><td>Watch how the network becomes far more connected under stress.</td></tr>
+          <tr><td class="time">00:00:18.050&ndash;00:00:20.806</td><td class="scene">Direct exploration</td><td>Explore the relationships directly.</td></tr>
+          <tr><td class="time">00:00:20.826&ndash;00:00:25.078</td><td class="scene">Mapper</td><td>Mapper connects groups that share industry portfolios.</td></tr>
+          <tr><td class="time">00:00:27.050&ndash;00:00:32.313</td><td class="scene">Alert explanation</td><td>A separate indicator studies the shape of recent S&amp;P 500 returns.</td></tr>
+          <tr><td class="time">00:00:32.333&ndash;00:00:35.734</td><td class="scene">Alert explanation</td><td>This percentile measures unusual behavior.</td></tr>
+          <tr><td class="time">00:00:39.050&ndash;00:00:41.451</td><td class="scene">Blind Replay</td><td>Now test the warning without hindsight.</td></tr>
+          <tr><td class="time">00:00:41.471&ndash;00:00:43.442</td><td class="scene">Reveal</td><td>Reveal the next twenty sessions.</td></tr>
+          <tr><td class="time">00:00:43.462&ndash;00:00:49.434</td><td class="scene">Reveal</td><td>The decline had already begun, and the next twenty sessions did not reach the ten percent target.</td></tr>
+          <tr><td class="time">00:00:50.050&ndash;00:00:54.610</td><td class="scene">Validation evidence</td><td>Forecasting remains experimental; compare it with the simpler benchmarks.</td></tr>
+          <tr><td class="time">00:00:55.050&ndash;00:00:58.602</td><td class="scene">End card</td><td>Explore the code and the live demo on GitHub.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="meta">A Markdown copy with scene-level timing is in <a href="transcript.md">transcript.md</a>.</p>
+  </section>
+
+</main>
+
+<footer>
+  <p>TopoMarket is research software. The film, screenshots and figures use project-generated synthetic data only; no genuine market data is published in this repository.</p>
+  <p><a href="https://github.com/SergeyGer/TopoMarket">GitHub repository</a> &middot; <a href="https://github.com/SergeyGer/TopoMarket/blob/main/NOTICE.md">Data notices</a> &middot; <a href="https://github.com/SergeyGer/TopoMarket/blob/main/LICENSE">MIT license</a></p>
+</footer>
+
+</div>
+</body>
+</html>

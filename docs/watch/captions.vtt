@@ -1,0 +1,49 @@
+WEBVTT
+
+1
+00:00:00.050 --> 00:00:05.690
+TopoMarket visualizes market structure and tests whether topology can warn of sharp declines.
+
+2
+00:00:06.050 --> 00:00:10.275
+These twelve industry portfolios contrast two market regimes.
+
+3
+00:00:10.295 --> 00:00:14.590
+Watch how the network becomes far more connected under stress.
+
+4
+00:00:18.050 --> 00:00:20.806
+Explore the relationships directly.
+
+5
+00:00:20.826 --> 00:00:25.078
+Mapper connects groups that share industry portfolios.
+
+6
+00:00:27.050 --> 00:00:32.313
+A separate indicator studies the shape of recent S&amp;P 500 returns.
+
+7
+00:00:32.333 --> 00:00:35.734
+This percentile measures unusual behavior.
+
+8
+00:00:39.050 --> 00:00:41.451
+Now test the warning without hindsight.
+
+9
+00:00:41.471 --> 00:00:43.442
+Reveal the next twenty sessions.
+
+10
+00:00:43.462 --> 00:00:49.434
+The decline had already begun, and the next twenty sessions did not reach the ten percent target.
+
+11
+00:00:50.050 --> 00:00:54.610
+Forecasting remains experimental; compare it with the simpler benchmarks.
+
+12
+00:00:55.050 --> 00:00:58.602
+Explore the code and the live demo on GitHub.
