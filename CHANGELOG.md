@@ -3,6 +3,35 @@
 Release notes per implementation step. TopoMarket identifies releases by step number and semantic
 version; no release dates or schedules are published in repository content.
 
+## v1.3.1 - v1.3.0 acceptance-review patch: data-correctness and visitor-path fixes
+
+Patch for the v1.3.0 acceptance review. Owner film approval recorded (26 November 2026; YouTube
+<https://youtu.be/8Xyp-BDM88Q>). See `docs/UPGRADE_v1.3.1.md` and `docs/ACCEPTANCE_v1.3.1.md`.
+
+- **Manual comparison order (#97).** Only the ordered 29 Aug -> 10 Oct direction applies the
+  retrospective frozen sentence; a manual reverse selection keeps the ordered -37 result and the
+  reverse/regime-contrast statement. Tests assert both directions' dates, counts and signs.
+- **One-click date synchronisation (#98).** Preset/tour/alert/previous/next changes persist, request a
+  one-shot UI sync and rerun, so the bound screen/mode/date controls agree with the header, charts and
+  accessible values.
+- **Computed Replay/Structure target sentence (#99).** The 10% sentence derives from the computed
+  breach/target/horizon and the active alert record (below target, target reached with first breach and
+  decline, pending horizon, unknown onset); the duplicate Structure late-alert notice is removed.
+- **Interactive Mapper selection (#100).** The Mapper nerve graph renders with node-id hit targets;
+  pointer/box selection selects the same canonical node id as the buttons/keyboard inspector
+  (node-01 7 members, node-02 6, shared Consumer durables).
+- **Public entry points and approval (#101/#102).** README/watch links point at the signed-out Pages
+  player, include the owner-approved YouTube version and cite v1.3; Wiki status/links/acceptance are
+  reconciled; Mathematics report identity fields are corrected (v1.3.0 current, historical v1.1
+  retained); a versioned release evidence index records tag, generating revisions, deployed versions and
+  media digests including the production ZIP.
+- **Evidence (#103).** Repaired hosted assertions cover Replay blind/reveal, Validation, Data, both
+  Mapper nodes, mobile and two sessions; a fresh 100-transition timing run on the tagged v1.3.0
+  checkout records the revision, environment, cold start and cached/uncached values separately
+  (environment-sensitive; the clean reference run is retained).
+- **Release (#104).** v1.3.1 with regenerated frozen artifacts, Linux+Windows CI, preserved v1.3.0 tag
+  and assets.
+
 ## v1.3.0 - Updated release-audit remediation: trustworthy guided walkthrough, media entry points and cross-platform evidence
 
 Follow-up to the updated 26 November 2026 release audit. The research application is accepted; this

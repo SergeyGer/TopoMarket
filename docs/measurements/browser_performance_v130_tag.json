@@ -1,0 +1,25 @@
+{
+  "environment": "Playwright Chromium headless, 1440x900, local release candidate",
+  "commit": "c65a9ed",
+  "platform": "Linux-6.8.0-147-generic-x86_64-with-glibc2.39",
+  "python": "3.12.3",
+  "cpu_count": 8,
+  "cold_start_measurement": "time from Streamlit process spawn to first rendered TopoMarket heading (health+page load, below)",
+  "cold_start_seconds": 85.12,
+  "cached_preset_date_changes": {
+    "iterations": 100,
+    "p50_ms": 450.6,
+    "p95_ms": 572.4,
+    "max_ms": 697.5,
+    "failures": 0
+  },
+  "uncached_next_session_changes": {
+    "iterations": 20,
+    "p50_ms": 173.6,
+    "p95_ms": 498.8,
+    "max_ms": 2548.2
+  },
+  "cached_target_ms": 500,
+  "measured_at_utc": "2026-11-26T16:48:58Z",
+  "cached_within_target": false
+}
