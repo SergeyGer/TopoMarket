@@ -270,6 +270,21 @@ def build_structure_change_pair(data: Any) -> dict[str, Any]:
     cache = getattr(data, "_presets_cache", None)
     if isinstance(cache, dict) and "structure_change" in cache:
         return cache["structure_change"]
+    # The frozen expectations describe the synthetic public showcase only.  A
+    # private snapshot may contain the same calendar dates with different
+    # industry data, so validate the frozen counts only for the showcase.
+    synthetic = bool(getattr(data, "demo", False)) or (
+        str(getattr(data, "snapshot_id", "")) == "showcase-synthetic"
+    )
+    if not synthetic:
+        payload = {
+            "available": False,
+            "reason": "the frozen 2008 synthetic example is not available for this data snapshot",
+            "fixture_id": getattr(data, "snapshot_id", None) or "private",
+        }
+        if isinstance(cache, dict):
+            cache["structure_change"] = payload
+        return payload
     rows = getattr(data, "industry_rows", ()) or data.rows
     available_dates = set(getattr(data, "session_dates", ()) or ())
     if any(date not in available_dates for date in STRUCTURE_CHANGE_DATES):
