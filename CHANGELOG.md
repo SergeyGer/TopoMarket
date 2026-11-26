@@ -3,6 +3,40 @@
 Release notes per implementation step. TopoMarket identifies releases by step number and semantic
 version; no release dates or schedules are published in repository content.
 
+## v1.3.0 - Updated release-audit remediation: trustworthy guided walkthrough, media entry points and cross-platform evidence
+
+Follow-up to the updated 26 November 2026 release audit. The research application is accepted; this
+release corrects the guided demonstration, media/documentation and verification gaps and links one
+named revision to the tested code, hosted app, film and evaluation report. Evidence:
+`docs/ACCEPTANCE_v1.3.md`; plan: `docs/UPGRADE_v1.3.md`; epic #88.
+
+- **Guided chronology (#77).** First guided stop renders Window A 2008-08-29 (29/66) then Window B
+  2008-10-10 (66/66, +37 added/0 removed, mean r 0.791 -> 0.911); captions, cards, legend, edge
+  colours and accessible table derive from the ordered result.
+- **Mapper node identity (#78).** The selected Mapper node id is carried through state/persistence/
+  cache; node-01 shows exactly 7 members, node-02 exactly 6; edges show real shared portfolios.
+- **Late-alert classification (#79).** 2025-03-10 is a recorded post-onset late alert inside the
+  frozen evaluation (episode onset 2025-03-06, zero early-warning credit, 2.02% max decline below the
+  10% target); blind mode stays neutral.
+- **Playback and captions (#80).** GitHub Pages signed-out player, README/Wiki links, and WebVTT/
+  transcript/inline transcript generated from the reviewed SRT by `scripts/build_watch_assets.py`.
+- **Public report provenance (#81).** Regenerated report carries import-manifest identity/digest,
+  independent-calendar metadata, code revision and bootstrap v2; published metrics unchanged.
+- **Documentation (#82/#83).** README two-window hero/citation, Wiki status merged into Roadmap,
+  professional menu with Mathematics page, Methodology corrected (private TDA 0/9), KaTeX formatting
+  and full-precision correlation boundary fixed.
+- **Windows portability (#84).** Host-native path normalisation, POSIX canonical JSON, LF-pinned
+  checksummed fixtures and a green windows-latest pytest + release-check job.
+- **Performance and receipts (#85).** Fresh browser timing evidence (cached p95 497.6 ms, p50
+  421.2 ms, cold start separately) and a sanitised owner-seeded private receipt; lazy inspection
+  controls keep the rerun budget.
+- **Corrected film (#86).** 60.000 s cut with the chronological pair, both topology plots during the
+  Takens/H1 narration, enlarged outcome and large TDA 0/3 vs VIX 1/3 cards; checked-in builder and
+  provenance (public URL, UTC, visible version, fixture, commit; documented capture deviation where
+  the deployment was stale).
+- **Release (#87).** v1.3.0 with Linux+Windows CI, hosted smoke, verified assets and preserved
+  historical tags/artifacts.
+
 ## v1.2.0 - Release-audit follow-up: evaluation integrity, trustworthy Studio and public documentation
 
 Focused follow-up to the 26 November 2026 release audit (`TopoMarket_Release_Audit_and_Improvement_Specification_EN.docx`).
