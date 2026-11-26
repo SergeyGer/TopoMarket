@@ -292,3 +292,27 @@ def test_write_snapshot_accepts_a_directory_keyword(tmp_path: Path) -> None:
         json.loads((written.path / MANIFEST_FILENAME).read_text(encoding="utf-8"))["snapshot_id"]
         == written.snapshot_id
     )
+
+
+def test_relative_paths_accept_windows_separators() -> None:
+    """#84: host-native Path components must work on Windows without weakening safety."""
+
+    import pytest
+
+    from topomarket.data.manifest import PathTraversalError, validate_relative_path
+
+    assert validate_relative_path("reports\\ledger.jsonl") == Path("reports/ledger.jsonl")
+    assert validate_relative_path(Path("a") / "b") == Path("a/b")
+    for unsafe in ("..\\..\\etc\\passwd", "C:\\Windows\\system.ini", "~\\secret", "a\\..\\b"):
+        with pytest.raises(PathTraversalError):
+            validate_relative_path(unsafe)
+
+
+def test_path_text_is_host_independent() -> None:
+    """#84: serialised identifiers always use forward slashes."""
+
+    from topomarket.data.manifest import path_text
+
+    assert path_text(Path("showcase") / "normalized" / "tda_daily.csv") == (
+        "showcase/normalized/tda_daily.csv"
+    )

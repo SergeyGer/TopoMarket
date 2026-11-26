@@ -22,6 +22,8 @@ from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import Any
 
+from topomarket.data.manifest import path_text
+
 from .accessibility import alternative_text, table_alternative
 
 PRICE = "price"
@@ -204,7 +206,7 @@ def build_calendar_status(data: Any) -> dict[str, Any]:
         "title": "Data",
         "profile": getattr(data, "profile", None),
         "snapshot_id": getattr(data, "snapshot_id", None),
-        "data_dir": str(getattr(data, "data_dir", "")),
+        "data_dir": path_text(getattr(data, "data_dir", "")),
         "synthetic": bool(getattr(data, "demo", False)),
         "calendars": calendars,
         "combined": combined,

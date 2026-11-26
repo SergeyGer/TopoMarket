@@ -1,0 +1,8 @@
+# Keep the committed evidence and checksummed showcase fixtures byte-identical on
+# every platform; a Windows checkout with core.autocrlf=true must not rewrite LF.
+* text=auto
+showcase/** -text
+docs/reports/** -text
+docs/measurements/** -text
+docs/video/*.srt -text
+docs/measurements/*.json -text

@@ -90,7 +90,8 @@ def _json_default(value: Any) -> Any:
     if isinstance(value, (datetime, date)):
         return value.isoformat()
     if isinstance(value, Path):
-        return str(value)
+        # Serialised identifiers use the stable POSIX form on every host (#84).
+        return value.as_posix()
     if isinstance(value, (set, frozenset)):
         return sorted(value)
     if isinstance(value, bytes):
@@ -596,6 +597,17 @@ init_data_directory = ensure_data_directory
 init_data_dir = ensure_data_directory
 
 
+def path_text(path: Path | str) -> str:
+    """Return a stable POSIX display/serialisation form of a filesystem path.
+
+    Canonical JSON/report payloads must not depend on the host separator (audit
+    v1.2.0 remediation #84); use this helper whenever a path is embedded in a
+    serialised identifier or report field.
+    """
+
+    return Path(path).expanduser().as_posix()
+
+
 def validate_relative_path(relative: str | Path) -> Path:
     """Validate a relative path that must stay below its base directory.
 
@@ -615,8 +627,9 @@ def validate_relative_path(relative: str | Path) -> Path:
         raise PathTraversalError("relative path must not be empty")
     if "\x00" in text:
         raise PathTraversalError("relative path must not contain NUL bytes")
-    if "\\" in text:
-        raise PathTraversalError(f"relative path must not contain backslashes: {text!r}")
+    # Accept host-native Path components (Windows joins with backslashes) while
+    # still rejecting absolute paths, traversal and home-relative escapes below.
+    text = text.replace("\\", "/")
 
     windows = PureWindowsPath(text)
     if windows.is_absolute() or windows.drive or windows.root:
@@ -1018,6 +1031,7 @@ __all__ = [
     "validate_manifest",
     "validate_relative",
     "validate_relative_path",
+    "path_text",
     "write_json_atomic",
     "write_manifest",
     "write_snapshot",

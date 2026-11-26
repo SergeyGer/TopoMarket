@@ -110,11 +110,15 @@ def test_private_default_is_pushed_outside_a_fake_checkout(
     fake_repo = tmp_path / "repo"
     fake_repo.mkdir()
     monkeypatch.setattr(profiles, "REPOSITORY_ROOT", fake_repo)
-    monkeypatch.setenv("HOME", str(fake_repo / "home"))
+    fake_home = fake_repo / "home"
+    fake_temp = fake_repo / "tmp"
+    monkeypatch.setenv("HOME", str(fake_home))
+    monkeypatch.setenv("USERPROFILE", str(fake_home))
+    monkeypatch.setenv("LOCALAPPDATA", str(fake_home))
+    monkeypatch.setenv("APPDATA", str(fake_home))
     monkeypatch.delenv("XDG_DATA_HOME", raising=False)
-    monkeypatch.setenv("TMPDIR", str(fake_repo / "tmp"))
-    monkeypatch.delenv("TEMP", raising=False)
-    monkeypatch.delenv("TMP", raising=False)
+    for name in ("TMPDIR", "TEMP", "TMP"):
+        monkeypatch.setenv(name, str(fake_temp))
 
     resolved = profiles._default_private_data_dir()
 
@@ -232,7 +236,7 @@ def test_load_profile_as_dict() -> None:
 
     assert payload["profile"] == "demo"
     assert payload["private_data"] is False
-    assert payload["data_dir"] == str(profile.data_dir)
+    assert payload["data_dir"] == profile.data_dir.as_posix()
 
 
 @pytest.mark.parametrize("profile", PROFILE_NAMES)

@@ -21,6 +21,7 @@ from pathlib import Path
 from typing import Any
 
 from topomarket import __version__
+from topomarket.data.manifest import path_text
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 LOCKFILE_FILENAME = "requirements.lock"
@@ -203,7 +204,7 @@ def check_lockfile(root: Path) -> CheckResult:
     """Verify the dependency lock exists with pinned runtime dependencies."""
 
     path = root / LOCKFILE_FILENAME
-    details: dict[str, Any] = {"path": str(path)}
+    details: dict[str, Any] = {"path": path_text(path)}
     problems: list[str] = []
     if not path.is_file():
         problems.append(f"{LOCKFILE_FILENAME} is missing")
@@ -365,7 +366,7 @@ def check_showcase_fixture(root: Path) -> CheckResult:
 
     showcase = root / "showcase"
     manifest_path = showcase / "manifest.json"
-    details: dict[str, Any] = {"path": str(showcase)}
+    details: dict[str, Any] = {"path": path_text(showcase)}
     problems: list[str] = []
     if not manifest_path.is_file():
         # The showcase is optional for the minimal package; report as skipped.
