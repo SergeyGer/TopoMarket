@@ -71,6 +71,16 @@ under `~/TopoMarket-private-results/`.
 - README ~750 words with the reader-first first screen, honest holdout numbers and experimental
   caveat; `docs/watch/index.html` browser player with English WebVTT captions + transcript + downloads.
 
+## Deployment incident (26 November 2026)
+
+After the v1.2.0 candidate merged, the public Community Cloud app continued to report
+`release 1.1.0` for more than 40 minutes and a mixed/stale deployment crashed on the 2025-03-10 guided
+teaching example with `FrozenConfigurationError` (the identical local build and CI are healthy). The
+honest anonymous evidence, including the error screenshots, is recorded in
+`docs/measurements/hosted_evidence_v1.2.json` with most checks `false`. A dashboard reboot/re-deploy of
+the app is the documented owner action; the v1.2.0 tag is held until the deployed identity `1.2.0`
+passes the signed-out smoke, and then the evidence file is regenerated.
+
 ## Film evidence
 
 - 60.000 s master, 1920x1080/30 fps, H.264/AAC, loudness about -16 LUFS, true peak <= -1.5 dBTP;
