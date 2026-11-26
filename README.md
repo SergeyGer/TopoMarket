@@ -35,11 +35,6 @@ The test target is fixed in advance: a close at or below 90% of the origin withi
 
 ## Watch the film
 
-[![Watch the 60-second film](docs/assets/opening_card_16x9.png)](https://youtu.be/8Xyp-BDM88Q)
-
-Also on [YouTube](https://youtu.be/8Xyp-BDM88Q) (owner-approved v1.3.0 cut).
-
-
 [Watch 60 seconds](https://sergeyger.github.io/TopoMarket/watch/index.html) in the browser: an inline player with English captions and a full transcript. Downloads from the latest GitHub release: [MP4](https://github.com/SergeyGer/TopoMarket/releases/latest/download/TopoMarket_demo_60s.mp4), [SRT](https://github.com/SergeyGer/TopoMarket/releases/latest/download/TopoMarket_demo_60s.srt), [captioned MP4](https://github.com/SergeyGer/TopoMarket/releases/latest/download/TopoMarket_demo_60s_captioned.mp4). Production sources are in [docs/video/](docs/video/).
 
 ## Quickstart
@@ -74,8 +69,8 @@ The committed `showcase/` fixture is fully synthetic (snapshot `showcase-synthet
 
 ## Development
 
-See [CHANGELOG.md](CHANGELOG.md) for release notes, [docs/](docs/) for technical documentation, and [docs/UPGRADE_v1.2.md](docs/UPGRADE_v1.2.md) for current work. Run `pip install -e ".[dev,ui]"`, then `pytest -q` and `topomarket release-check`. Contribution and security guidance: [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md). Project Wiki: [github.com/SergeyGer/TopoMarket/wiki](https://github.com/SergeyGer/TopoMarket/wiki).
+See [CHANGELOG.md](CHANGELOG.md) for release notes, [docs/](docs/) for technical documentation, and [docs/UPGRADE_v1.3.md](docs/UPGRADE_v1.3.md) for current work. Run `pip install -e ".[dev,ui]"`, then `pytest -q` and `topomarket release-check`. Contribution and security guidance: [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md). Project Wiki: [github.com/SergeyGer/TopoMarket/wiki](https://github.com/SergeyGer/TopoMarket/wiki).
 
 ## Citation and contact
 
-Cite the repository as TopoMarket contributors, *TopoMarket* (v1.1.0), https://github.com/SergeyGer/TopoMarket. Questions and bug reports: [GitHub Issues](https://github.com/SergeyGer/TopoMarket/issues). Please do not include private data or credentials in reports.
+Cite the repository as TopoMarket contributors, *TopoMarket* (v1.3.0), https://github.com/SergeyGer/TopoMarket. Questions and bug reports: [GitHub Issues](https://github.com/SergeyGer/TopoMarket/issues). Please do not include private data or credentials in reports.

@@ -285,7 +285,7 @@ def test_streamlit_market_studio_guided_tour_and_comparison() -> None:
     assert "Retrospective synthetic example" in page_captions
     assert "2008-08-29" in page_captions and "2008-10-10" in page_captions
     assert "Edges added in window B" in page_captions
-    for expected_step in (2, 3, 4):
+    for expected_step in (2, 3, 4, 5):
         app_test.sidebar.button(key="tm_guide_next").click().run()
         assert not list(app_test.exception)
         guided = [
@@ -294,12 +294,6 @@ def test_streamlit_market_studio_guided_tour_and_comparison() -> None:
             if "Guided step" in str(caption.value)
         ]
         assert guided and f"Guided step {expected_step}/5" in guided[0]
-    # Final tour stop intentionally switches to Replay, where the Structure tour
-    # caption is no longer rendered; verify the screen changed cleanly instead.
-    app_test.sidebar.button(key="tm_guide_next").click().run()
-    assert not list(app_test.exception)
-    screens = [item for item in app_test.sidebar.selectbox if item.key == "tm_screen_label"]
-    assert screens and screens[0].value == "Replay"
 
 
 @pytest.mark.skipif(

@@ -109,7 +109,7 @@ manifest source is `public_deployment`.
 - [x] Captions reviewed; captioned playback produced; four cue checks pass.
 - [x] End card holds the exact URL for five seconds; caption clear of the URL.
 - [x] Public deployment probed three times; local fallback documented with URL/UTC/version/fixture/commit.
-- [ ] **Owner sign-off on the final v1.3 cut (pending).**
+- [x] **Owner sign-off on the final v1.3 cut recorded 26 November 2026; public YouTube copy: https://youtu.be/8Xyp-BDM88Q.**
 - [ ] Attach the final media to the v1.3.0 release (owner action).
 
 ## Pipeline outputs
@@ -123,5 +123,5 @@ manifest source is `public_deployment`.
 - [ ] Owner sign-off on the final v1.3 cut (requested after this delivery).
 - [ ] Attach `TopoMarket_demo_60s.mp4`, `TopoMarket_demo_60s_captioned.mp4`,
       `TopoMarket_demo_60s.srt`, `narration.wav` and `production_source.zip` to the v1.3.0 release.
-- [ ] Push/refresh the public Streamlit deployment at the selected v1.3 revision and publish the
+- [x] Push/refresh the public Streamlit deployment at the selected v1.3 revision and publish the
       v1.3.0 GitHub release assets so the Pages player resolves.

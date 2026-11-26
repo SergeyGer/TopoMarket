@@ -64,9 +64,8 @@ and Mapper node checks) is recorded at release time.
       00:52 verified against the frame content; watch page links versioned v1.3.0 assets (#86/#87).
 - [x] v1.3.0 tagged and published with 9 assets; version bump/frozen artifacts, Linux (py3.11/3.12) and
       Windows CI, release checks, dependency audit, CodeQL and cloud smoke green (#87).
-- [x] Owner film sign-off recorded on 26 November 2026 for the published v1.3.0 master
-      (`803d51d61911497a99f2e83b653da0afee244c958d8cb31ea27d3ce4437c322a`); public YouTube version:
-      <https://youtu.be/8Xyp-BDM88Q>.
+- [ ] Owner film sign-off (the film is recorded and published; sign-off remains open until the owner
+      confirms).
 - [x] Sanitised private-suite receipt on the selected v1.3.0 commit: **701 passed, 0 failed,
       0 skipped** (21:16) with the owner seed on `c65a9ed`; snapshot identity `5ca5aac2…`;
       aggregate only in `docs/measurements/private_acceptance_receipt_v13.json`, detailed

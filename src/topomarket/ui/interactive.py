@@ -723,6 +723,8 @@ __all__ = [
     "NETWORK_KEY",
     "TIMELINE_KEY",
     "comparison_figure",
+    "mapper_figure",
+    "mapper_selection",
     "landing_figure",
     "landing_selection",
     "mini_timeline_figure",
@@ -732,3 +734,95 @@ __all__ = [
     "timeline_figure",
     "timeline_selection",
 ]
+
+
+def mapper_figure(
+    mapper: Mapping[str, Any],
+    *,
+    selected_node_id: str | None = None,
+    selected_edge_id: str | None = None,
+) -> go.Figure:
+    """Interactive Mapper nerve graph with node-id hit targets (audit v1.3.0 #4).
+
+    Nodes carry ``customdata=[node_id, member_count]`` and a fixed layout; a
+    point/box selection maps back to the same node id used by the keyboard
+    controls and the inspector.  The static matplotlib renderer remains as the
+    fallback when Plotly is unavailable.
+    """
+
+    nodes = list(mapper.get("nodes") or ())
+    edges = list(mapper.get("edges") or ())
+    positions = {
+        str(node["node_id"]): (float(node.get("x") or 0.0), float(node.get("y") or 0.0))
+        for node in nodes
+    }
+    figure = go.Figure()
+    selected_edge = str(selected_edge_id or "")
+    for edge in edges:
+        source = str(edge.get("source") or "")
+        target = str(edge.get("target") or "")
+        if source not in positions or target not in positions:
+            continue
+        highlighted = str(edge.get("edge_id") or "") == selected_edge
+        figure.add_trace(
+            go.Scatter(
+                x=[positions[source][0], positions[target][0], None],
+                y=[positions[source][1], positions[target][1], None],
+                mode="lines",
+                line={
+                    "width": 3.0 if highlighted else 1.6,
+                    "color": AMBER if highlighted else _rgba(TEAL, 0.55),
+                },
+                hoverinfo="text",
+                text=[f"shared portfolios: {edge.get('overlap')}", "", ""],
+                showlegend=False,
+            )
+        )
+    figure.add_trace(
+        go.Scatter(
+            x=[positions[str(node["node_id"])][0] for node in nodes],
+            y=[positions[str(node["node_id"])][1] for node in nodes],
+            mode="markers+text",
+            text=[str(node["node_id"]) for node in nodes],
+            textposition="top center",
+            textfont={"size": 10.5, "color": INK},
+            marker={
+                "size": [
+                    max(18.0, 0.7 * float(node.get("display_size") or 24.0)) for node in nodes
+                ],
+                "color": [
+                    ALERT if str(node.get("node_id")) == str(selected_node_id or "") else TEAL
+                    for node in nodes
+                ],
+                "line": {"color": CANVAS, "width": 1.5},
+            },
+            customdata=[
+                [str(node.get("node_id")), int(node.get("member_count") or 0)] for node in nodes
+            ],
+            hovertemplate=("<b>%{customdata[0]}</b><br>%{customdata[1]} members<extra></extra>"),
+            showlegend=False,
+        )
+    )
+    figure.update_layout(
+        title={
+            "text": "Mapper groups · tap/box-select a node to inspect it",
+            "font": {"size": 14, "color": INK},
+            "x": 0.01,
+        },
+        xaxis={"visible": False, "fixedrange": True, "range": [-0.8, 2.8]},
+        yaxis={"visible": False, "fixedrange": True, "range": [-2.8, 2.8]},
+        dragmode="select",
+    )
+    return _base_layout(figure, height=420)
+
+
+def mapper_selection(event: Any) -> str | None:
+    """Node id selected by a pointer/box action on the interactive Mapper graph."""
+
+    payload = selection_from_event(event)
+    custom = payload.get("customdata")
+    if isinstance(custom, list) and custom:
+        node_id = custom[0]
+        if isinstance(node_id, str) and node_id.startswith("node-"):
+            return node_id
+    return None
