@@ -206,3 +206,44 @@ def test_pearson_correlation_edge_cases() -> None:
     assert pearson_correlation([1.0], [1.0]) is None
     with pytest.raises(NetworkError):
         pearson_correlation([1.0, 2.0], [1.0])
+
+
+def test_boundary_qualification_uses_full_precision(monkeypatch) -> None:
+    """Network builder qualifies exact full-precision rho, not the rounded tag."""
+
+    import math
+    from datetime import date, timedelta
+
+    from topomarket.analysis.network import build_correlation_network
+    from topomarket.data.schemas import INDUSTRY_NAMES, industry_return_column
+
+    days = [date(2020, 1, 1) + timedelta(days=offset) for offset in range(60)]
+    x = [math.cos(2 * math.pi * index / 60) for index in range(60)]
+    orth = [math.sin(2 * math.pi * index / 60) for index in range(60)]
+
+    def correlated(level: float) -> list[float]:
+        scale = math.sqrt(1.0 - level * level)
+        return [level * left + scale * right for left, right in zip(x, orth, strict=False)]
+
+    series: dict[str, list[float]] = {}
+    for name in INDUSTRY_NAMES:
+        series[name] = [float(index + position) for position, index in enumerate(range(60))]
+    # nodur/durbl: true rho 0.7999996 (rounds to 0.800000); manuf/enrgy: exactly 0.8.
+    series["NoDur"] = x
+    series["Durbl"] = correlated(0.7999996)
+    series["Manuf"] = correlated(0.8)
+    series["Enrgy"] = correlated(0.8)
+    rows = [
+        {
+            "date": day.isoformat(),
+            **{industry_return_column(n): f"{series[n][i]:.12f}" for n in INDUSTRY_NAMES},
+        }
+        for i, day in enumerate(days)
+    ]
+    network = build_correlation_network(rows, days[-1].isoformat())
+    pairs = {(pair["source"], pair["target"]): pair for pair in network["pairs"]}
+    nodur_durbl = pairs[("nodur", "durbl")]
+    assert nodur_durbl["correlation"] == 0.8  # six-decimal display tag
+    assert nodur_durbl["correlation_full"] < 0.8
+    assert all((edge["source"], edge["target"]) != ("nodur", "durbl") for edge in network["edges"])
+    assert any((edge["source"], edge["target"]) == ("manuf", "enrgy") for edge in network["edges"])

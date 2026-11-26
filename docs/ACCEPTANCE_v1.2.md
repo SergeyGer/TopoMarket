@@ -99,12 +99,12 @@ passes the signed-out smoke, and then the evidence file is regenerated.
 - [x] Private suite with `TOPOMARKET_SEED_DIR` green on the R1-R3/A7 candidate (686 passed; recorded
       outside the repo).
 - [x] Hosted signed-out smoke on the deployed release identity (`1.2.0`), desktop + mobile + two
-      isolated sessions (cold start 5.8 s; landing, frozen pair/comparison, mobile and two-session
-      checks pass). Blind/reveal, Validation and Data re-checks remain a follow-up smoke on the
-      rebooted deployment; app-level tests cover them.
-- [x] Film delivered from the identical local release build with hosted-URL/UTC/version/commit
-      manifest and documented deviation; README/watch-page entry points verified. Hosted re-record and
-      owner sign-off remain optional follow-ups.
+      isolated sessions (cold start 7.93 s; identity, landing/interactive chart, frozen pair,
+      two-window comparison, blind replay, reveal, Validation evidence cards, independent Data
+      calendars, mobile and two isolated sessions all verified; 0 page errors).
+- [x] Final film/captions attached to the release and verified by SHA-256; manifest records the
+      public URL/UTC/version/fixture/commit and the documented identical-local-build deviation.
+      Owner sign-off remains open; hosted re-record and the v1.3 playback page are follow-ups.
 - [ ] Release assets attached; v1.0/v1.1 artifacts retained; no private data or credentials committed.
 
 ## Known limitations / owner actions
