@@ -158,15 +158,27 @@ def comparison_figure(
         network = window.get("network") or {}
         nodes = list(network.get("nodes") or ())
         x_offset = column * 2.8
-        added = {frozenset(edge) for edge in window.get("added_edges") or ()}
-        removed = {frozenset(edge) for edge in window.get("removed_edges") or ()}
+        added = {
+            frozenset((edge["source"], edge["target"])) for edge in window.get("added_edges") or ()
+        }
+        removed = {
+            frozenset((edge["source"], edge["target"]))
+            for edge in window.get("removed_edges") or ()
+        }
         positions = {node["code"]: (node["x"] + x_offset, node["y"]) for node in nodes}
         labels = {node["code"]: node["label"] for node in nodes}
+        legend_seen: set[str] = set()
         for edge in network.get("edges") or ():
             pair = frozenset((edge["source"], edge["target"]))
-            colour = POSITIVE if pair in added else (_rgba(TEAL, 0.55))
-            if pair in removed and letter == letters[0]:
-                colour = ALERT
+            if pair in added:
+                category = "Added in B (solid, positive)"
+                colour, dash, width = POSITIVE, "solid", 2.6
+            elif pair in removed and letter == letters[0]:
+                category = "Removed in B (amber, dashed)"
+                colour, dash, width = ALERT, "dash", 2.6
+            else:
+                category = "Kept (unchanged)"
+                colour, dash, width = _rgba(TEAL, 0.45), "solid", 1.3
             figure.add_trace(
                 go.Scatter(
                     x=[
@@ -180,7 +192,9 @@ def comparison_figure(
                         None,
                     ],
                     mode="lines",
-                    line={"width": 2.2 if pair in added else 1.6, "color": colour},
+                    name=category,
+                    legendgroup=category,
+                    line={"width": width, "color": colour, "dash": dash},
                     hoverinfo="text",
                     text=[
                         f"{labels[edge['source']]} – {labels[edge['target']]}<br>"
@@ -188,9 +202,11 @@ def comparison_figure(
                         "",
                         "",
                     ],
-                    showlegend=False,
+                    showlegend=category not in legend_seen,
+                    visible=True,
                 )
             )
+            legend_seen.add(category)
         figure.add_trace(
             go.Scatter(
                 x=[position[0] for position in positions.values()],
@@ -218,7 +234,8 @@ def comparison_figure(
             text=(
                 f"<b>{letter}</b> · {window.get('date')}<br>"
                 f"{window.get('pairs_qualifying')}/{window.get('pairs_total')} pairs · "
-                f"{window.get('pairs_percentage'):.1f}%"
+                f"{window.get('pairs_percentage'):.1f}% · "
+                f"mean r {window.get('mean_off_diagonal_correlation'):.3f}"
             ),
             showarrow=False,
             font={"size": 12, "color": INK},
@@ -231,6 +248,14 @@ def comparison_figure(
         },
         xaxis={"visible": False, "range": [-1.25, 1.25 + 2.8]},
         yaxis={"visible": False, "range": [-1.25, 1.5], "fixedrange": True},
+        showlegend=True,
+        legend={
+            "orientation": "h",
+            "x": 0.0,
+            "y": -0.06,
+            "font": {"size": 10, "color": INK},
+            "bgcolor": "rgba(0,0,0,0)",
+        },
         dragmode="select",
     )
     return _base_layout(figure, height=440)

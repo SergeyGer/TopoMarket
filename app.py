@@ -491,30 +491,62 @@ def _apply_widgets(
         _call(sidebar, "markdown", "**Guided tour**")
         steps = _guided_steps(presets, data)
         state = ui.session_state
+        started = GUIDE_STEP_KEY in state
         step_index = int(state.get(GUIDE_STEP_KEY, 0) or 0) % max(1, len(steps))
         changed = False
         if _call(sidebar, "button", "Guided: back", key="tm_guide_prev"):
-            step_index = (step_index - 1) % len(steps)
+            step_index = (len(steps) - 1) if not started else (step_index - 1) % max(1, len(steps))
             changed = True
         if _call(sidebar, "button", "Guided: next step ▶", key="tm_guide_next"):
-            step_index = (step_index + 1) % len(steps)
+            step_index = 0 if not started else (step_index + 1) % max(1, len(steps))
             changed = True
         if changed:
             state[GUIDE_STEP_KEY] = step_index
+            started = True
             selection = _apply_guided_step(selection, steps[step_index])
+            step = steps[step_index]
+            if step.get("compare"):
+                state[COMPARE_TOGGLE_KEY] = True
+                state[COMPARE_DATE_KEY] = step.get("compare_date")
         step = steps[step_index]
-        _call(
-            sidebar,
-            "caption",
-            f"Guided step {step_index + 1}/{len(steps)}: {step['name']}. {step['description']}",
-        )
-        compare_on = _call(
-            sidebar,
-            "checkbox",
-            "Compare two windows",
-            value=bool(state.get(COMPARE_TOGGLE_KEY, False)),
-            key=COMPARE_TOGGLE_KEY,
-        )
+        if not started:
+            _call(
+                sidebar,
+                "caption",
+                "Guided tour not started. Next step opens the synthetic market shift "
+                "(29/66 -> 66/66); Back/Next move through Quiet, Stress, Explain and Replay.",
+            )
+        elif str(selection.date) != str(step.get("date")):
+            _call(
+                sidebar,
+                "caption",
+                f"Guided tour paused: current selection differs from step "
+                f"{step_index + 1}/{len(steps)} ({step['name']}). Next resumes the tour.",
+            )
+        else:
+            _call(
+                sidebar,
+                "caption",
+                f"Guided step {step_index + 1}/{len(steps)}: {step['name']}. {step['description']}",
+            )
+        if blind_structure_state(selection):
+            state[COMPARE_TOGGLE_KEY] = False
+            state.pop(COMPARE_DATE_KEY, None)
+            _call(
+                sidebar,
+                "caption",
+                "Blind replay: both windows and all annotations stay capped at the selected "
+                "session. Reveal the outcome to enable the retrospective two-window comparison.",
+            )
+            compare_on = False
+        else:
+            compare_on = _call(
+                sidebar,
+                "checkbox",
+                "Compare two windows",
+                value=bool(state.get(COMPARE_TOGGLE_KEY, False)),
+                key=COMPARE_TOGGLE_KEY,
+            )
         if compare_on:
             dates = list(_loaded_context(data)["session_dates"])
             if dates:
@@ -720,8 +752,15 @@ def _chronological_quiet_date(data: DashboardData, stress_date: str | None) -> s
 def _guided_steps(
     presets: Mapping[str, Any], data: DashboardData | None = None
 ) -> list[dict[str, Any]]:
-    """Four-stop guided sequence: Quiet -> Stress -> Explain -> Replay."""
+    """Guided sequence: synthetic market shift -> Quiet -> Stress -> Explain -> Replay.
 
+    The first stop is the frozen retrospective synthetic pair required by the release
+    audit (29/66 on 2008-08-29 -> 66/66 on 2008-10-10); later stops use the released
+    presets.  The tour is only "active" after the visitor starts or navigates it, so
+    the first screen never labels a stress selection as the quiet window.
+    """
+
+    change = presets.get("structure_change") or {}
     records = {str(record.get("preset_id")): record for record in presets.get("presets") or ()}
     quiet = records.get("quiet") or {}
     stress = records.get("stress_transition") or {}
@@ -732,6 +771,19 @@ def _guided_steps(
         _chronological_quiet_date(data, stress_date) if data is not None else None
     ) or quiet_date
     return [
+        {
+            "name": "Synthetic market shift",
+            "description": (
+                "Frozen retrospective example: 29/66 pairs on 2008-08-29 -> 66/66 on "
+                "2008-10-10 (+37, none removed) after the 2008-09-16 onset."
+            ),
+            "date": change.get("right_date"),
+            "compare_date": change.get("left_date"),
+            "compare": True,
+            "mode": "live",
+            "screen": "structure",
+            "reveal": False,
+        },
         {
             "name": "Quiet window",
             "description": (
@@ -797,6 +849,8 @@ def _comparison_state(
         return None
     if not state.get(COMPARE_TOGGLE_KEY):
         return None
+    if blind_structure_state(selection):
+        return None
     compare_date = state.get(COMPARE_DATE_KEY)
     if not compare_date or not selection.date:
         return None
@@ -808,6 +862,15 @@ def _comparison_state(
         comparison = build_window_comparison(data, str(selection.date), str(compare_date))
     except Exception as error:  # noqa: BLE001 - comparison is an optional view
         return {"available": False, "reason": str(error)}
+    presets = build_presets(data)
+    frozen = presets.get("structure_change") or {}
+    if frozen.get("available") and {frozen.get("left_date"), frozen.get("right_date")} == {
+        str(selection.date),
+        str(compare_date),
+    }:
+        comparison = dict(comparison)
+        comparison["label"] = "Retrospective synthetic example"
+        comparison["statement"] = str(frozen.get("statement") or comparison["statement"])
     if isinstance(cache, dict):
         cache[key] = comparison
     return comparison
@@ -1129,6 +1192,8 @@ def render_structure_screen(
         if comparison and comparison.get("available"):
             _call(ui, "subheader", "Two-window comparison")
             _call(ui, "markdown", f"**{comparison['statement']}**")
+            if comparison.get("label"):
+                _call(ui, "caption", f"**{comparison['label']}**")
             event = _render_interactive_or_static(
                 ui,
                 lambda: interactive.comparison_figure(comparison, selected_code=selection.member),
@@ -1333,6 +1398,52 @@ def render_structure_screen(
             )
     else:
         _call(ui, "caption", explanation.get("reason") or "No score explanation for this session.")
+
+    # U5: reveal the outcome inline on the Structure screen instead of switching screens.
+    if str(payload.get("mode")) == "replay":
+        if not selection.reveal:
+            if _call(
+                ui,
+                "button",
+                f"Reveal next {OUTCOME_HORIZON} sessions (stay on Structure)",
+                key="tm_structure_reveal",
+            ):
+                selection = _commit_interactive_selection(ui, toggle_reveal(selection))
+            _call(
+                ui,
+                "caption",
+                "Blind review: the network, selected date, threshold and H1 explanation stay "
+                "visible; revealing adds the 20-session outcome inline.",
+            )
+        else:
+            outcome = (payload.get("replay") or {}).get("outcome") or {}
+            _call(ui, "subheader", "Inline outcome")
+            _call(ui, "markdown", f"**{outcome.get('outcome_label') or 'Outcome revealed'}**")
+            metrics = _call(ui, "columns", 5) or []
+            values = [
+                ("Origin close", outcome.get("origin", {}).get("close")),
+                ("10% boundary", outcome.get("boundary", {}).get("close")),
+                ("Lowest close", outcome.get("lowest", {}).get("close")),
+                ("First breach", (outcome.get("first_breach") or {}).get("date") or "none"),
+                (
+                    "Maximum decline",
+                    None
+                    if outcome.get("max_decline_pct") is None
+                    else f"{outcome['max_decline_pct']:.2f}%",
+                ),
+            ]
+            for column, (label, value) in zip(metrics, values, strict=False):
+                _call(column, "metric", label, "—" if value is None else value)
+            if outcome.get("pending"):
+                _call(ui, "warning", "Outcome horizon is still pending.")
+            if _call(ui, "button", "Hide outcome (blind view)", key="tm_structure_blind"):
+                selection = _commit_interactive_selection(ui, toggle_blind(selection))
+            _call(
+                ui,
+                "caption",
+                "Retrospective outcome added inline. Hiding it restores the blind payload, "
+                "including hover and accessibility text.",
+            )
     score_text = (
         "unavailable"
         if score.get("value") is None

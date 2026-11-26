@@ -284,11 +284,27 @@ def build_window_comparison(
     right_metrics = _network_metrics(right)
     left_pairs = {_pair_key(edge) for edge in left.get("edges") or ()}
     right_pairs = {_pair_key(edge) for edge in right.get("edges") or ()}
+    left_correlation = {
+        _pair_key(edge): edge.get("correlation") for edge in left.get("edges") or ()
+    }
+    right_correlation = {
+        _pair_key(edge): edge.get("correlation") for edge in right.get("edges") or ()
+    }
     added = [
-        {"source": source, "target": target} for source, target in sorted(right_pairs - left_pairs)
+        {
+            "source": source,
+            "target": target,
+            "correlation": right_correlation.get((source, target)),
+        }
+        for source, target in sorted(right_pairs - left_pairs)
     ]
     removed = [
-        {"source": source, "target": target} for source, target in sorted(left_pairs - right_pairs)
+        {
+            "source": source,
+            "target": target,
+            "correlation": left_correlation.get((source, target)),
+        }
+        for source, target in sorted(left_pairs - right_pairs)
     ]
     delta = right_metrics["pairs_qualifying"] - left_metrics["pairs_qualifying"]
     material_increase = delta >= max(5, int(round(PAIR_COUNT * 0.10)))
@@ -329,8 +345,22 @@ def build_window_comparison(
         "added_count": len(added),
         "removed_count": len(removed),
         "windows": {
-            "A": {"date": left_date, "network": left, **left_metrics},
-            "B": {"date": right_date, "network": right, **right_metrics},
+            "A": {
+                "date": left_date,
+                "network": left,
+                **left_metrics,
+                # Edges removed going A -> B are drawn in A with a distinct style.
+                "removed_edges": removed,
+                "added_edges": [],
+            },
+            "B": {
+                "date": right_date,
+                "network": right,
+                **right_metrics,
+                # Edges added going A -> B are drawn in B with a distinct style.
+                "added_edges": added,
+                "removed_edges": [],
+            },
         },
         "edge_density_note": (
             "Edge density is the share of the 66 industry pairs with Pearson r above the fixed "
@@ -861,9 +891,14 @@ def build_structure_payload(
         }
     )
     presets = build_presets(data)
-    if str(getattr(selection, "mode", "live")) == "replay" and not getattr(
-        selection, "reveal", False
-    ):
+    mode = str(getattr(selection, "mode", "live"))
+    revealed = bool(getattr(selection, "reveal", False))
+    inline_outcome = None
+    if mode == "replay" and revealed:
+        from .replay import build_outcome
+
+        inline_outcome = build_outcome(data, selected)
+    if mode == "replay" and not revealed:
         presets = _blind_safe_presets(presets, selected)
     score = _score_point(data, selected)
     cutoff_value = _policy_cutoff(data)
@@ -904,10 +939,9 @@ def build_structure_payload(
             f"{len(mapper['nodes'])} Mapper group(s); score {score_text}"
         ),
         "replay": {
-            "blind": str(getattr(selection, "mode", "live")) == "replay"
-            and not getattr(selection, "reveal", False),
-            "revealed": bool(getattr(selection, "reveal", False)),
-            "outcome": None,
+            "blind": mode == "replay" and not revealed,
+            "revealed": revealed,
+            "outcome": inline_outcome,
         },
     }
     return payload
