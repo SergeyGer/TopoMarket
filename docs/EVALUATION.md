@@ -114,6 +114,25 @@ exits with status `2`.
   0/3 with average precision 0.0154, VIX recall 1/3 with average precision 0.1187, realized
   volatility recall 0/3 with average precision 0.0556, and `"Experimental market anomaly"`.
 
+## Independent signal calendars (v1.2 R1)
+
+Price-based signals no longer depend on industry coverage. `topomarket.data.signals` loads three
+independent calendars from a snapshot:
+
+- **price** (`normalized/sp500_daily.csv`, or the joint `tda_daily` fallback for old synthetic
+  snapshots) drives S&P log returns, the TDA score, realised volatility, origin labels and
+  20-index-session horizons;
+- **industry** (`normalized/industries_daily.csv`, or fallback) drives industry windows/Mapper only;
+- **VIX** (`normalized/vix_daily.csv`, a saved VIX source file, or fallback) is joined by date for the
+  comparison cohort only.
+
+`topomarket topology` and `topomarket evaluate` use the price calendar; evaluation rows are the price
+calendar left-joined with VIX by date, so a later VIX/industry date can no longer extend or truncate
+the price/label series. Reports and CLI output record separate as-of dates, the source of each
+calendar and the fallback reason; `provenance.snapshot_provenance.signal_calendars` carries the same
+block. Acceptance tests write split tables, append price/VIX dates beyond the industry coverage,
+mutate only the industry table and assert price scores and evaluation reports are byte-identical.
+
 ## Snapshot identity at the CLI (v1.2 R3)
 
 `topomarket evaluate` now resolves one non-empty identity before running: active snapshot pointer,
