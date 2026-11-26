@@ -149,16 +149,63 @@ def test_guided_steps_sequence_and_application() -> None:
     presets = data._presets_cache or app.build_presets(data)
     steps = app._guided_steps(presets, data)
     assert [step["name"] for step in steps] == [
+        "Synthetic market shift",
         "Quiet window",
         "Stress transition",
         "Explain the alert",
         "Replay it blind",
     ]
+    assert steps[0]["compare"] is True
+    assert steps[0]["compare_date"] == "2008-08-29"
+    assert steps[0]["date"] == "2008-10-10"
     dates = [step["date"] for step in steps]
     assert all(dates)
     assert dates[0] < dates[1], "stress transition must follow the quiet window"
     selection = DashboardSelection(screen="structure", mode="replay", date=dates[0])
-    applied = app._apply_guided_step(selection, steps[3])
+    applied = app._apply_guided_step(selection, steps[4])
     assert applied.screen == "replay"
     assert applied.reveal is False
     assert applied.network_view == "correlation"
+
+
+def test_comparison_edge_change_encoding_uses_real_style() -> None:
+    """U3: added/removed edges get distinct colour + dash in rendered traces."""
+
+    from topomarket.ui.interactive import comparison_figure
+    from topomarket.ui.theme import ALERT, POSITIVE
+    from topomarket.ui.presets import build_structure_change_pair
+
+    data = _data()
+    pair = build_structure_change_pair(data)
+    assert pair["summary"]["left_pairs"] == 29
+    assert pair["summary"]["right_pairs"] == 66
+    assert pair["summary"]["added"] == 37
+    assert pair["summary"]["removed"] == 0
+
+    comparison = build_window_comparison(data, pair["left_date"], pair["right_date"])
+    assert comparison["added_count"] == 37
+    assert comparison["removed_count"] == 0
+    assert len(comparison["windows"]["B"]["added_edges"]) == 37
+    assert comparison["windows"]["A"]["removed_edges"] == []
+    figure = comparison_figure(comparison)
+    namespace = [trace for trace in figure.data if getattr(trace, "name", "") or ""]
+    added = [trace for trace in namespace if trace.name.startswith("Added in B")]
+    assert len(added) == 37
+    assert all(trace.line.color == POSITIVE for trace in added)
+    assert all(trace.line.dash == "solid" for trace in added)
+    assert len([trace for trace in namespace if trace.name.startswith("Kept")]) > 0
+    legend_names = {trace.name for trace in figure.data if trace.showlegend}
+    assert "Added in B (solid, positive)" in legend_names
+
+    reverse = build_window_comparison(data, pair["right_date"], pair["left_date"])
+    assert reverse["removed_count"] == 37
+    assert len(reverse["windows"]["A"]["removed_edges"]) == 37
+    reverse_figure = comparison_figure(reverse)
+    removed = [
+        trace
+        for trace in reverse_figure.data
+        if (getattr(trace, "name", "") or "").startswith("Removed in B")
+    ]
+    assert len(removed) == 37
+    assert all(trace.line.color == ALERT for trace in removed)
+    assert all(trace.line.dash == "dash" for trace in removed)

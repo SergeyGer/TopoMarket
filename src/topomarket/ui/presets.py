@@ -73,6 +73,14 @@ PRESET_BLIND_DESCRIPTIONS: dict[str, str] = {
     ),
 }
 
+#: Frozen before/after synthetic market-shift pair (release audit visual design).
+STRUCTURE_CHANGE_DATES: tuple[str, str] = ("2008-08-29", "2008-10-10")
+STRUCTURE_CHANGE_ONSET = "2008-09-16"
+STRUCTURE_CHANGE_EXPECTED: dict[str, Any] = {
+    "2008-08-29": {"pairs_qualifying": 29, "mean_off_diagonal_correlation": 0.791},
+    "2008-10-10": {"pairs_qualifying": 66, "mean_off_diagonal_correlation": 0.911},
+}
+
 #: Frozen preset dates freeze the demonstration once step 4 locks them.
 FROZEN_PRESETS_FILENAME = "presets.json"
 
@@ -251,6 +259,89 @@ def _latest(values: Sequence[str]) -> str | None:
     return max(values) if values else None
 
 
+def build_structure_change_pair(data: Any) -> dict[str, Any]:
+    """Return the frozen increasing synthetic pair with expected edge sets (visual design).
+
+    The pair is verified against the committed fixture: 29/66 pairs on 2008-08-29 and
+    66/66 on 2008-10-10 after the 2008-09-16 drawdown episode began, so it is a
+    *retrospective synthetic example* rather than a live prediction.
+    """
+
+    cache = getattr(data, "_presets_cache", None)
+    if isinstance(cache, dict) and "structure_change" in cache:
+        return cache["structure_change"]
+    rows = getattr(data, "industry_rows", ()) or data.rows
+    available_dates = set(getattr(data, "session_dates", ()) or ())
+    if any(date not in available_dates for date in STRUCTURE_CHANGE_DATES):
+        payload = {
+            "available": False,
+            "reason": "the frozen 2008 synthetic pair is not present in this data snapshot",
+            "fixture_id": getattr(data, "snapshot_id", None) or "synthetic-demo",
+        }
+        if isinstance(cache, dict):
+            cache["structure_change"] = payload
+        return payload
+    windows: dict[str, Any] = {}
+    edge_sets: dict[str, set[tuple[str, str]]] = {}
+    for date in STRUCTURE_CHANGE_DATES:
+        network = build_correlation_network(rows, date)
+        pairs = [
+            float(pair["correlation"])
+            for pair in network.get("pairs") or ()
+            if pair.get("correlation") is not None
+        ]
+        expected = STRUCTURE_CHANGE_EXPECTED[date]
+        if int(network.get("pairs_qualifying") or 0) != expected["pairs_qualifying"]:
+            raise PresetError(
+                f"frozen pair mismatch on {date}: {network.get('pairs_qualifying')} != "
+                f"{expected['pairs_qualifying']}"
+            )
+        mean = sum(pairs) / len(pairs) if pairs else None
+        windows[date] = {
+            "date": date,
+            "pairs_qualifying": int(network.get("pairs_qualifying") or 0),
+            "pairs_total": int(network.get("pairs_total") or PAIR_COUNT),
+            "mean_off_diagonal_correlation": None if mean is None else round(mean, 6),
+            "window": network.get("window"),
+            "edges": [
+                [edge["source"], edge["target"], edge["correlation"]]
+                for edge in network.get("edges") or ()
+            ],
+        }
+        edge_sets[date] = {(edge["source"], edge["target"]) for edge in network.get("edges") or ()}
+    left, right = STRUCTURE_CHANGE_DATES
+    added = sorted(edge_sets[right] - edge_sets[left])
+    removed = sorted(edge_sets[left] - edge_sets[right])
+    payload = {
+        "available": True,
+        "fixture_id": getattr(data, "snapshot_id", None) or "synthetic-demo",
+        "kind": "retrospective_synthetic_example",
+        "label": "Retrospective synthetic example",
+        "onset": STRUCTURE_CHANGE_ONSET,
+        "left_date": left,
+        "right_date": right,
+        "windows": windows,
+        "added_edges": [{"source": source, "target": target} for source, target in added],
+        "removed_edges": [{"source": source, "target": target} for source, target in removed],
+        "summary": {
+            "left_pairs": windows[left]["pairs_qualifying"],
+            "right_pairs": windows[right]["pairs_qualifying"],
+            "delta_pairs": windows[right]["pairs_qualifying"] - windows[left]["pairs_qualifying"],
+            "left_mean": windows[left]["mean_off_diagonal_correlation"],
+            "right_mean": windows[right]["mean_off_diagonal_correlation"],
+            "added": len(added),
+            "removed": len(removed),
+        },
+        "statement": (
+            "Synthetic retrospective example: 29/66 pairs on 2008-08-29 vs 66/66 on 2008-10-10 "
+            "(+37, none removed) after the 2008-09-16 episode onset; not a live prediction."
+        ),
+    }
+    if isinstance(cache, dict):
+        cache["structure_change"] = payload
+    return payload
+
+
 def derive_presets(data: Any) -> list[Preset]:
     """Derive the four presets deterministically from the loaded fixture."""
 
@@ -402,6 +493,7 @@ def build_presets(data: Any) -> dict[str, Any]:
         "source": source,
         "presets": [preset.as_dict() for preset in presets],
         "available": [preset.preset_id for preset in presets if preset.verified],
+        "structure_change": build_structure_change_pair(data),
         "table_alternative": _preset_table(presets),
     }
     try:
@@ -448,9 +540,11 @@ __all__ = [
     "FROZEN_PRESETS_FILENAME",
     "PRESET_LABELS",
     "PRESET_ORDER",
+    "STRUCTURE_CHANGE_DATES",
     "Preset",
     "PresetError",
     "build_presets",
+    "build_structure_change_pair",
     "derive_presets",
     "find_preset",
     "load_frozen_presets",

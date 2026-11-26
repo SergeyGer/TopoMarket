@@ -92,6 +92,17 @@ Final sign-off requires the owner-seeded private suite and the public checks on 
   byte-identical. The refreshed-snapshot dashboard view of split calendars is a follow-up under
   U4/docs if needed; default synthetic data keeps the joint fallback.
 
+- **U1/U2/U3/U5 + visual pair (in review):** guided tour now starts explicitly and its first
+  stop is the frozen retrospective synthetic pair 2008-08-29 (29/66) -> 2008-10-10 (66/66, +37/0,
+  mean 0.791 -> 0.911, onset 2008-09-16), auto-enabling the two-window comparison with both dates,
+  counts and the retrospective label; the comparison producer now exposes per-window added/removed
+  edges and the figure renders removed edges amber/dashed and added edges positive/solid with a
+  legend and hover correlations (tested against independently computed edge sets). Blind replay
+  refuses/blocks the comparison view and clears stale comparison state; Structure gains an inline
+  reveal/hide outcome panel (origin/boundary/low/breach/max decline) that keeps the network, date,
+  threshold and H1 explanation mounted, with a blind-safe payload when hidden. U4 (single-click/tap
+  node and Mapper hit targets) remains.
+
 ## Owner actions pending
 
 - **Private seed:** provide `TOPOMARKET_SEED_DIR` locally (outside Git) so the corrected private

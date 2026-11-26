@@ -243,27 +243,49 @@ def test_streamlit_blind_replay_is_neutral_about_outcomes() -> None:
     reason="Streamlit is an optional dependency",
 )
 def test_streamlit_market_studio_guided_tour_and_comparison() -> None:
-    """WP-C: guided sequence, comparison toggle and interactive chart mounting."""
+    """U1/U2/U5: blind isolation, inline reveal, frozen pair and guided sequence."""
 
     from streamlit.testing.v1 import AppTest
 
     app_test = AppTest.from_file(str(APP_PATH), default_timeout=120).run()
     assert not list(app_test.exception)
-    assert any(checkbox.label == "Compare two windows" for checkbox in app_test.sidebar.checkbox)
+    # U2: the initial blind replay must not offer the comparative view.
+    assert not any(
+        checkbox.label == "Compare two windows" for checkbox in app_test.sidebar.checkbox
+    )
+    captions = " ".join(str(caption.value) for caption in app_test.sidebar.caption)
+    assert "Guided tour not started" in captions
+    assert "Blind" in captions
     assert any(button.label.startswith("Guided:") for button in app_test.sidebar.button)
 
-    app_test.sidebar.checkbox(key="tm_compare").set_value(True).run()
+    # U5: reveal inline on Structure; the network stays mounted and the comparative
+    # view becomes available without switching screens.
+    app_test.button(key="tm_structure_reveal").click().run()
     assert not list(app_test.exception)
-    subheaders = [subheader.value for subheader in app_test.subheader]
-    assert "Two-window comparison" in subheaders
-    page_text = " ".join(str(item.value) for item in [*app_test.markdown, *app_test.caption])
-    assert (
-        "no chronological crisis-emergence claim" in page_text
-        or "regime contrast, not as proven crisis emergence" in page_text
+    assert any(checkbox.label == "Compare two windows" for checkbox in app_test.sidebar.checkbox)
+    assert "Industry correlation network" in [str(item.value) for item in app_test.subheader]
+    assert "Inline outcome" in [str(item.value) for item in app_test.subheader]
+    assert any("10% boundary" in str(metric.label) for metric in app_test.metric)
+    app_test.button(key="tm_structure_blind").click().run()
+    assert not list(app_test.exception)
+    assert not any(
+        checkbox.label == "Compare two windows" for checkbox in app_test.sidebar.checkbox
     )
-    assert "Edges added in window B" in page_text
 
-    for expected_step in (2, 3, 4):
+    # U1: first guided stop is the frozen retrospective synthetic pair; it enables
+    # the comparison and both dated windows render without a blind-mode contradiction.
+    app_test.sidebar.button(key="tm_guide_next").click().run()
+    assert not list(app_test.exception)
+    captions = " ".join(str(caption.value) for caption in app_test.sidebar.caption)
+    assert "Guided step 1/5" in captions and "Synthetic market shift" in captions
+    assert app_test.sidebar.checkbox(key="tm_compare").value is True
+    subheaders = [str(subheader.value) for subheader in app_test.subheader]
+    assert "Two-window comparison" in subheaders
+    page_captions = " ".join(str(item.value) for item in [*app_test.markdown, *app_test.caption])
+    assert "Retrospective synthetic example" in page_captions
+    assert "2008-08-29" in page_captions and "2008-10-10" in page_captions
+    assert "Edges added in window B" in page_captions
+    for expected_step in (2, 3, 4, 5):
         app_test.sidebar.button(key="tm_guide_next").click().run()
         assert not list(app_test.exception)
         guided = [
@@ -271,4 +293,4 @@ def test_streamlit_market_studio_guided_tour_and_comparison() -> None:
             for caption in app_test.sidebar.caption
             if "Guided step" in str(caption.value)
         ]
-        assert guided and f"Guided step {expected_step}/4" in guided[0]
+        assert guided and f"Guided step {expected_step}/5" in guided[0]
