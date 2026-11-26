@@ -11,7 +11,7 @@ TopoMarket explores how US equity markets move together and tests whether change
 **Start here:** [Launch demo](https://topomarket-juhbvrgk2k67pnr6qbpfmc.streamlit.app/) &middot; [Watch 60 seconds](docs/watch/index.html) &middot; [Read the mathematics](docs/MATHEMATICS.md) &middot; [Validation evidence](docs/ACCEPTANCE_v1.2.md) &middot; [Quickstart](#quickstart)
 
 <p align="center">
-  <img src="docs/assets/opening_card_16x9.png" alt="Synthetic TopoMarket structure scene: twelve labelled industry portfolios connected where trailing 60-session returns correlate at 0.80 or more; the 2020-02-24 window shows 56 of 66 qualifying pairs." width="900">
+  <img src="docs/assets/two_window_comparison_2008.png" alt="Two dated synthetic correlation networks: Window A on 29 August 2008 has 29 of 66 industry pairs at r >= 0.80; Window B on 10 October 2008 has 66 of 66; the change is +37 added edges, 0 removed." width="900">
 </p>
 
 *Synthetic structure scene from the demo; the app's frozen before/after pair moves from 29 of 66 qualifying pairs on 2008-08-29 to 66 of 66 on 2008-10-10. Every published figure uses the synthetic showcase only.*
