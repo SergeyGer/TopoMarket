@@ -103,6 +103,9 @@ Final sign-off requires the owner-seeded private suite and the public checks on 
   threshold and H1 explanation mounted, with a blind-safe payload when hidden. U4 (single-click/tap
   node and Mapper hit targets) remains.
 
+- **Release candidate:** version bumped to 1.2.0; frozen showcase/presets regenerated; acceptance
+  pack, hosted smoke, new film, evidence and release assets are being finalised.
+
 ## Owner actions pending
 
 - **Private seed:** provide `TOPOMARKET_SEED_DIR` locally (outside Git) so the corrected private
