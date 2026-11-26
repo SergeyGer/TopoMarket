@@ -236,7 +236,7 @@ def test_load_profile_as_dict() -> None:
 
     assert payload["profile"] == "demo"
     assert payload["private_data"] is False
-    assert payload["data_dir"] == str(profile.data_dir)
+    assert payload["data_dir"] == profile.data_dir.as_posix()
 
 
 @pytest.mark.parametrize("profile", PROFILE_NAMES)
