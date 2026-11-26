@@ -78,8 +78,8 @@
       "start_s": 27.0,
       "end_s": 39.0,
       "duration_s": 12.0,
-      "picture": "2025-03-10 late-warning teaching example (outside the frozen evaluation): percentile 100, frozen threshold 100, Takens window and H1 persistence diagram",
-      "narration": "March 10, 2025: a late-warning teaching example at percentile 100. Takens and H1 show the S&P 500 return shape; the frozen threshold is 100.",
+      "picture": "2025-03-10 recorded late alert inside the frozen evaluation (outside the frozen evaluation): percentile 100, frozen threshold 100, Takens window and H1 persistence diagram",
+      "narration": "March 10, 2025: a recorded late alert inside the frozen evaluation at percentile 100. Takens and H1 show the S&P 500 return shape; the frozen threshold is 100.",
       "interactions": [
         {
           "at_s": 28.153,

@@ -46,22 +46,22 @@
     },
     {
       "preset_id": "matched_warning",
-      "label": "Late warning (teaching example)",
+      "label": "Recorded late alert",
       "date": "2025-03-10",
       "mode": "replay",
       "expected": [
         "late alert",
         "decline already under way"
       ],
-      "description": "A late alert used as a labelled teaching example; it is not part of the frozen evaluation.",
+      "description": "The 2025-03-10 alert is part of the frozen evaluation as a late alert: the episode began on 2025-03-06 and the alert fired after onset, so its early-warning credit is zero.",
       "fixture_id": "showcase-synthetic",
       "verified": true,
       "reason": null,
       "teaching": true,
       "blind_label": "Guided alert example",
-      "review_label": "Late warning (teaching example)",
+      "review_label": "Recorded late alert",
       "blind_description": "A labelled demonstration example; its retrospective outcome is hidden in blind mode.",
-      "review_description": "A late alert used as a labelled teaching example; it is not part of the frozen evaluation."
+      "review_description": "The 2025-03-10 alert is part of the frozen evaluation as a late alert: the episode began on 2025-03-06 and the alert fired after onset, so its early-warning credit is zero."
     },
     {
       "preset_id": "missed_warning",

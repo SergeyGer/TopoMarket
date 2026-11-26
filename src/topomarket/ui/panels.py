@@ -703,6 +703,7 @@ class PanelCache:
             selection.run,
             str(selection.network_view),
             selection.edge,
+            selection.node,
             self.data.data_signature,
         )
 

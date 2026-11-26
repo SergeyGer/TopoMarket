@@ -402,6 +402,7 @@ class DashboardSelection:
         *args: Any,
         network_view: Any = _UNSET,
         edge: str | None = _UNSET,
+        node: str | None = _UNSET,
         **unknown: Any,
     ) -> None:
         if args:
@@ -419,6 +420,7 @@ class DashboardSelection:
             "run": None if run is _UNSET else run,
             "network_view": DEFAULT_NETWORK_VIEW if network_view is _UNSET else network_view,
             "edge": None if edge is _UNSET else edge,
+            "node": None if node is _UNSET else node,
         }
 
         loaded = unknown.pop("_loaded", None)
@@ -460,7 +462,9 @@ class DashboardSelection:
             "selected_member": "member",
             "industry": "member",
             "industry_member": "member",
-            "node": "member",
+            "node": "node",
+            "mapper_node": "node",
+            "selected_node": "node",
             "selected_run": "run",
             "run_id": "run",
             "evaluation_run": "run",
@@ -532,6 +536,7 @@ class DashboardSelection:
         run_value = _normalise_optional_text("run", values["run"])
         network_view_value = _normalise_network_view(values["network_view"])
         edge_value = _normalise_optional_text("edge", values["edge"])
+        node_value = _normalise_optional_text("node", values["node"])
 
         if blind_values:
             blind = _normalise_bool("blind", blind_values[-1])
@@ -561,6 +566,7 @@ class DashboardSelection:
         object.__setattr__(self, "run", run_value)
         object.__setattr__(self, "network_view", network_view_value)
         object.__setattr__(self, "edge", edge_value)
+        object.__setattr__(self, "node", node_value)
         context = _LoadedContext(
             session_dates=session_values,
             members=member_values,
@@ -697,6 +703,10 @@ class DashboardSelection:
         return self.edge
 
     @property
+    def selected_node(self) -> str | None:
+        return self.node
+
+    @property
     def is_correlation_view(self) -> bool:
         return str(self.network_view) == "correlation"
 
@@ -810,6 +820,7 @@ class DashboardSelection:
             "run": self.run,
             "network_view": self.network_view,
             "edge": self.edge,
+            "node": self.node,
         }
         if include_context:
             payload["window_size"] = self.window_size
@@ -962,6 +973,9 @@ class DashboardSelection:
 
     def with_edge(self, edge: str | None) -> DashboardSelection:
         return self.replace(edge=edge)
+
+    def with_node(self, node: str | None) -> DashboardSelection:
+        return self.replace(node=node)
 
     select_edge = with_edge
 

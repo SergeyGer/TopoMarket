@@ -25,7 +25,7 @@ timestamp, visible version, fixture ID and release commit.
 | 00:00-00:06 | Social preview opening card | "TopoMarket maps market structure and tests whether topology can warn of sharp declines." |
 | 00:06-00:19 | Guided tour first stop: frozen retrospective pair 2008-08-29 29/66 (mean r 0.791) -> 2008-10-10 66/66 (mean r 0.911, +37/0), onset 2008-09-16, retrospective label, r >= 0.80 cutoff, comparison enabled | "Frozen retrospective: 29 of 66 pairs on 2008-08-29; 66 of 66 on 2008-10-10. Mean correlation rises from 0.791 to 0.911." |
 | 00:19-00:27 | Finance selected in the interactive network (11 qualifying pairs), then Mapper groups overlap view with the selected Finance group highlighted | "Finance: eleven qualifying pairs. Mapper groups portfolios by shared structure." |
-| 00:27-00:39 | 2025-03-10 late-warning teaching example: warning label, percentile 100.0, frozen threshold 100.0, Takens embedding (56 points) and H1 persistence diagram (longest lifetime 0.921) | "March 10, 2025: a late-warning teaching example at percentile 100. Takens and H1 show the S&P 500 return shape; the frozen threshold is 100." |
+| 00:27-00:39 | 2025-03-10 recorded late alert (post-onset, inside the frozen evaluation): warning label, percentile 100.0, frozen threshold 100.0, Takens embedding (56 points) and H1 persistence diagram (longest lifetime 0.921) | "March 10, 2025: a recorded late alert at percentile 100. Takens and H1 show the S&P 500 return shape; the frozen threshold is 100." |
 | 00:39-00:49 | Blind Replay with no outcome, then explicit reveal: origin close 305.998293, 10% boundary 275.3984637, lowest close 299.830407 (2025-03-14), first breach none, maximum decline 2.02%, target not reached | "Blind replay. Reveal: the index stayed above the 10% boundary, with a 2.02% maximum decline." |
 | 00:49-00:55 | Validation evidence cards/chart: TDA 0/3 (AP 0.0154, 0.91 false alerts/year), VIX 1/3 (AP 0.1187), realized volatility 0/3 (AP 0.0556), experimental wording and limitations | "Experimental: TDA 0 of 3, VIX 1 of 3. Average precision is low." |
 | 00:55-01:00 | Static end card holding the exact URL `github.com/SergeyGer/TopoMarket` for five seconds | "Explore the code and the live demo on GitHub." |
@@ -38,9 +38,9 @@ Every spoken number and on-screen number was checked against the released fixtur
 - Frozen pair: **29/66** on 2008-08-29 (mean r 0.791036) -> **66/66** on 2008-10-10
   (mean r 0.910608); **+37 added, 0 removed**; onset 2008-09-16; labelled retrospective synthetic
   example; fixed r >= 0.80 cutoff; not a live prediction.
-- Teaching example: 2025-03-10 is a **late-warning teaching example outside the frozen evaluation**;
+- Late alert: 2025-03-10 is a **recorded post-onset late alert inside the frozen evaluation** (episode onset 2025-03-06) with zero early-warning credit;
   comparative percentile **100.0**, frozen threshold **100.0**; Takens 56 points, dimension 3, lag 2;
-  H1 longest finite lifetime 0.921. The warning panel says "Teaching example (late warning)".
+  H1 longest finite lifetime 0.921. The warning panel says "Recorded late alert" and explains the post-onset classification; the v1.3 film re-record will carry the same copy.
 - Replay: blind state has no outcome; reveal shows origin **305.998293**, 10% boundary
   **275.3984637**, lowest close **299.830407** on 2025-03-14, first breach **none**, maximum decline
   **2.02%** (2.01566%), 20-session horizon; the 10% target was not reached. The narration states the

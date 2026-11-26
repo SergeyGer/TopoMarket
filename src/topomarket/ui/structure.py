@@ -894,10 +894,14 @@ def build_structure_payload(
     mode = str(getattr(selection, "mode", "live"))
     revealed = bool(getattr(selection, "reveal", False))
     inline_outcome = None
+    inline_alert = None
     if mode == "replay" and revealed:
+        from topomarket.analysis.asof import alert_state
+
         from .replay import build_outcome
 
         inline_outcome = build_outcome(data, selected)
+        inline_alert = alert_state(data, selected, blinded=False)
     if mode == "replay" and not revealed:
         presets = _blind_safe_presets(presets, selected)
     score = _score_point(data, selected)
@@ -942,6 +946,7 @@ def build_structure_payload(
             "blind": mode == "replay" and not revealed,
             "revealed": revealed,
             "outcome": inline_outcome,
+            "alert": inline_alert,
         },
     }
     return payload

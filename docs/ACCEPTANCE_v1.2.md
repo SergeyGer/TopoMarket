@@ -75,7 +75,7 @@ under `~/TopoMarket-private-results/`.
 
 After the v1.2.0 candidate merged, the public Community Cloud app continued to report
 `release 1.1.0` for more than 40 minutes and a mixed/stale deployment crashed on the 2025-03-10 guided
-teaching example with `FrozenConfigurationError` (the identical local build and CI are healthy). The
+recorded late alert with `FrozenConfigurationError` (the identical local build and CI are healthy). The
 honest anonymous evidence, including the error screenshots, is recorded in
 `docs/measurements/hosted_evidence_v1.2.json` with most checks `false`. A dashboard reboot/re-deploy of
 the app is the documented owner action; the v1.2.0 tag is held until the deployed identity `1.2.0`
@@ -88,7 +88,7 @@ passes the signed-out smoke, and then the evidence file is regenerated.
   release commit; reviewed WebVTT/SRT captions, captioned playback copy and editable production source
   attached to the release.
 - Scenes: opening card; 29/66 -> 66/66 retrospective pair; Finance + Mapper overlap; 2025-03-10
-  late-warning teaching example with Takens/H1 and percentile 100/threshold 100; blind Replay ->
+  late-warning recorded late alert with Takens/H1 and percentile 100/threshold 100; blind Replay ->
   reveal (origin 305.998, boundary 275.398, lowest 299.830, max decline 2.02%, target not reached);
   results card TDA 0/3 and VIX 1/3 (AP in details); static repository URL for five seconds.
 
