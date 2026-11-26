@@ -172,8 +172,8 @@ def test_comparison_edge_change_encoding_uses_real_style() -> None:
     """U3: added/removed edges get distinct colour + dash in rendered traces."""
 
     from topomarket.ui.interactive import comparison_figure
-    from topomarket.ui.theme import ALERT, POSITIVE
     from topomarket.ui.presets import build_structure_change_pair
+    from topomarket.ui.theme import ALERT, POSITIVE
 
     data = _data()
     pair = build_structure_change_pair(data)
