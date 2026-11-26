@@ -44,15 +44,35 @@ Hosted signed-out 10/10 evidence for v1.2.0 remains in `docs/measurements/hosted
 mobile, two isolated sessions, cold start 7.93 s). v1.3.0 hosted smoke (including per-card chronology
 and Mapper node checks) is recorded at release time.
 
+## Release
+
+- Published: <https://github.com/SergeyGer/TopoMarket/releases/tag/v1.3.0> (tag `v1.3.0`, main
+  `c65a9ed`), 9 assets: hosted film MP4/SRT/captioned/narration/production source, wheel, sdist,
+  test report, release-check report.
+- Player: <https://sergeyger.github.io/TopoMarket/watch/index.html> (versioned v1.3.0 media links; the
+  release assets are now attached so playback is unblocked).
+- Git history: remediation merges #89-#95; historical v1.0-v1.2 tags/artefacts retained.
+
 ## Film and release gates
 
-- [ ] Corrected public-deployment film with both topology plots held, 2.02%/10% boundary, large TDA
-      0/3 vs VIX 1/3, checked-in builder, manifest URL/UTC/revision/fixture/digests (#86).
-- [ ] Captions/transcripts regenerated from the final narration; four cue checks at 00:16/00:30/00:46/
-      00:52 against the versioned manifest (#86/#87).
-- [ ] v1.3.0 version bump, frozen artifacts, Linux+Windows CI, hosted smoke and published assets (#87).
-- [ ] Owner film sign-off (open until recorded) and sanitised private receipt on the selected release
-      commit.
+- [x] Corrected public-deployment film recorded from the fixed public app (source public_deployment,
+      UTC 2026-11-26T14:31:34Z, visible release 1.2.0, fixture showcase-synthetic, commit 0baf9c2, no
+      deviation); chronology, both topology plots through the Takens/H1 narration, 2.02%/10% reveal,
+      large TDA 0/3 vs VIX 1/3 and end-card URL verified; checked-in builder secret-scan clean;
+      assets attached to v1.3.0 (#86).
+- [x] Captions/transcripts regenerated from the final narration; four cue checks at 00:16/00:30/00:46/
+      00:52 verified against the frame content; watch page links versioned v1.3.0 assets (#86/#87).
+- [x] v1.3.0 tagged and published with 9 assets; version bump/frozen artifacts, Linux (py3.11/3.12) and
+      Windows CI, release checks, dependency audit, CodeQL and cloud smoke green (#87).
+- [ ] Owner film sign-off (open until recorded).
+- [ ] Sanitised private-suite receipt on the selected v1.3.0 commit: the full owner-seeded rerun on
+      `c65a9ed` is still in progress (the environment is slow); the previous full run on the same
+      remediation candidate produced 697 passed/4 failed, and the four failures were the frozen-2008
+      private-snapshot `PresetError` now fixed, so the receipt is appended after the rerun completes.
+- [ ] Hosted v1.3.0 identity re-check: after the v1.3.0 merge the Cloud deployment still reported
+      release 1.2.0 (the corrected UI is deployed and previously smoke-tested 10/10); a dashboard
+      reboot/redeploy is the documented owner action, then the hosted evidence is refreshed with the
+      1.3.0 identity.
 
 ## Known limitations / owner actions
 
