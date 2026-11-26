@@ -3,6 +3,42 @@
 Release notes per implementation step. TopoMarket identifies releases by step number and semantic
 version; no release dates or schedules are published in repository content.
 
+## v1.2.0 - Release-audit follow-up: evaluation integrity, trustworthy Studio and public documentation
+
+Focused follow-up to the 26 November 2026 release audit (`TopoMarket_Release_Audit_and_Improvement_Specification_EN.docx`).
+The interactive market-structure demonstration is accepted; early warning stays explicitly experimental.
+See `docs/ACCEPTANCE_v1.2.md` for the evidence matrix and `docs/UPGRADE_v1.2.md` for the plan.
+
+- **R1 independent signal calendars (#55).** Price-based signals (S&P returns, TDA, realised
+  volatility, labels, 20-session horizons) use the ordered index calendar; industry windows use their
+  own table; VIX is joined by date for the comparison cohort only; old synthetic snapshots keep an
+  explicit joint fallback. Reports/CLI expose separate as-of dates, sources and reasons; evaluation
+  rows are the price calendar left-joined with VIX. Acceptance: appending only price/VIX dates past
+  industry coverage extends the score and labels, and mutating only industry data leaves price
+  scores/evaluation reports byte-identical. Owner-seeded run: 19,343 index rows through 2026-11-18,
+  latest TDA score 2026-11-18 (baseline 2026-09-30), snapshot ID resolved, common eligible 3,220.
+- **R2 bootstrap multiplicity (#56).** Blocks are drawn with replacement, concatenated and trimmed to
+  N; identical position weights drive each method's frozen onset/false-alert indicators; exposure is
+  fixed at N; algorithm identity `moving_block_with_replacement_v2`; intervals regenerated and
+  versioned; duplicate-block/absent-event/shared-draw tests.
+- **R3 CLI snapshot identity (#57).** Active pointer -> refresh manifest -> import manifest/content
+  digest resolution with visible conflict failures; identity/source/manifest digest carried into
+  reports, policies and ledger rows.
+- **U1-U5 Studio trust fixes (#58/#59).** Explicit guided-tour start (no quiet-window mislabel) with the
+  frozen retrospective 2008-08-29 (29/66) -> 2008-10-10 (66/66, +37/0) pair; blind replay blocks the
+  comparative view; real edge-change encoding (removed amber dashed, added positive solid, legend,
+  hover correlations); inline Structure reveal/hide of the 20-session outcome; reliable single-tap
+  node/edge/Mapper targets.
+- **Mathematics reference (#61).** `docs/MATHEMATICS.md` with corrected definitions, units, worked
+  examples and links; correlation qualification now uses the full-precision value (six-decimal tag is
+  display/provenance only).
+- **Public presentation (#62).** Reader-first ~750-word README, honest 0/3 TDA vs 1/3 VIX holdout,
+  browser-playable `docs/watch/index.html` with WebVTT captions/transcript/downloads, Wiki refresh.
+- **New film (#63) and release (#65).** Re-recorded 60-second cut with hosted URL/UTC/version/fixture/
+  commit manifest, WebVTT/SRT/captioned copy; v1.2.0 release assets; v1.0/v1.1 artifacts retained.
+- No private data, credentials, ledgers or release dates are committed; private historical results
+  stay outside the public repository.
+
 ## v1.1.0 - Acceptance-review release: auditable evidence, causal Replay and Market Structure Studio
 
 Follow-up release implementing the v1.1 acceptance review (epic #48). See
