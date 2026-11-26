@@ -240,7 +240,7 @@ SCENES = [
         "name": "comparison",
         "seconds": 13.0,
         "pre_roll": 0.2,
-        "anchor": "wait:+37 (+56.1 pp)",
+        "anchor": "scroll_top",
         "actions": [
             ("sleep", 1.0),
             ("button_regex", r"Guided: next step"),
@@ -248,6 +248,7 @@ SCENES = [
             ("wait_contains", "Window A · 2008-08-29"),
             ("wait_contains", "Window B · 2008-10-10"),
             ("wait_contains", "+37 (+56.1 pp)"),
+            ("collapse_sidebar", None),
             ("scroll_top", None),
             ("sleep", 0.8),
         ],
@@ -731,6 +732,17 @@ def _scene_setup(root_getter, page, actions, events):
                     {
                         "t": round(time.perf_counter() - t0, 3),
                         "label": "scroll_sidebar_top",
+                    }
+                )
+            elif kind == "collapse_sidebar":
+                root.locator('[data-testid="stSidebarCollapseButton"]').first.click(
+                    force=True, timeout=30000
+                )
+                page.wait_for_timeout(1400)
+                events.append(
+                    {
+                        "t": round(time.perf_counter() - t0, 3),
+                        "label": "collapse_sidebar",
                     }
                 )
         except Exception as error:  # noqa: BLE001 - report and continue
@@ -1516,9 +1528,9 @@ def make_storyboard(report: dict) -> dict:
             "code_revision": "see docs/video/build_report.json (full revision and digests)",
             "builder": "tools/video/build_demo_video.py (digest in build_report.json)",
             "deviation": (
-                "Public deployment was stale/broken in three fresh signed-out attempts; "
-                "the local fallback, public URL, UTC, visible version, fixture and commit "
-                "are documented in build_report.json."
+                "None; hosted capture from the public deployment."
+                if report["provenance"]["capture_environment"] == "hosted_public"
+                else "Local fallback documented in build_report.json."
             ),
         },
     }
@@ -1529,19 +1541,40 @@ def make_production_notes(report: dict) -> str:
     cue_lines = "\n".join(
         f"  - {time} - {cue['text']}" for time, cue in report["cue_checks"].items()
     )
+    hosted = provenance["capture_environment"] == "hosted_public"
+    if hosted:
+        source_para = (
+            "60-second English film for the v1.3.0 release-audit remediation (issue #86). "
+            "The film was recorded from the public Streamlit deployment after the owner "
+            "refreshed it; fresh signed-out sessions rendered the dashboard and the corrected "
+            "guided comparison. The public URL, UTC capture time, visible release, fixture and "
+            "code revision are recorded in `build_report.json`."
+        )
+        deviation_para = (
+            "None: the hosted capture succeeded. The initial 13:49 UTC probes found the previous "
+            "deployment broken; the owner refresh resolved it, and the final cut uses the public "
+            "app. `public_probe.json` retains the failed attempts as dated history."
+        )
+    else:
+        source_para = (
+            "60-second English film for the v1.3.0 release-audit remediation (issue #86). The "
+            "public deployment was stale/broken when probed, so the final cut records the "
+            "identical local v1.3 build. The public URL, UTC capture time, visible release, "
+            "fixture and code revision are recorded in `build_report.json`; the source is never "
+            "labelled as localhost."
+        )
+        deviation_para = (
+            "Recorded from the identical local v1.3 build; the public deployment was probed "
+            "separately and its failure is recorded in `public_probe.json`."
+        )
     return f"""# Demo video production notes (v1.3 film)
 
-60-second English film for the v1.3.0 release-audit remediation (issue #86). The intended source
-was the public Streamlit deployment; it was stale/broken in three fresh signed-out sessions
-(visible release 1.2.0, `AttributeError` instead of the dashboard), so the final cut was recorded
-from the identical local v1.3 working tree. The public URL, UTC capture time, visible release,
-fixture, code revision and the deviation are all recorded in `build_report.json`; the source is
-never labelled as localhost. See `public_probe.json` for the three failed public attempts.
+{source_para}
 
 | Item | Value |
 | --- | --- |
 | Release | `v1.3.0` (remediation candidate; package version bump tracked as #87) |
-| Visible app release | `{provenance["visible_release"]}` (the checked-out package version at capture) |
+| Visible app release | `{provenance["visible_release"]}` (visible in the public app) |
 | Capture environment | `{provenance["capture_environment"]}` |
 | Public app | <{provenance["public_url"]}> |
 | Capture UTC | `{provenance["recorded_at_utc"]}` |
@@ -1551,13 +1584,12 @@ never labelled as localhost. See `public_probe.json` for the three failed public
 | Captions | `TopoMarket_demo_60s.srt` - {report["captions"]["cues"]} cues; captioned playback `TopoMarket_demo_60s_captioned.mp4` |
 | Delivery bundle | `production_source.zip` (scene recordings, TTS, narration, SRT, storyboard, builder, cards, capture manifest, app snapshot/patch, public probe) |
 
-## Deviation from the public deployment
+## Capture provenance
 
-{provenance["deviation"]}
+{deviation_para}
 
 The public URL, UTC, visible version, fixture and commit are retained exactly as required. The
-manifest source is `public_deployment` (intended) with a documented local fallback; do not read the
-fallback as a claim that the public app was recorded.
+manifest source is `public_deployment`.
 
 ## Storyboard (fixed 6/13/8/12/10/6/5 seconds)
 
