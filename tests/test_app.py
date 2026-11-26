@@ -294,3 +294,47 @@ def test_streamlit_market_studio_guided_tour_and_comparison() -> None:
             if "Guided step" in str(caption.value)
         ]
         assert guided and f"Guided step {expected_step}/5" in guided[0]
+
+
+@pytest.mark.skipif(
+    importlib.util.find_spec("streamlit") is None,
+    reason="Streamlit is an optional dependency",
+)
+def test_streamlit_direct_inspection_tap_targets() -> None:
+    """U4: single-tap node, reliable edge hit target and direct Mapper inspection."""
+
+    from streamlit.testing.v1 import AppTest
+
+    app_test = AppTest.from_file(str(APP_PATH), default_timeout=180).run()
+    assert not list(app_test.exception)
+    node_buttons = [
+        button
+        for button in app_test.button
+        if button.key and button.key.startswith("tm_node_tap::")
+    ]
+    assert len(node_buttons) == 12
+    node_buttons[0].click().run()
+    assert not list(app_test.exception)
+    page_text = " ".join(str(item.value) for item in [*app_test.markdown, *app_test.caption])
+    assert "Selected portfolio:" in page_text
+    assert any(edge.label == "Edge inspector (reliable hit target)" for edge in app_test.selectbox)
+    edge_select = next(
+        edge for edge in app_test.selectbox if edge.label == "Edge inspector (reliable hit target)"
+    )
+    edge_select.select_index(1).run()
+    assert not list(app_test.exception)
+    page_text = " ".join(str(item.value) for item in [*app_test.markdown, *app_test.caption])
+    assert "Selected edge:" in page_text
+
+    view_radio = next(item for item in app_test.sidebar.radio if item.key == "tm_view_label")
+    view_radio.set_value("Mapper groups").run()
+    assert not list(app_test.exception)
+    mapper_buttons = [
+        button
+        for button in app_test.button
+        if button.key and button.key.startswith("tm_mapper_node::")
+    ]
+    assert mapper_buttons
+    mapper_buttons[0].click().run()
+    assert not list(app_test.exception)
+    assert "Mapper groups" in [str(item.value) for item in app_test.subheader]

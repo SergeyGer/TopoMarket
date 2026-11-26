@@ -1101,6 +1101,110 @@ def blind_structure_state(selection: DashboardSelection) -> bool:
     )
 
 
+def _render_node_tap_buttons(
+    ui: Any, network: Mapping[str, Any], selection: DashboardSelection
+) -> DashboardSelection:
+    """U4: reliable single-tap portfolio selection (touch pointer + keyboard)."""
+
+    nodes = list(network.get("nodes") or ())[:12]
+    if not nodes:
+        return selection
+    _call(
+        ui,
+        "caption",
+        "Tap a portfolio to inspect it (single tap works on touch and with the keyboard); "
+        "box-select on the network does the same with a mouse.",
+    )
+    for start in (0, 6):
+        row = nodes[start : start + 6]
+        if not row:
+            continue
+        columns = _call(ui, "columns", len(row)) or []
+        for column, node in zip(columns, row, strict=False):
+            label = node.get("label") or node.get("code")
+            if _call(column, "button", str(label), key=f"tm_node_tap::{node['code']}"):
+                selection = _commit_interactive_selection(
+                    ui, selection.with_member(str(node["code"]))
+                )
+    return selection
+
+
+def _render_edge_inspector(
+    ui: Any, network: Mapping[str, Any], selection: DashboardSelection
+) -> DashboardSelection:
+    """U4: reliable edge hit targets with correlation and text equivalent."""
+
+    edges = list(network.get("edges") or ())
+    if not edges:
+        return selection
+    labels = {node["code"]: node["label"] for node in network.get("nodes") or ()}
+    options = ["(no edge highlighted)"] + [
+        f"{labels.get(edge['source'], edge['source'])} – "
+        f"{labels.get(edge['target'], edge['target'])} · r={float(edge['correlation']):.3f}"
+        for edge in edges
+    ]
+    by_label = {
+        option: f"{edge['source']}--{edge['target']}"
+        for option, edge in zip(options[1:], edges, strict=False)
+    }
+    current = 0
+    for position, option in enumerate(options[1:], start=1):
+        if by_label[option] == str(selection.edge or ""):
+            current = position
+    chosen = _call(
+        ui,
+        "selectbox",
+        "Edge inspector (reliable hit target)",
+        options,
+        index=current,
+        key="tm_edge_inspect",
+        help="Every qualifying pair can be selected here; hovering/box-selecting on the network "
+        "shows the same correlation.",
+    )
+    if chosen and chosen != options[0]:
+        selection = selection.replace(edge=by_label[chosen])
+        edge_id = by_label[chosen]
+        edge = next(
+            (item for item in edges if edge_id == f"{item['source']}--{item['target']}"),
+            None,
+        )
+        if edge is not None:
+            _call(
+                ui,
+                "markdown",
+                f"**Selected edge:** {labels.get(edge['source'], edge['source'])} – "
+                f"{labels.get(edge['target'], edge['target'])} · "
+                f"Pearson r = {float(edge['correlation']):.3f} (above the fixed cutoff).",
+            )
+    return selection
+
+
+def _render_mapper_node_buttons(
+    ui: Any, mapper: Mapping[str, Any], selection: DashboardSelection
+) -> DashboardSelection:
+    """U4: direct Mapper inspection without switching to the network view."""
+
+    nodes = list(mapper.get("nodes") or ())[:8]
+    if not nodes:
+        return selection
+    _call(ui, "caption", "Tap a Mapper group to inspect its members and within-group correlations.")
+    columns = _call(ui, "columns", min(4, len(nodes))) or []
+    for position, node in enumerate(nodes):
+        column = columns[position % len(columns)] if columns else ui
+        members = ", ".join(member["label"] for member in node.get("members") or ())
+        if _call(
+            column,
+            "button",
+            f"{node['node_id']} · {node.get('member_count', 0)} members",
+            key=f"tm_mapper_node::{node['node_id']}",
+            help=members,
+        ):
+            first = (node.get("member_codes") or [None])[0]
+            if first:
+                selection = _commit_interactive_selection(ui, selection.with_member(str(first)))
+    return selection
+
+
 def render_structure_screen(
     ui: Any, data: DashboardData, selection: DashboardSelection, payload: Mapping[str, Any]
 ) -> DashboardSelection:
@@ -1146,6 +1250,7 @@ def render_structure_screen(
     score = payload.get("score") or {}
     if str(selection.network_view) == "mapper":
         _call(ui, "subheader", "Mapper groups")
+        selection = _render_mapper_node_buttons(ui, mapper, selection)
         _render_figure(
             ui,
             lambda: charts.mapper_figure(
@@ -1255,6 +1360,8 @@ def render_structure_screen(
             timeline = payload.get("timeline") or {}
             selection = _render_landing(ui, network, timeline, selection)
             _call(ui, "caption", str(network.get("summary") or ""))
+            selection = _render_node_tap_buttons(ui, network, selection)
+            selection = _render_edge_inspector(ui, network, selection)
             pairs = [
                 pair for pair in network.get("pairs") or () if pair.get("correlation") is not None
             ]
