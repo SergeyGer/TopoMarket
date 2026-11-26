@@ -98,11 +98,11 @@ inference or use of a future row. A valid window has 60 observations and 60 only
 Within the window, let
 
 $$
-m_t = \operatorname{median}\left(W_t\right),
+m_t = \mathrm{median}\left(W_t\right),
 \qquad
-\operatorname{MAD}_t = \operatorname{median}_{r \in W_t}\left(\lvert r - m_t\rvert\right),
+\mathrm{MAD}_t = \mathrm{median}_{r \in W_t}\left(\lvert r - m_t\rvert\right),
 \qquad
-s_t = 1.4826 \cdot \operatorname{MAD}_t.
+s_t = 1.4826 \cdot \mathrm{MAD}_t.
 $$
 
 Scale every return in the window to
@@ -196,7 +196,7 @@ Implementation: [`score.py`](../src/topomarket/topology/score.py),
 At close `t`, let `L_t` be the loop statistic from a valid window. Let
 
 $$
-D_t = \left\lvert L_t - \operatorname{median}\left(L_{t-252}, \ldots, L_{t-1}\right)\right\rvert
+D_t = \left\lvert L_t - \mathrm{median}\left(L_{t-252}, \ldots, L_{t-1}\right)\right\rvert
 $$
 
 where the reference consists of the **previous 252 valid** `L` values, excluding the current one.
@@ -325,10 +325,10 @@ pairs; the Structure comparison layer reports the mean off-diagonal correlation 
 pair tags.
 
 **Six-decimal tag versus full precision.** The mathematical cutoff above applies to the unrounded
-Pearson value. The JSON pair tag stores `round(rho, 6)` for display, and the released network
-builder applies the cutoff to that six-decimal tag. The two decisions disagree only for a true
-value that is below 0.80 but rounds up to `0.800000` (for example 0.7999996). The normative rule in
-this reference is the full-precision comparison; exact 0.80 qualifies under both. See
+Pearson value and the released network builder now applies it to that full-precision value. The JSON
+pair tag stores `round(rho, 6)` for display/provenance only, so the tag can read `0.800000` while the
+full-precision value is below the cutoff (for example 0.7999996, which does **not** qualify). The
+normative rule in this reference is the full-precision comparison; exact 0.80 qualifies. See
 [Section 7.5](#75-exactly-080-qualifies) for the boundary table.
 
 Implementation: [`network.py`](../src/topomarket/analysis/network.py) and the comparison summary in
@@ -343,11 +343,11 @@ of industry `j` on session `s`. Each industry column is robustly scaled independ
 sessions:
 
 $$
-z_{s,j} = \frac{x_{s,j} - m_j}{1.4826 \cdot \operatorname{MAD}_j},
+z_{s,j} = \frac{x_{s,j} - m_j}{1.4826 \cdot \mathrm{MAD}_j},
 \qquad
-m_j = \operatorname{median}_{s}\left(x_{s,j}\right),
+m_j = \mathrm{median}_{s}\left(x_{s,j}\right),
 \qquad
-\operatorname{MAD}_j = \operatorname{median}_{s}\left(\lvert x_{s,j} - m_j\rvert\right).
+\mathrm{MAD}_j = \mathrm{median}_{s}\left(\lvert x_{s,j} - m_j\rvert\right).
 $$
 
 A zero or non-finite column scale makes the cloud invalid; the app reports an error rather than
@@ -377,7 +377,7 @@ the Mapper builder reports an error instead of creating a graph from fabricated 
 The lens value for industry `i` is its annualised sample volatility over the 60 daily returns:
 
 $$
-\sigma_i = \sqrt{252}\cdot \operatorname{std}\left(x_{i,1}, \ldots, x_{i,60}; \mathrm{ddof}=1\right).
+\sigma_i = \sqrt{252}\cdot \mathrm{std}\left(x_{i,1}, \ldots, x_{i,60}; \mathrm{ddof}=1\right).
 $$
 
 The lens is measured per year. Let `sigma_min` and `sigma_max` be the smallest and largest lens
@@ -497,7 +497,7 @@ values; for realized volatility they are
 
 $$
 \widehat{\sigma}_t = \sqrt{252}\cdot
-\operatorname{std}\left(r_{t-19}, \ldots, r_t; \mathrm{ddof}=1\right),
+\mathrm{std}\left(r_{t-19}, \ldots, r_t; \mathrm{ddof}=1\right),
 $$
 
 where the returns are the 20 most recent log returns through `t`. This volatility is annualised
@@ -717,17 +717,19 @@ assert (0.7999994 >= cutoff) is False
 assert (0.800001 >= cutoff) is True
 ```
 
-The boundary table separates the mathematical rule from the six-decimal display tag:
+The boundary table separates the mathematical rule from the six-decimal display tag. The released
+implementation qualifies on the full-precision value; the tag is not used for the decision:
 
-| True correlation | Six-decimal tag | Full-precision edge | Released tag comparison |
-| --- | --- | --- | --- |
-| 0.7999994 | 0.799999 | no | no |
-| 0.7999996 | 0.800000 | no | yes |
-| 0.8000000 | 0.800000 | yes | yes |
-| 0.8000010 | 0.800001 | yes | yes |
+| True correlation | Six-decimal tag | Edge in the released implementation |
+| --- | --- | --- |
+| 0.7999994 | 0.799999 | no |
+| 0.7999996 | 0.800000 | no (tag rounds up but full precision is below 0.80) |
+| 0.8000000 | 0.800000 | yes |
+| 0.8000010 | 0.800001 | yes |
 
-Exactly 0.80 qualifies under both. The one divergent row is the implementation note in
-Section 5.1; the reference rule is the full-precision column.
+Exactly 0.80 qualifies. The network builder applies the cutoff to the unrounded Pearson value and
+keeps `round(rho, 6)` only as the display/provenance tag; a network-builder boundary test asserts the
+returned edge set.
 
 ### 7.6 Day 20 breaches, day 21 does not
 
