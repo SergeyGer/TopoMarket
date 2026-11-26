@@ -110,14 +110,15 @@ def test_private_default_is_pushed_outside_a_fake_checkout(
     fake_repo = tmp_path / "repo"
     fake_repo.mkdir()
     monkeypatch.setattr(profiles, "REPOSITORY_ROOT", fake_repo)
-    monkeypatch.setenv("HOME", str(fake_repo / "home"))
-    # Windows does not read HOME for the default home directory; isolate the
-    # platform variable too so the fallback chain is deterministic on Windows CI.
-    monkeypatch.setenv("USERPROFILE", str(fake_repo / "home"))
+    fake_home = fake_repo / "home"
+    fake_temp = fake_repo / "tmp"
+    monkeypatch.setenv("HOME", str(fake_home))
+    monkeypatch.setenv("USERPROFILE", str(fake_home))
+    monkeypatch.setenv("LOCALAPPDATA", str(fake_home))
+    monkeypatch.setenv("APPDATA", str(fake_home))
     monkeypatch.delenv("XDG_DATA_HOME", raising=False)
-    monkeypatch.setenv("TMPDIR", str(fake_repo / "tmp"))
-    monkeypatch.delenv("TEMP", raising=False)
-    monkeypatch.delenv("TMP", raising=False)
+    for name in ("TMPDIR", "TEMP", "TMP"):
+        monkeypatch.setenv(name, str(fake_temp))
 
     resolved = profiles._default_private_data_dir()
 

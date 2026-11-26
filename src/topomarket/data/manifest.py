@@ -90,7 +90,8 @@ def _json_default(value: Any) -> Any:
     if isinstance(value, (datetime, date)):
         return value.isoformat()
     if isinstance(value, Path):
-        return str(value)
+        # Serialised identifiers use the stable POSIX form on every host (#84).
+        return value.as_posix()
     if isinstance(value, (set, frozenset)):
         return sorted(value)
     if isinstance(value, bytes):
