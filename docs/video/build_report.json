@@ -1,30 +1,28 @@
 {
   "schema_version": 2,
   "release": "v1.2.0",
-  "recorded_release_identity": "v1.1.0 (local build of the same commit as the public deployment)",
+  "recorded_release_identity": "v1.2.0",
   "master": {
     "file": "TopoMarket_demo_60s.mp4",
-    "sha256": "154bdd9fb0f2fd1302996fe84f9622468404bc328b7a82598c831a77acdbe8e2",
-    "size_bytes": 5424975
+    "sha256": "11139493228251ff8187ca3497045c45daceea0bbc3d3c6dd44e22791dfe2a76",
+    "size_bytes": 5291603
   },
   "captions": {
     "file": "TopoMarket_demo_60s.srt",
     "sha256": "7898926bc268993feddbb6902841cf19a3b01ee5e141209b61c38bd9146aa64b",
     "cues": 12,
-    "review": "v1.2 storyboard; TopoMarket/Mapper/S&P 500 spellings verified; cues clear of the end-card URL"
+    "review": "12 cues; TopoMarket, Mapper and S&P 500 spellings verified; dates/numbers agree with the narration; final cue holds the end-card URL clear (caption sits below the URL)."
   },
   "captioned_playback": {
     "file": "TopoMarket_demo_60s_captioned.mp4",
-    "sha256": "14606b4b6e721267a8fa24e05b42cd74a75183d3f715b14cb4a64a14382f7e7b",
-    "note": "reviewed SRT burned in"
+    "sha256": "bc0e023d014d5246bb9944f4719600e3d33b63167beeee057b53fad86ddd5cae",
+    "size_bytes": 5648147,
+    "note": "reviewed SRT burned in at 8 pt (1080p); playback and end-card URL checked; captions clear of the URL."
   },
   "narration_master": {
-    "file": "TopoMarket_demo_60s_narration.wav",
-    "sha256": "e9ffdc707d8fd313cc10c13bdd2d53af749d2580a3825aaca17527a9ba19d612"
-  },
-  "production_source": {
-    "file": "TopoMarket_demo_production_source.zip",
-    "sha256": "dc83c0ef4d163b7f171a32d863538b069c17fe77173514350df08be6acadafe9"
+    "file": "narration.wav",
+    "sha256": "3fc503671461f43682d3d55e3d9d6727cf8f82f22da7ce0869226edd15736bbb",
+    "size_bytes": 11520078
   },
   "video": {
     "codec": "h264",
@@ -33,20 +31,20 @@
     "height": 1080,
     "pix_fmt": "yuv420p",
     "frame_rate": "30/1",
-    "bit_rate": "721103"
+    "bit_rate": 551093
   },
   "audio": {
     "codec": "aac",
     "profile": "LC",
     "sample_rate": 48000,
     "channels": 2,
-    "bit_rate": "133789"
+    "bit_rate": 145372
   },
   "duration_seconds": 60.0,
   "loudness": {
-    "measured_integrated_lufs": -16.15,
-    "measured_true_peak_dbtp": -4.34,
-    "measured_lra": 6.1,
+    "measured_integrated_lufs": -16.16,
+    "measured_true_peak_dbtp": -3.99,
+    "measured_lra": 5.4,
     "target": {
       "integrated_lufs": -16.0,
       "true_peak_dbtp": -1.5
@@ -59,116 +57,518 @@
     "end_s": 5.0
   },
   "verified_claims": {
-    "frozen_pair": "29/66 pairs on 2008-08-29 (mean r 0.791) -> 66/66 on 2008-10-10 (mean r 0.911, +37 added, 0 removed), onset 2008-09-16, labelled retrospective synthetic example",
-    "validation": "TDA 0/3 episodes, AP 0.0154; VIX 1/3, AP 0.1187; experimental market anomaly",
-    "replay": "2025-03-10 teaching example (late warning, zero early-warning credit); reveal shows origin 305.998293, 10% boundary 275.3984637, lowest 299.830407 (2025-03-14), max decline 2.02%, target not reached"
+    "release_identity": "Public deployment sidebar shows release 1.2.0; fixture showcase-synthetic; synthetic data only.",
+    "frozen_pair": {
+      "left_date": "2008-08-29",
+      "left_pairs": 29,
+      "left_total": 66,
+      "left_mean_r": 0.791036,
+      "right_date": "2008-10-10",
+      "right_pairs": 66,
+      "right_total": 66,
+      "right_mean_r": 0.910608,
+      "added": 37,
+      "removed": 0,
+      "delta_pairs": 37,
+      "onset": "2008-09-16",
+      "label": "Retrospective synthetic example",
+      "cutoff": 0.8,
+      "statement": "Synthetic retrospective example: 29/66 pairs on 2008-08-29 vs 66/66 on 2008-10-10 (+37, none removed) after the 2008-09-16 episode onset; not a live prediction."
+    },
+    "teaching_example": {
+      "date": "2025-03-10",
+      "mode": "late-warning teaching example, outside the frozen evaluation",
+      "percentile": 100.0,
+      "frozen_threshold": 100.0,
+      "takens_points": 56,
+      "takens_dimension": 3,
+      "takens_lag": 2,
+      "h1_longest_lifetime": 0.921,
+      "warning_label": "Teaching example (late warning)"
+    },
+    "replay_outcome": {
+      "date": "2025-03-10",
+      "blind_before_reveal": true,
+      "origin_close": 305.998293,
+      "boundary_10pct": 275.3984637,
+      "lowest_close": 299.830407,
+      "lowest_date": "2025-03-14",
+      "first_breach": null,
+      "max_decline_pct": 2.02,
+      "horizon_sessions": 20,
+      "target_reached": false,
+      "outcome_label": "Observed: the index stayed above the 10% boundary for the full horizon"
+    },
+    "validation": {
+      "wording": "Experimental market anomaly",
+      "tda_recall": "0/3",
+      "tda_average_precision": 0.0154,
+      "tda_false_alerts_per_year": 0.91,
+      "vix_recall": "1/3",
+      "vix_average_precision": 0.1187,
+      "realized_vol_recall": "0/3",
+      "realized_vol_average_precision": 0.0556,
+      "event_prevalence": 0.013309
+    },
+    "end_card": {
+      "url": "github.com/SergeyGer/TopoMarket",
+      "held_seconds": 5.0
+    },
+    "fixture": {
+      "id": "showcase-synthetic",
+      "synthetic": true,
+      "seed": 4242,
+      "rows": 5673,
+      "range": "2005-01-03..2026-09-30"
+    }
   },
   "scenes": [
     {
-      "name": "comparison",
-      "duration_s": 12.0,
-      "trim_skip_s": 7.572,
-      "recording": "page@baef79f491f0dbdb4e256e1da8f74625.webm",
-      "recording_sha256": "a42ed6573c4f9127c2af53352e514eabc9c3639b8e11387d143dd2b9c534e6da",
+      "name": "pair",
+      "duration_s": 13.0,
+      "trim_skip_s": 9.643,
+      "trim_start_s": 3.981,
+      "anchor": "scroll:Comparison window: 2008-08-29",
+      "recording": "page@73c6e46e40d482917ba9df70530474cd.webm",
+      "recording_sha256": "ee2b2544a3c586dbf1e3a754736260ef18a076a68b1c4cafdd216b87ed0ec7c7",
       "actions": [
         {
-          "t": 1.564,
-          "click": true,
-          "label": "checkbox"
+          "t": 1.468,
+          "x": 102,
+          "y": 1016,
+          "label": "button:Guided: next step"
+        },
+        {
+          "t": 2.008,
+          "label": "wait:Synthetic retrospective example: 29/66"
+        },
+        {
+          "t": 2.746,
+          "label": "wait:Window A \u00b7 2008-10-10"
+        },
+        {
+          "t": 3.781,
+          "label": "scroll:Comparison window: 2008-08-29"
         }
       ]
     },
     {
       "name": "explore",
-      "duration_s": 9.0,
-      "trim_skip_s": 5.457,
-      "recording": "page@e6a7db73edd1fe5362caea3e49c188a2.webm",
-      "recording_sha256": "ad2de8bf540bd676b01045840f155df039fc13b15f9ffc70a3d708762b7f87f4",
+      "duration_s": 8.0,
+      "trim_skip_s": 5.23,
+      "trim_start_s": 0.462,
+      "anchor": "button:^Finance$",
+      "recording": "page@805e7c47a787ce5e26fb8e72188fc471.webm",
+      "recording_sha256": "aa109e13c0a630eeea9e54ad7e200986958eb89cc6d251e3f58c714f9963b299",
       "actions": [
         {
-          "t": 2.509,
-          "click": true,
-          "label": "select_option"
+          "t": 1.462,
+          "x": 1396,
+          "y": 750,
+          "label": "button:^Finance$"
         },
         {
-          "t": 8.159,
-          "click": true,
-          "label": "select_edge"
+          "t": 5.07,
+          "label": "radio:Mapper groups"
+        },
+        {
+          "t": 5.497,
+          "label": "scroll:Mapper groups"
         }
       ]
     },
     {
-      "name": "explain",
+      "name": "teaching",
       "duration_s": 12.0,
-      "trim_skip_s": 5.905,
-      "recording": "page@e979322140e8381533c1627149e8c7d5.webm",
-      "recording_sha256": "0ca65d8af044a711834aa3417209810af5eec962e31a387508021a50ce4aeef0",
+      "trim_skip_s": 9.745,
+      "trim_start_s": 5.555,
+      "anchor": "wait:Teaching example (late warning)",
+      "recording": "page@83d8328ac8f8354a84118367759b68cc.webm",
+      "recording_sha256": "ff5c100a089627f170230ccddb43636546b57350bc234c0bd39d5b85f85a50ad",
       "actions": [
         {
-          "t": 0.104,
+          "t": 1.458,
           "x": 144,
           "y": 762,
-          "label": "button_regex"
+          "label": "button:Guided alert example"
+        },
+        {
+          "t": 4.51,
+          "label": "radio:latest"
+        },
+        {
+          "t": 4.555,
+          "label": "wait:Teaching example (late warning)"
+        },
+        {
+          "t": 5.175,
+          "label": "scroll_top"
+        },
+        {
+          "t": 6.708,
+          "label": "scroll:Score explanation"
+        },
+        {
+          "t": 10.615,
+          "label": "scroll_fraction"
         }
       ]
     },
     {
       "name": "replay",
-      "duration_s": 11.0,
-      "trim_skip_s": 5.589,
-      "recording": "page@57248fe61d94078752dc5bc942ba7858.webm",
-      "recording_sha256": "40e39451990f860ad84ed50929e3b1384c7178ba1955a3a583fc1cf31eb155eb",
+      "duration_s": 10.0,
+      "trim_skip_s": 9.593,
+      "trim_start_s": 4.842,
+      "anchor": "viewport:Alert state",
+      "recording": "page@ec42e4d02df0cc6aa988f3d9ef52c9fe.webm",
+      "recording_sha256": "6d0548136aed4e2a57dd6902423557f315d52141a7dae60a3d28809eccc177cb",
       "actions": [
         {
-          "t": 0.128,
+          "t": 1.449,
           "x": 144,
           "y": 762,
-          "label": "button_regex"
+          "label": "button:Guided alert example"
         },
         {
-          "t": 2.874,
+          "t": 2.073,
+          "label": "scroll_top"
+        },
+        {
+          "t": 3.476,
           "click": true,
-          "label": "select_option"
+          "label": "select_option:Screen=Replay"
         },
         {
-          "t": 5.46,
+          "t": 3.842,
+          "label": "viewport:Alert state"
+        },
+        {
+          "t": 6.618,
           "x": 115,
           "y": 857,
-          "label": "button_regex"
+          "label": "button:Reveal next 20 sessions"
+        },
+        {
+          "t": 10.616,
+          "label": "scroll_contains:Observed: the index stayed above"
         }
       ]
     },
     {
       "name": "evidence",
-      "duration_s": 5.0,
-      "trim_skip_s": 5.901,
-      "recording": "page@dbc65d90bb241ab50362489f4f0f2310.webm",
-      "recording_sha256": "9edf8555b5ac1ba0cb040a16b2826dababb968c7825d5b977ab6b4bdaa4274b9",
+      "duration_s": 6.0,
+      "trim_skip_s": 7.77,
+      "trim_start_s": 3.071,
+      "anchor": "scroll:Holdout recall",
+      "recording": "page@5c8dec4cb6f34d1fe134c6e4421b1e1d.webm",
+      "recording_sha256": "13fa61edc14a93c9e875fa9386f63cc13d7a6a2fe319b8eac7ae240d5bf2fbc2",
       "actions": [
         {
-          "t": 0.868,
+          "t": 1.92,
           "click": true,
-          "label": "select_option"
+          "label": "select_option:Screen=Validation"
+        },
+        {
+          "t": 2.571,
+          "label": "scroll:Holdout recall"
+        },
+        {
+          "t": 4.296,
+          "label": "scroll:Inspectors and advanced controls"
         }
       ]
     }
   ],
   "capture": {
-    "app_url": "http://127.0.0.1:8631/",
+    "app_url": "https://topomarket-juhbvrgk2k67pnr6qbpfmc.streamlit.app/",
+    "capture_environment": "local_fallback",
+    "recorded_at_utc": "2026-11-26T11:50:53Z",
     "browser": "Playwright Chromium headless",
     "viewport": "1920x1080",
-    "toolbar_hidden": true
+    "toolbar_hidden": true,
+    "scenes": [
+      {
+        "name": "pair",
+        "webm": "/tmp/tm-build-v12/record/pair/page@73c6e46e40d482917ba9df70530474cd.webm",
+        "webm_sha256": "ee2b2544a3c586dbf1e3a754736260ef18a076a68b1c4cafdd216b87ed0ec7c7",
+        "lead": 5.662,
+        "skip": 9.643,
+        "trim_start": 3.981,
+        "pre_roll": -0.2,
+        "anchor": "scroll:Comparison window: 2008-08-29",
+        "anchor_t": 3.781,
+        "duration": 13.0,
+        "events": [
+          {
+            "t": 1.468,
+            "x": 102,
+            "y": 1016,
+            "label": "button:Guided: next step"
+          },
+          {
+            "t": 2.008,
+            "label": "wait:Synthetic retrospective example: 29/66"
+          },
+          {
+            "t": 2.746,
+            "label": "wait:Window A \u00b7 2008-10-10"
+          },
+          {
+            "t": 3.781,
+            "label": "scroll:Comparison window: 2008-08-29"
+          }
+        ]
+      },
+      {
+        "name": "explore",
+        "webm": "/tmp/tm-build-v12/record/explore/page@805e7c47a787ce5e26fb8e72188fc471.webm",
+        "webm_sha256": "aa109e13c0a630eeea9e54ad7e200986958eb89cc6d251e3f58c714f9963b299",
+        "lead": 4.768,
+        "skip": 5.23,
+        "trim_start": 0.462,
+        "pre_roll": 1.0,
+        "anchor": "button:^Finance$",
+        "anchor_t": 1.462,
+        "duration": 8.0,
+        "events": [
+          {
+            "t": 1.462,
+            "x": 1396,
+            "y": 750,
+            "label": "button:^Finance$"
+          },
+          {
+            "t": 5.07,
+            "label": "radio:Mapper groups"
+          },
+          {
+            "t": 5.497,
+            "label": "scroll:Mapper groups"
+          }
+        ]
+      },
+      {
+        "name": "teaching",
+        "webm": "/tmp/tm-build-v12/record/teaching/page@83d8328ac8f8354a84118367759b68cc.webm",
+        "webm_sha256": "ff5c100a089627f170230ccddb43636546b57350bc234c0bd39d5b85f85a50ad",
+        "lead": 4.19,
+        "skip": 9.745,
+        "trim_start": 5.555,
+        "pre_roll": -1.0,
+        "anchor": "wait:Teaching example (late warning)",
+        "anchor_t": 4.555,
+        "duration": 12.0,
+        "events": [
+          {
+            "t": 1.458,
+            "x": 144,
+            "y": 762,
+            "label": "button:Guided alert example"
+          },
+          {
+            "t": 4.51,
+            "label": "radio:latest"
+          },
+          {
+            "t": 4.555,
+            "label": "wait:Teaching example (late warning)"
+          },
+          {
+            "t": 5.175,
+            "label": "scroll_top"
+          },
+          {
+            "t": 6.708,
+            "label": "scroll:Score explanation"
+          },
+          {
+            "t": 10.615,
+            "label": "scroll_fraction"
+          }
+        ]
+      },
+      {
+        "name": "replay",
+        "webm": "/tmp/tm-build-v12/record/replay/page@ec42e4d02df0cc6aa988f3d9ef52c9fe.webm",
+        "webm_sha256": "6d0548136aed4e2a57dd6902423557f315d52141a7dae60a3d28809eccc177cb",
+        "lead": 4.751,
+        "skip": 9.593,
+        "trim_start": 4.842,
+        "pre_roll": -1.0,
+        "anchor": "viewport:Alert state",
+        "anchor_t": 3.842,
+        "duration": 10.0,
+        "events": [
+          {
+            "t": 1.449,
+            "x": 144,
+            "y": 762,
+            "label": "button:Guided alert example"
+          },
+          {
+            "t": 2.073,
+            "label": "scroll_top"
+          },
+          {
+            "t": 3.476,
+            "click": true,
+            "label": "select_option:Screen=Replay"
+          },
+          {
+            "t": 3.842,
+            "label": "viewport:Alert state"
+          },
+          {
+            "t": 6.618,
+            "x": 115,
+            "y": 857,
+            "label": "button:Reveal next 20 sessions"
+          },
+          {
+            "t": 10.616,
+            "label": "scroll_contains:Observed: the index stayed above"
+          }
+        ]
+      },
+      {
+        "name": "evidence",
+        "webm": "/tmp/tm-build-v12/record/evidence/page@5c8dec4cb6f34d1fe134c6e4421b1e1d.webm",
+        "webm_sha256": "13fa61edc14a93c9e875fa9386f63cc13d7a6a2fe319b8eac7ae240d5bf2fbc2",
+        "lead": 4.699,
+        "skip": 7.77,
+        "trim_start": 3.071,
+        "pre_roll": -0.5,
+        "anchor": "scroll:Holdout recall",
+        "anchor_t": 2.571,
+        "duration": 6.0,
+        "events": [
+          {
+            "t": 1.92,
+            "click": true,
+            "label": "select_option:Screen=Validation"
+          },
+          {
+            "t": 2.571,
+            "label": "scroll:Holdout recall"
+          },
+          {
+            "t": 4.296,
+            "label": "scroll:Inspectors and advanced controls"
+          }
+        ]
+      }
+    ],
+    "visible_release": "1.2.0",
+    "fixture_id": "showcase-synthetic",
+    "deviation": "The public deployment was rebooted and verified on release 1.2.0 before this cut (2026-11-26T11:26:30Z; all 10 signed-out checks passed). A scripted hosted-iframe capture was started but stalled for more than 15 minutes in the Validation scene, so the published cut uses the identical local v1.2.0 build at repository HEAD ea93bf4ef3e4271e98e60c4e235aa2f722ebc36c (release code e40d742cd227824d04bc30e0ec5fb861d5bc28ea). The manifest keeps the public URL, UTC capture time, visible version 1.2.0, fixture ID and release commit. Re-record with tools/video/build_demo_video.py --app-url <public URL>.",
+    "release_commit": "e40d742cd227824d04bc30e0ec5fb861d5bc28ea",
+    "repo_head_at_capture": "ea93bf4ef3e4271e98e60c4e235aa2f722ebc36c",
+    "capture_target": "identical local v1.2.0 build (port 8631); public app separately smoke-tested"
   },
   "provenance": {
-    "fixture_id": "showcase-synthetic",
-    "synthetic": true,
-    "seed": 4242,
     "hosted_url": "https://topomarket-juhbvrgk2k67pnr6qbpfmc.streamlit.app/",
     "hosted_verified_release": "1.2.0",
-    "hosted_smoke_evidence": "docs/measurements/hosted_evidence_v1.2.json",
-    "release_commit": "5f86f94",
-    "recorded_at_utc": "2026-11-26T10:30:00Z",
-    "capture_environment": "local build of the same release commit (identical v1.2.0 code); public deployment rebooted and verified after the cut",
-    "deviation": "Scripted hosted-iframe capture was unreliable while the Cloud app was stale/rebooting; the published cut uses the identical local build, and the public deployment was smoke-tested on release 1.2.0. Re-record with tools/video/build_demo_video.py --app-url <public URL>."
+    "hosted_verification": "docs/measurements/hosted_evidence_v1.2.json",
+    "hosted_verified_at_utc": "2026-11-26T11:26:30Z",
+    "hosted_checks_passed": 10,
+    "hosted_checks_failed": 0,
+    "cold_start_seconds": 7.93,
+    "recorded_at_utc": "2026-11-26T11:50:53Z",
+    "visible_version": "1.2.0",
+    "fixture_id": "showcase-synthetic",
+    "release_commit": "e40d742cd227824d04bc30e0ec5fb861d5bc28ea",
+    "repo_head": "ea93bf4ef3e4271e98e60c4e235aa2f722ebc36c",
+    "capture_environment": "local_fallback",
+    "deviation": "The public deployment was rebooted and verified on release 1.2.0 before this cut (2026-11-26T11:26:30Z; all 10 signed-out checks passed). A scripted hosted-iframe capture was started but stalled for more than 15 minutes in the Validation scene, so the published cut uses the identical local v1.2.0 build at repository HEAD ea93bf4ef3e4271e98e60c4e235aa2f722ebc36c (release code e40d742cd227824d04bc30e0ec5fb861d5bc28ea). The manifest keeps the public URL, UTC capture time, visible version 1.2.0, fixture ID and release commit. Re-record with tools/video/build_demo_video.py --app-url <public URL>.",
+    "owner_signoff": "pending"
+  },
+  "verification": {
+    "duration": {
+      "measured_s": 60.0,
+      "tolerance_s": 0.1,
+      "pass": true
+    },
+    "video": {
+      "codec": "h264",
+      "profile": "High",
+      "width": 1920,
+      "height": 1080,
+      "fps": "30/1",
+      "pix_fmt": "yuv420p",
+      "pass": true
+    },
+    "audio": {
+      "codec": "aac",
+      "sample_rate": 48000,
+      "channels": 2,
+      "pass": true
+    },
+    "loudness": {
+      "integrated_lufs": -16.16,
+      "true_peak_dbtp": -3.99,
+      "target_lufs": -16.0,
+      "target_true_peak_dbtp": -1.5,
+      "pass": true
+    },
+    "captions": {
+      "cues": 12,
+      "spellings": [
+        "TopoMarket",
+        "Mapper",
+        "S&P 500"
+      ],
+      "end_card_url_clear": true,
+      "pass": true
+    },
+    "black_frames": {
+      "detected": false,
+      "method": "ffmpeg blackdetect d=0.05:pix_th=0.10",
+      "pass": true
+    },
+    "frame_review": {
+      "timestamps_reviewed": [
+        6.1,
+        12.0,
+        18.9,
+        19.1,
+        24.0,
+        25.0,
+        26.0,
+        27.1,
+        30.0,
+        36.0,
+        39.1,
+        42.0,
+        45.0,
+        48.9,
+        49.1,
+        55.1,
+        57.0
+      ],
+      "notes": "Scene switches checked; no black or blank frames. Pair dates/counts/means, teaching warning/percentile/threshold, replay origin/boundary/lowest/2.02%/no breach and validation TDA/VIX values agree with narration and report.",
+      "pass": true
+    },
+    "captioned_playback": {
+      "duration_s": 60.0,
+      "captions_burned": true,
+      "end_card_url_clear": true,
+      "pass": true
+    },
+    "claims": {
+      "source": "showcase/reports/evaluation-showcase.json + released fixture",
+      "pass": true
+    },
+    "contact_sheet": {
+      "file": "contact.png",
+      "reviewed": true,
+      "pass": true
+    }
+  },
+  "contact_sheet": "contact.png",
+  "production_source": {
+    "file": "production_source.zip",
+    "sha256": "bc66164c4cd1128672244d929844e1433c407c417066b106a49a7d12c0938df5",
+    "size_bytes": 40539539,
+    "note": "scene recordings, TTS, narration, SRT, storyboard, build script, cards, capture manifest; authoritative manifest is docs/video/build_report.json"
   }
 }
