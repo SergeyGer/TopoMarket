@@ -1115,23 +1115,29 @@ def _render_node_tap_buttons(
     nodes = list(network.get("nodes") or ())[:12]
     if not nodes:
         return selection
+    labels = [str(node.get("label") or node.get("code")) for node in nodes]
+    codes = [str(node["code"]) for node in nodes]
     _call(
         ui,
         "caption",
-        "Tap a portfolio to inspect it (single tap works on touch and with the keyboard); "
-        "box-select on the network does the same with a mouse.",
+        "Inspect a portfolio (one tap on touch, arrow keys/Enter on a keyboard); box-select on the "
+        "network does the same with a mouse.",
     )
-    for start in (0, 6):
-        row = nodes[start : start + 6]
-        if not row:
-            continue
-        columns = _call(ui, "columns", len(row)) or []
-        for column, node in zip(columns, row, strict=False):
-            label = node.get("label") or node.get("code")
-            if _call(column, "button", str(label), key=f"tm_node_tap::{node['code']}"):
-                selection = _commit_interactive_selection(
-                    ui, selection.with_member(str(node["code"]))
-                )
+    # A single horizontal selector keeps the rerun cost low while remaining a
+    # one-tap/one-key target for every portfolio (#84 performance gate).
+    current = codes.index(str(selection.member)) if str(selection.member) in codes else 0
+    chosen = _call(
+        ui,
+        "selectbox",
+        "Portfolio inspector",
+        labels,
+        index=current,
+        key="tm_node_pick",
+    )
+    if chosen in labels:
+        code = codes[labels.index(chosen)]
+        if code != str(selection.member):
+            selection = _commit_interactive_selection(ui, selection.with_member(code))
     return selection
 
 
@@ -1387,8 +1393,24 @@ def render_structure_screen(
             timeline = payload.get("timeline") or {}
             selection = _render_landing(ui, network, timeline, selection)
             _call(ui, "caption", str(network.get("summary") or ""))
-            selection = _render_node_tap_buttons(ui, network, selection)
-            selection = _render_edge_inspector(ui, network, selection)
+            if _call(
+                ui,
+                "toggle",
+                "Direct inspection controls",
+                value=False,
+                key="tm_direct_inspection",
+                help="Tap-select a portfolio or an edge here; box-select on the network and the "
+                "sidebar member control remain available without this toggle.",
+            ):
+                selection = _render_node_tap_buttons(ui, network, selection)
+                selection = _render_edge_inspector(ui, network, selection)
+            else:
+                _call(
+                    ui,
+                    "caption",
+                    "Box-select a node or use the sidebar Industry member control; enable Direct "
+                    "inspection controls for tap/edge targets.",
+                )
             pairs = [
                 pair for pair in network.get("pairs") or () if pair.get("correlation") is not None
             ]

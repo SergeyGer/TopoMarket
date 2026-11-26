@@ -52,6 +52,14 @@ Epic **#88**, milestone **Release v1.3**.
   narration cues; release assets and manifest live on one identifiable revision (historical tags
   preserved; release explicitly linked to corrected manifest or shipped as v1.3.0).
 
+## Progress log
+
+- **#77-#79 (#91), #80-#81 (#92), #83/#82 (#89), #84 (#93):** completed and merged; Windows CI green.
+- **#85 (in review):** fresh clean browser timing run `docs/measurements/browser_performance_v13.json`
+  (commit `f40b1f3`, cold start, cached p95 497.6 ms / p50 421.2 ms, 0 failures) and the sanitised
+  private receipt `docs/measurements/private_acceptance_receipt_v13.json`; direct-inspection controls
+  made lazy to preserve the rerun budget. Acceptance draft `docs/ACCEPTANCE_v1.3.md` added.
+
 ## Owner actions pending
 
 - **Private seed run/receipt** on the chosen release candidate (`TOPOMARKET_SEED_DIR`), sanitised

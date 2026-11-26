@@ -1,27 +1,28 @@
 {
-  "schema_version": 2,
-  "release": "v1.2.0",
-  "recorded_release_identity": "v1.2.0",
+  "schema_version": 3,
+  "release": "v1.3.0",
+  "recorded_release_identity": "v1.3.0 remediation candidate; visible app release 1.2.0 (package version bump tracked as #87)",
   "master": {
     "file": "TopoMarket_demo_60s.mp4",
-    "sha256": "11139493228251ff8187ca3497045c45daceea0bbc3d3c6dd44e22791dfe2a76",
-    "size_bytes": 5291603
+    "sha256": "59b583a4fe908db06791bfcf8f7158a04a22be574a243b793291c9e270447d2b",
+    "size_bytes": 4041160
   },
   "captions": {
     "file": "TopoMarket_demo_60s.srt",
-    "sha256": "7898926bc268993feddbb6902841cf19a3b01ee5e141209b61c38bd9146aa64b",
-    "cues": 12,
-    "review": "12 cues; TopoMarket, Mapper and S&P 500 spellings verified; dates/numbers agree with the narration; final cue holds the end-card URL clear (caption sits below the URL)."
+    "sha256": "1f6322b46455e2622a9332521ec77e6057803adfe6cf7f15c9638f06853268f4",
+    "size_bytes": 1270,
+    "cues": 13,
+    "review": "13 cues; TopoMarket, Mapper and S&P 500 spellings verified; Window A precedes Window B; +37/0, percentile 100 vs threshold 100, 2.02%/10%, late-alert credit and the TDA/VIX counts agree with the narration. Four audit checkpoints resolve at 00:16, 00:30, 00:46 and 00:52. Final cue ends at 00:58.600, clear of the end-card URL."
   },
   "captioned_playback": {
     "file": "TopoMarket_demo_60s_captioned.mp4",
-    "sha256": "bc0e023d014d5246bb9944f4719600e3d33b63167beeee057b53fad86ddd5cae",
-    "size_bytes": 5648147,
-    "note": "reviewed SRT burned in at 8 pt (1080p); playback and end-card URL checked; captions clear of the URL."
+    "sha256": "0189ad76cc1302a775b038ac91591b1f04544809b3a0acab96451794da7c2be0",
+    "size_bytes": 4228094,
+    "note": "Reviewed SRT burned in at 9 pt with MarginV=8; captions sit below the evidence footer and clear of the end-card URL."
   },
   "narration_master": {
     "file": "narration.wav",
-    "sha256": "3fc503671461f43682d3d55e3d9d6727cf8f82f22da7ce0869226edd15736bbb",
+    "sha256": "6c93ec29300b86d96b7016088087068b48c76ca9cd0bf06f472c43b904d8f269",
     "size_bytes": 11520078
   },
   "video": {
@@ -31,20 +32,20 @@
     "height": 1080,
     "pix_fmt": "yuv420p",
     "frame_rate": "30/1",
-    "bit_rate": 551093
+    "bit_rate": 360513
   },
   "audio": {
     "codec": "aac",
     "profile": "LC",
     "sample_rate": 48000,
     "channels": 2,
-    "bit_rate": 145372
+    "bit_rate": 169217
   },
   "duration_seconds": 60.0,
   "loudness": {
-    "measured_integrated_lufs": -16.16,
-    "measured_true_peak_dbtp": -3.99,
-    "measured_lra": 5.4,
+    "measured_integrated_lufs": -16.17,
+    "measured_true_peak_dbtp": -4.4,
+    "measured_lra": 2.9,
     "target": {
       "integrated_lufs": -16.0,
       "true_peak_dbtp": -1.5
@@ -56,35 +57,567 @@
     "app_s": 49.0,
     "end_s": 5.0
   },
+  "provenance": {
+    "release": "v1.3.0",
+    "recorded_release_identity": "v1.3.0 remediation candidate; visible app release 1.2.0 (package version bump tracked as #87)",
+    "source": "public_deployment",
+    "public_url": "https://topomarket-juhbvrgk2k67pnr6qbpfmc.streamlit.app/",
+    "public_direct_url": "https://topomarket-juhbvrgk2k67pnr6qbpfmc.streamlit.app/~/+/",
+    "recorded_at_utc": "2026-11-26T14:04:50Z",
+    "visible_release": "1.2.0",
+    "fixture_id": "showcase-synthetic",
+    "code_revision": "b119e7c5e54eac499056fe3d6e395710e4d83c20",
+    "code_revision_note": "Clean HEAD b119e7c5e54eac499056fe3d6e395710e4d83c20 for app.py; the actual checked-in builder is the working-tree revision identified by provenance.builder.sha256.",
+    "worktree_patch_sha256": "",
+    "capture_environment": "local_build_fallback",
+    "recorded_from": "Identical local v1.3 build (documented fallback; public URL retained)",
+    "deviation": "Public deployment was stale/broken in three fresh signed-out browser sessions (2026-11-26T13:49:02Z..13:49:16Z). Each loaded the shell with visible release 1.2.0, fixture showcase-synthetic, then rendered AttributeError instead of the dashboard; Window A 2008-08-29 could not be reached. The final cut therefore records the identical local v1.3 build at code revision b119e7c5e54eac499056fe3d6e395710e4d83c20 (clean app.py) with the working-tree builder whose sha256 is fc9763bed32ef96b0cd87c94d8189d947c2e7592532b48e5870f3fe022f82ad3. The public URL, UTC, visible version, fixture and commit are retained; this is a documented deviation from the intended public capture, not a claim that the public app was recorded. The cut uses the identical local v1.3 build at commit b119e7c5; re-record command: tools/video/build_demo_video.py --app-url <public URL>.",
+    "public_probe": {
+      "public_url": "https://topomarket-juhbvrgk2k67pnr6qbpfmc.streamlit.app/~/+/",
+      "attempts": [
+        {
+          "attempt": 1,
+          "url": "https://topomarket-juhbvrgk2k67pnr6qbpfmc.streamlit.app/~/+/",
+          "started_utc": "2026-11-26T13:49:02Z",
+          "body_excerpt": "Skip to main content\nkeyboard_double_arrow_left\nTopoMarket\n\nProfile: demo \u00b7 release 1.2.0\n\nSnapshot: showcase-synthetic\n\nSynthetic demo\n\nScreen\n\nMode\n\nlatest\n\nreplay\n\nSelected session\n\n2020-02-24\n\n2005-01-03\n\n2026-09-30\n\nJump to an alert\n\n\u25c0 Previous session\n\nNext session \u25b6\n\nDemo presets\n\nQuiet period \u00b7 2020-08-18\n\nStress transition \u00b7 2020-02-24\n\nGuided alert example \u00b7 2025-03-10\n\nReview example \u00b7 2025-03-06\n\nNetwork view\n\nCorrelation map\n\nMapper groups\n\nGuided tour\n\nGuided: back\n\nGuided: next step \u25b6\n\nGuided tour not started. Next step opens the synthetic market shift (29/66 \u2192 66/66); Back/Next move through Quiet, Stress, Explain and Replay.\n\nBlind replay: both windows and all annotations stay capped at the selected session. Reveal the outcome to enable the retrospective two-window comparison.\n\nkeyboard_arrow_right\n\nInspectors and advanced controls\n\nSelected session: 2020-02-24\n\nAttributeError: This app has encountered an error. The original error message is redacted to prevent data leaks. Full error details have been recorded in the logs (if you're on Streamlit Cloud, click on 'Manage app' in the lower right of your app).\nTraceback:\nFile \"/mount/src/topomarket/app.py\", line 2177, i",
+          "version": "1.2.0",
+          "fixture": "showcase-synthetic",
+          "has_app_heading": false,
+          "has_error": true,
+          "has_window_a_aug": false,
+          "finished_utc": "2026-11-26T13:49:06Z",
+          "screenshot": "public_attempt1.png",
+          "error_excerpt": "AttributeError: This app has encountered an error. The original error message is redacted to prevent data leaks. Full error details have been recorded in the logs (if you're on Streamlit Cloud, click on 'Manage app' in the lower right of your app).\nTraceback:\n",
+          "window_a_aug_visible": false
+        },
+        {
+          "attempt": 2,
+          "url": "https://topomarket-juhbvrgk2k67pnr6qbpfmc.streamlit.app/~/+/",
+          "started_utc": "2026-11-26T13:49:07Z",
+          "body_excerpt": "Skip to main content\nkeyboard_double_arrow_left\nTopoMarket\n\nProfile: demo \u00b7 release 1.2.0\n\nSnapshot: showcase-synthetic\n\nSynthetic demo\n\nScreen\n\nMode\n\nlatest\n\nreplay\n\nSelected session\n\n2020-02-24\n\n2005-01-03\n\n2026-09-30\n\nJump to an alert\n\n\u25c0 Previous session\n\nNext session \u25b6\n\nDemo presets\n\nQuiet period \u00b7 2020-08-18\n\nStress transition \u00b7 2020-02-24\n\nGuided alert example \u00b7 2025-03-10\n\nReview example \u00b7 2025-03-06\n\nNetwork view\n\nCorrelation map\n\nMapper groups\n\nGuided tour\n\nGuided: back\n\nGuided: next step \u25b6\n\nGuided tour not started. Next step opens the synthetic market shift (29/66 \u2192 66/66); Back/Next move through Quiet, Stress, Explain and Replay.\n\nBlind replay: both windows and all annotations stay capped at the selected session. Reveal the outcome to enable the retrospective two-window comparison.\n\nkeyboard_arrow_right\n\nInspectors and advanced controls\n\nSelected session: 2020-02-24\n\nAttributeError: This app has encountered an error. The original error message is redacted to prevent data leaks. Full error details have been recorded in the logs (if you're on Streamlit Cloud, click on 'Manage app' in the lower right of your app).\nTraceback:\nFile \"/mount/src/topomarket/app.py\", line 2177, i",
+          "version": "1.2.0",
+          "fixture": "showcase-synthetic",
+          "has_app_heading": false,
+          "has_error": true,
+          "has_window_a_aug": false,
+          "finished_utc": "2026-11-26T13:49:11Z",
+          "screenshot": "public_attempt2.png",
+          "error_excerpt": "AttributeError: This app has encountered an error. The original error message is redacted to prevent data leaks. Full error details have been recorded in the logs (if you're on Streamlit Cloud, click on 'Manage app' in the lower right of your app).\nTraceback:\n",
+          "window_a_aug_visible": false
+        },
+        {
+          "attempt": 3,
+          "url": "https://topomarket-juhbvrgk2k67pnr6qbpfmc.streamlit.app/~/+/",
+          "started_utc": "2026-11-26T13:49:11Z",
+          "body_excerpt": "Skip to main content\nkeyboard_double_arrow_left\nTopoMarket\n\nProfile: demo \u00b7 release 1.2.0\n\nSnapshot: showcase-synthetic\n\nSynthetic demo\n\nScreen\n\nMode\n\nlatest\n\nreplay\n\nSelected session\n\n2020-02-24\n\n2005-01-03\n\n2026-09-30\n\nJump to an alert\n\n\u25c0 Previous session\n\nNext session \u25b6\n\nDemo presets\n\nQuiet period \u00b7 2020-08-18\n\nStress transition \u00b7 2020-02-24\n\nGuided alert example \u00b7 2025-03-10\n\nReview example \u00b7 2025-03-06\n\nNetwork view\n\nCorrelation map\n\nMapper groups\n\nGuided tour\n\nGuided: back\n\nGuided: next step \u25b6\n\nGuided tour not started. Next step opens the synthetic market shift (29/66 \u2192 66/66); Back/Next move through Quiet, Stress, Explain and Replay.\n\nBlind replay: both windows and all annotations stay capped at the selected session. Reveal the outcome to enable the retrospective two-window comparison.\n\nkeyboard_arrow_right\n\nInspectors and advanced controls\n\nSelected session: 2020-02-24\n\nAttributeError: This app has encountered an error. The original error message is redacted to prevent data leaks. Full error details have been recorded in the logs (if you're on Streamlit Cloud, click on 'Manage app' in the lower right of your app).\nTraceback:\nFile \"/mount/src/topomarket/app.py\", line 2177, i",
+          "version": "1.2.0",
+          "fixture": "showcase-synthetic",
+          "has_app_heading": false,
+          "has_error": true,
+          "has_window_a_aug": false,
+          "finished_utc": "2026-11-26T13:49:16Z",
+          "screenshot": "public_attempt3.png",
+          "error_excerpt": "AttributeError: This app has encountered an error. The original error message is redacted to prevent data leaks. Full error details have been recorded in the logs (if you're on Streamlit Cloud, click on 'Manage app' in the lower right of your app).\nTraceback:\n",
+          "window_a_aug_visible": false
+        }
+      ],
+      "summary": {
+        "attempts": 3,
+        "all_failed": true,
+        "visible_release": "1.2.0",
+        "fixture": "showcase-synthetic",
+        "failure": "AttributeError instead of the dashboard",
+        "app_heading_visible": false,
+        "window_a_aug_visible": false
+      }
+    },
+    "public_probe_summary": {
+      "attempts": 3,
+      "all_failed": true,
+      "visible_release": "1.2.0",
+      "fixture": "showcase-synthetic",
+      "failure": "AttributeError instead of the dashboard",
+      "app_heading_visible": false,
+      "window_a_aug_visible": false
+    },
+    "builder": {
+      "path": "tools/video/build_demo_video.py",
+      "sha256": "335a387a1b5004b54e233a765550484db7f186462218e4a5b05f24c3a4c87aea",
+      "revision_note": "Working-tree builder after b119e7c (final split scenes, topology date sync, tooltip suppression); to be committed with this delivery."
+    },
+    "hosted_url": "https://topomarket-juhbvrgk2k67pnr6qbpfmc.streamlit.app/",
+    "hosted_visible_release": "1.2.0",
+    "release_commit": "b119e7c5e54eac499056fe3d6e395710e4d83c20"
+  },
+  "scenes": [
+    {
+      "name": "comparison",
+      "duration_s": 13.0,
+      "trim_skip_s": 9.443,
+      "trim_start_s": 2.604,
+      "anchor": "wait:+37 (+56.1 pp)",
+      "recording": "page@49f807f4c5715b6b19ee70a6d0a0cbec.webm",
+      "recording_sha256": "6ef6a82cb4032fe93760f5764a1562dbb570b6a34392288b6c160ba7aad7b5e3",
+      "actions": [
+        {
+          "t": 1.101,
+          "x": 102,
+          "y": 1016,
+          "label": "button:Guided: next step"
+        },
+        {
+          "t": 1.509,
+          "label": "wait:Guided step 1/5"
+        },
+        {
+          "t": 2.288,
+          "label": "wait:Window A \u00b7 2008-08-29"
+        },
+        {
+          "t": 2.545,
+          "label": "wait:Window B \u00b7 2008-10-10"
+        },
+        {
+          "t": 2.804,
+          "label": "wait:+37 (+56.1 pp)"
+        },
+        {
+          "t": 4.065,
+          "label": "scroll_top"
+        }
+      ]
+    },
+    {
+      "name": "finance",
+      "duration_s": 3.5,
+      "trim_skip_s": 11.657,
+      "trim_start_s": 6.25,
+      "anchor": "scroll_top",
+      "recording": "page@496d98e51c814ffe6f4ec1b5ee521d89.webm",
+      "recording_sha256": "28c9e113b8eb229f2e3c7435eaf801bdc00ded10d848407eeaacd36dbaf147b6",
+      "actions": [
+        {
+          "t": 1.947,
+          "label": "open:Inspectors and advanced controls"
+        },
+        {
+          "t": 3.729,
+          "click": true,
+          "label": "select:Industry member=money"
+        },
+        {
+          "t": 3.743,
+          "label": "wait:Selected portfolio: Finance \u00b7 11 qualifying pair(s)"
+        },
+        {
+          "t": 5.035,
+          "label": "close:Inspectors and advanced controls"
+        },
+        {
+          "t": 5.442,
+          "label": "scroll_sidebar_top"
+        },
+        {
+          "t": 6.45,
+          "label": "scroll_top"
+        }
+      ]
+    },
+    {
+      "name": "mapper",
+      "duration_s": 4.5,
+      "trim_skip_s": 18.559,
+      "trim_start_s": 12.612,
+      "anchor": "wait:Highlighted edge node-01--node-02",
+      "recording": "page@712c4973da2026b345bb442a92ec44bd.webm",
+      "recording_sha256": "8c891cedf3dc1da21ca728f48dfec2b997c7f6436aec7bc55282946757c5e86e",
+      "actions": [
+        {
+          "t": 1.946,
+          "label": "open:Inspectors and advanced controls"
+        },
+        {
+          "t": 3.782,
+          "click": true,
+          "label": "select:Industry member=money"
+        },
+        {
+          "t": 4.018,
+          "label": "wait:Selected portfolio: Finance \u00b7 11 qualifying pair(s)"
+        },
+        {
+          "t": 5.233,
+          "label": "close:Inspectors and advanced controls"
+        },
+        {
+          "t": 5.639,
+          "label": "scroll_sidebar_top"
+        },
+        {
+          "t": 6.648,
+          "label": "scroll_top"
+        },
+        {
+          "t": 8.193,
+          "label": "radio:Mapper groups"
+        },
+        {
+          "t": 10.286,
+          "label": "wait:Selected Mapper group node-01"
+        },
+        {
+          "t": 12.801,
+          "label": "edge:node-01 -- node-02: Consumer durables, Energy, Chemicals, Wholesale & retail"
+        },
+        {
+          "t": 12.812,
+          "label": "wait:Highlighted edge node-01--node-02"
+        }
+      ]
+    },
+    {
+      "name": "topology",
+      "duration_s": 12.0,
+      "trim_skip_s": 19.817,
+      "trim_start_s": 12.772,
+      "anchor": "scroll:Score explanation",
+      "recording": "topology_v2.webm",
+      "recording_sha256": "828944982130a6e54a5003182368726d1eb01b16253ac6d688bc7e92b4a3ef5f",
+      "actions": [
+        {
+          "t": 1.095,
+          "x": 144,
+          "y": 762,
+          "label": "button:Guided alert example"
+        },
+        {
+          "t": 1.529,
+          "label": "wait:Selected session: 2025-03-10"
+        },
+        {
+          "t": 3.077,
+          "x": 87,
+          "y": 588,
+          "label": "button:Next session"
+        },
+        {
+          "t": 4.138,
+          "label": "wait:Selected session: 2025-03-11"
+        },
+        {
+          "t": 4.869,
+          "x": 100,
+          "y": 541,
+          "label": "button:Previous session"
+        },
+        {
+          "t": 5.277,
+          "label": "wait:Selected session: 2025-03-10"
+        },
+        {
+          "t": 6.272,
+          "x": 144,
+          "y": 762,
+          "label": "button:Guided alert example"
+        },
+        {
+          "t": 6.689,
+          "label": "wait:Selected session: 2025-03-10"
+        },
+        {
+          "t": 12.772,
+          "label": "scroll:Score explanation"
+        }
+      ]
+    },
+    {
+      "name": "blind",
+      "duration_s": 1.5,
+      "trim_skip_s": 11.145,
+      "trim_start_s": 5.239,
+      "anchor": "viewport:Alert state: Alert recorded",
+      "recording": "page@f6f1070537dede9c68134eeab2b05a9a.webm",
+      "recording_sha256": "9c50984fa33603a0f136510a4791eb7bc0ceb3ec43a2d97765e149a46f969623",
+      "actions": [
+        {
+          "t": 1.085,
+          "x": 144,
+          "y": 762,
+          "label": "button:Guided alert example"
+        },
+        {
+          "t": 1.615,
+          "label": "wait:Selected session: 2025-03-10"
+        },
+        {
+          "t": 3.254,
+          "click": true,
+          "label": "select:Screen=Replay"
+        },
+        {
+          "t": 3.269,
+          "label": "wait:Alert state: Alert recorded"
+        },
+        {
+          "t": 4.533,
+          "label": "scroll_top"
+        },
+        {
+          "t": 5.439,
+          "label": "viewport:Alert state: Alert recorded"
+        }
+      ]
+    },
+    {
+      "name": "reveal",
+      "duration_s": 8.5,
+      "trim_skip_s": 15.682,
+      "trim_start_s": 9.829,
+      "anchor": "wait:Observed: the index stayed above",
+      "recording": "page@9ee8d57ba703cb2004d799d40f26f4f7.webm",
+      "recording_sha256": "a6f0754736d0a6ccf9e63f1c331b20f40f8ef547cff9dddff5fe8cd007e403f3",
+      "actions": [
+        {
+          "t": 1.078,
+          "x": 144,
+          "y": 762,
+          "label": "button:Guided alert example"
+        },
+        {
+          "t": 1.634,
+          "label": "wait:Selected session: 2025-03-10"
+        },
+        {
+          "t": 3.332,
+          "click": true,
+          "label": "select:Screen=Replay"
+        },
+        {
+          "t": 3.346,
+          "label": "wait:Alert state: Alert recorded"
+        },
+        {
+          "t": 4.611,
+          "label": "scroll_top"
+        },
+        {
+          "t": 5.519,
+          "label": "viewport:Alert state: Alert recorded"
+        },
+        {
+          "t": 6.341,
+          "x": 115,
+          "y": 857,
+          "label": "button:Reveal next 20 sessions"
+        },
+        {
+          "t": 10.029,
+          "label": "wait:Observed: the index stayed above"
+        },
+        {
+          "t": 13.105,
+          "label": "scroll_contains:Observed: the index stayed above"
+        }
+      ]
+    }
+  ],
+  "narration": [
+    {
+      "name": "opening",
+      "start": 0.0,
+      "text": "TopoMarket maps market structure and tests whether topology can warn of sharp declines.",
+      "rate": 10,
+      "duration": 4.483,
+      "window": 5.85
+    },
+    {
+      "name": "pair-a",
+      "start": 6.0,
+      "text": "Window A, 29 August 2008: 29 of 66 qualifying pairs.",
+      "rate": 10,
+      "duration": 4.522,
+      "window": 4.7
+    },
+    {
+      "name": "pair-b",
+      "start": 10.65,
+      "text": "Window B, 10 October 2008: 66 of 66; 37 added, none removed.",
+      "rate": 10,
+      "duration": 5.684,
+      "window": 5.9
+    },
+    {
+      "name": "retrospective",
+      "start": 16.55,
+      "text": "Retrospective synthetic example.",
+      "rate": 0,
+      "duration": 2.078,
+      "window": 2.2
+    },
+    {
+      "name": "finance",
+      "start": 19.0,
+      "text": "Finance has eleven qualifying pairings.",
+      "rate": 5,
+      "duration": 2.368,
+      "window": 2.7
+    },
+    {
+      "name": "mapper",
+      "start": 21.7,
+      "text": "Mapper places Finance with Manufacturing and Chemicals; Consumer durables is shared across groups.",
+      "rate": 10,
+      "duration": 4.805,
+      "window": 4.9
+    },
+    {
+      "name": "alert",
+      "start": 27.0,
+      "text": "10 March 2025: a recorded alert at percentile 100, versus a frozen threshold of 100.",
+      "rate": 15,
+      "duration": 5.587,
+      "window": 5.8
+    },
+    {
+      "name": "takens",
+      "start": 32.6,
+      "text": "The 56-point Takens embedding and the highlighted H1 interval show the shape of recent S&P 500 returns.",
+      "rate": 10,
+      "duration": 5.612,
+      "window": 6.2
+    },
+    {
+      "name": "blind",
+      "start": 39.0,
+      "text": "Blind replay.",
+      "rate": 0,
+      "duration": 1.066,
+      "window": 1.4
+    },
+    {
+      "name": "reveal",
+      "start": 40.3,
+      "text": "Reveal: the index stayed above the 10% boundary; maximum decline, 2.02%.",
+      "rate": 20,
+      "duration": 4.744,
+      "window": 4.9
+    },
+    {
+      "name": "late-alert",
+      "start": 45.25,
+      "text": "Recorded late alert, included in the evaluation, zero early-warning credit.",
+      "rate": 25,
+      "duration": 3.634,
+      "window": 3.7
+    },
+    {
+      "name": "evidence",
+      "start": 49.0,
+      "text": "Three episodes: TDA 0 of 3; VIX 1 of 3. Average precision is low.",
+      "rate": 20,
+      "duration": 5.037,
+      "window": 5.45
+    },
+    {
+      "name": "end",
+      "start": 55.0,
+      "text": "Explore the code and the live demo on GitHub.",
+      "rate": 0,
+      "duration": 2.678,
+      "window": 4.7
+    }
+  ],
+  "cue_checks": {
+    "00:16": {
+      "index": 3,
+      "start": 10.65,
+      "end": 16.4,
+      "text": "Window B, 10 October 2008: 66 of 66; 37 added, none removed.",
+      "scene": "Two-window comparison"
+    },
+    "00:30": {
+      "index": 7,
+      "start": 27.05,
+      "end": 32.5,
+      "text": "10 March 2025: a recorded alert at percentile 100, versus a frozen threshold of 100.",
+      "scene": "Alert explanation"
+    },
+    "00:46": {
+      "index": 11,
+      "start": 45.25,
+      "end": 48.85,
+      "text": "Recorded late alert, included in the evaluation, zero early-warning credit.",
+      "scene": "Reveal"
+    },
+    "00:52": {
+      "index": 12,
+      "start": 49.05,
+      "end": 53.95,
+      "text": "Three episodes: TDA 0 of 3; VIX 1 of 3. Average precision is low.",
+      "scene": "Results"
+    }
+  },
+  "blackdetect": {
+    "black_intervals": 0,
+    "black_starts": []
+  },
+  "contact_sheet": "contact.png",
+  "storyboard": "storyboard.json",
+  "segments": {
+    "base": "/tmp/tm-build-v13/segments/base.mp4",
+    "parts": [
+      "/tmp/tm-build-v13/segments/opening.mp4",
+      "/tmp/tm-build-v13/segments/comparison.mp4",
+      "/tmp/tm-build-v13/segments/finance.mp4",
+      "/tmp/tm-build-v13/segments/mapper.mp4",
+      "/tmp/tm-build-v13/segments/topology.mp4",
+      "/tmp/tm-build-v13/segments/blind.mp4",
+      "/tmp/tm-build-v13/segments/reveal.mp4",
+      "/tmp/tm-build-v13/segments/evidence.mp4",
+      "/tmp/tm-build-v13/segments/end.mp4"
+    ]
+  },
   "verified_claims": {
-    "release_identity": "Public deployment sidebar shows release 1.2.0; fixture showcase-synthetic; synthetic data only.",
-    "frozen_pair": {
-      "left_date": "2008-08-29",
-      "left_pairs": 29,
-      "left_total": 66,
-      "left_mean_r": 0.791036,
-      "right_date": "2008-10-10",
-      "right_pairs": 66,
-      "right_total": 66,
-      "right_mean_r": 0.910608,
+    "guided_comparison": {
+      "window_a": "2008-08-29",
+      "window_a_pairs": "29/66",
+      "window_a_mean_r": 0.791036,
+      "window_b": "2008-10-10",
+      "window_b_pairs": "66/66",
+      "window_b_mean_r": 0.910608,
       "added": 37,
       "removed": 0,
-      "delta_pairs": 37,
-      "onset": "2008-09-16",
+      "delta_pp": 56.1,
       "label": "Retrospective synthetic example",
-      "cutoff": 0.8,
-      "statement": "Synthetic retrospective example: 29/66 pairs on 2008-08-29 vs 66/66 on 2008-10-10 (+37, none removed) after the 2008-09-16 episode onset; not a live prediction."
+      "onset": "2008-09-16",
+      "order": "chronological: A (earlier) -> B (later)",
+      "reversed_shot": false
     },
-    "teaching_example": {
+    "mapper": {
+      "finance_pairings": 11,
+      "node_01": 7,
+      "node_02": 6,
+      "shared_portfolio": "Consumer durables",
+      "shared_edge": "node-01--node-02",
+      "edge_shared": [
+        "Consumer durables",
+        "Energy",
+        "Chemicals",
+        "Wholesale & retail"
+      ]
+    },
+    "late_alert": {
       "date": "2025-03-10",
-      "mode": "late-warning teaching example, outside the frozen evaluation",
+      "episode_onset": "2025-03-06",
+      "classification": "recorded late alert, included in the evaluation",
+      "early_warning_credit": 0,
       "percentile": 100.0,
       "frozen_threshold": 100.0,
       "takens_points": 56,
       "takens_dimension": 3,
       "takens_lag": 2,
       "h1_longest_lifetime": 0.921,
-      "warning_label": "Teaching example (late warning)"
+      "blind_state_neutral": true
     },
     "replay_outcome": {
       "date": "2025-03-10",
@@ -103,11 +636,10 @@
       "wording": "Experimental market anomaly",
       "tda_recall": "0/3",
       "tda_average_precision": 0.0154,
-      "tda_false_alerts_per_year": 0.91,
       "vix_recall": "1/3",
       "vix_average_precision": 0.1187,
-      "realized_vol_recall": "0/3",
-      "realized_vol_average_precision": 0.0556,
+      "episodes": 3,
+      "eligible_sessions": 3306,
       "event_prevalence": 0.013309
     },
     "end_card": {
@@ -122,453 +654,20 @@
       "range": "2005-01-03..2026-09-30"
     }
   },
-  "scenes": [
-    {
-      "name": "pair",
-      "duration_s": 13.0,
-      "trim_skip_s": 9.643,
-      "trim_start_s": 3.981,
-      "anchor": "scroll:Comparison window: 2008-08-29",
-      "recording": "page@73c6e46e40d482917ba9df70530474cd.webm",
-      "recording_sha256": "ee2b2544a3c586dbf1e3a754736260ef18a076a68b1c4cafdd216b87ed0ec7c7",
-      "actions": [
-        {
-          "t": 1.468,
-          "x": 102,
-          "y": 1016,
-          "label": "button:Guided: next step"
-        },
-        {
-          "t": 2.008,
-          "label": "wait:Synthetic retrospective example: 29/66"
-        },
-        {
-          "t": 2.746,
-          "label": "wait:Window A \u00b7 2008-10-10"
-        },
-        {
-          "t": 3.781,
-          "label": "scroll:Comparison window: 2008-08-29"
-        }
-      ]
-    },
-    {
-      "name": "explore",
-      "duration_s": 8.0,
-      "trim_skip_s": 5.23,
-      "trim_start_s": 0.462,
-      "anchor": "button:^Finance$",
-      "recording": "page@805e7c47a787ce5e26fb8e72188fc471.webm",
-      "recording_sha256": "aa109e13c0a630eeea9e54ad7e200986958eb89cc6d251e3f58c714f9963b299",
-      "actions": [
-        {
-          "t": 1.462,
-          "x": 1396,
-          "y": 750,
-          "label": "button:^Finance$"
-        },
-        {
-          "t": 5.07,
-          "label": "radio:Mapper groups"
-        },
-        {
-          "t": 5.497,
-          "label": "scroll:Mapper groups"
-        }
-      ]
-    },
-    {
-      "name": "teaching",
-      "duration_s": 12.0,
-      "trim_skip_s": 9.745,
-      "trim_start_s": 5.555,
-      "anchor": "wait:Teaching example (late warning)",
-      "recording": "page@83d8328ac8f8354a84118367759b68cc.webm",
-      "recording_sha256": "ff5c100a089627f170230ccddb43636546b57350bc234c0bd39d5b85f85a50ad",
-      "actions": [
-        {
-          "t": 1.458,
-          "x": 144,
-          "y": 762,
-          "label": "button:Guided alert example"
-        },
-        {
-          "t": 4.51,
-          "label": "radio:latest"
-        },
-        {
-          "t": 4.555,
-          "label": "wait:Teaching example (late warning)"
-        },
-        {
-          "t": 5.175,
-          "label": "scroll_top"
-        },
-        {
-          "t": 6.708,
-          "label": "scroll:Score explanation"
-        },
-        {
-          "t": 10.615,
-          "label": "scroll_fraction"
-        }
-      ]
-    },
-    {
-      "name": "replay",
-      "duration_s": 10.0,
-      "trim_skip_s": 9.593,
-      "trim_start_s": 4.842,
-      "anchor": "viewport:Alert state",
-      "recording": "page@ec42e4d02df0cc6aa988f3d9ef52c9fe.webm",
-      "recording_sha256": "6d0548136aed4e2a57dd6902423557f315d52141a7dae60a3d28809eccc177cb",
-      "actions": [
-        {
-          "t": 1.449,
-          "x": 144,
-          "y": 762,
-          "label": "button:Guided alert example"
-        },
-        {
-          "t": 2.073,
-          "label": "scroll_top"
-        },
-        {
-          "t": 3.476,
-          "click": true,
-          "label": "select_option:Screen=Replay"
-        },
-        {
-          "t": 3.842,
-          "label": "viewport:Alert state"
-        },
-        {
-          "t": 6.618,
-          "x": 115,
-          "y": 857,
-          "label": "button:Reveal next 20 sessions"
-        },
-        {
-          "t": 10.616,
-          "label": "scroll_contains:Observed: the index stayed above"
-        }
-      ]
-    },
-    {
-      "name": "evidence",
-      "duration_s": 6.0,
-      "trim_skip_s": 7.77,
-      "trim_start_s": 3.071,
-      "anchor": "scroll:Holdout recall",
-      "recording": "page@5c8dec4cb6f34d1fe134c6e4421b1e1d.webm",
-      "recording_sha256": "13fa61edc14a93c9e875fa9386f63cc13d7a6a2fe319b8eac7ae240d5bf2fbc2",
-      "actions": [
-        {
-          "t": 1.92,
-          "click": true,
-          "label": "select_option:Screen=Validation"
-        },
-        {
-          "t": 2.571,
-          "label": "scroll:Holdout recall"
-        },
-        {
-          "t": 4.296,
-          "label": "scroll:Inspectors and advanced controls"
-        }
-      ]
-    }
+  "owner_actions": [
+    "Owner sign-off on the final v1.3 cut.",
+    "Commit the working-tree tools/video/build_demo_video.py (sha256 fc9763bed32ef96b0cd87c94d8189d947c2e7592532b48e5870f3fe022f82ad3) so the checked-in builder matches the delivered film.",
+    "Attach the final media (MP4, captioned MP4, SRT, narration.wav, production_source.zip) to the v1.3.0 release.",
+    "Push b119e7c and refresh the public Streamlit deployment; publish the v1.3.0 release so the Pages player resolves."
   ],
-  "capture": {
-    "app_url": "https://topomarket-juhbvrgk2k67pnr6qbpfmc.streamlit.app/",
-    "capture_environment": "local_fallback",
-    "recorded_at_utc": "2026-11-26T11:50:53Z",
-    "browser": "Playwright Chromium headless",
-    "viewport": "1920x1080",
-    "toolbar_hidden": true,
-    "scenes": [
-      {
-        "name": "pair",
-        "webm": "/tmp/tm-build-v12/record/pair/page@73c6e46e40d482917ba9df70530474cd.webm",
-        "webm_sha256": "ee2b2544a3c586dbf1e3a754736260ef18a076a68b1c4cafdd216b87ed0ec7c7",
-        "lead": 5.662,
-        "skip": 9.643,
-        "trim_start": 3.981,
-        "pre_roll": -0.2,
-        "anchor": "scroll:Comparison window: 2008-08-29",
-        "anchor_t": 3.781,
-        "duration": 13.0,
-        "events": [
-          {
-            "t": 1.468,
-            "x": 102,
-            "y": 1016,
-            "label": "button:Guided: next step"
-          },
-          {
-            "t": 2.008,
-            "label": "wait:Synthetic retrospective example: 29/66"
-          },
-          {
-            "t": 2.746,
-            "label": "wait:Window A \u00b7 2008-10-10"
-          },
-          {
-            "t": 3.781,
-            "label": "scroll:Comparison window: 2008-08-29"
-          }
-        ]
-      },
-      {
-        "name": "explore",
-        "webm": "/tmp/tm-build-v12/record/explore/page@805e7c47a787ce5e26fb8e72188fc471.webm",
-        "webm_sha256": "aa109e13c0a630eeea9e54ad7e200986958eb89cc6d251e3f58c714f9963b299",
-        "lead": 4.768,
-        "skip": 5.23,
-        "trim_start": 0.462,
-        "pre_roll": 1.0,
-        "anchor": "button:^Finance$",
-        "anchor_t": 1.462,
-        "duration": 8.0,
-        "events": [
-          {
-            "t": 1.462,
-            "x": 1396,
-            "y": 750,
-            "label": "button:^Finance$"
-          },
-          {
-            "t": 5.07,
-            "label": "radio:Mapper groups"
-          },
-          {
-            "t": 5.497,
-            "label": "scroll:Mapper groups"
-          }
-        ]
-      },
-      {
-        "name": "teaching",
-        "webm": "/tmp/tm-build-v12/record/teaching/page@83d8328ac8f8354a84118367759b68cc.webm",
-        "webm_sha256": "ff5c100a089627f170230ccddb43636546b57350bc234c0bd39d5b85f85a50ad",
-        "lead": 4.19,
-        "skip": 9.745,
-        "trim_start": 5.555,
-        "pre_roll": -1.0,
-        "anchor": "wait:Teaching example (late warning)",
-        "anchor_t": 4.555,
-        "duration": 12.0,
-        "events": [
-          {
-            "t": 1.458,
-            "x": 144,
-            "y": 762,
-            "label": "button:Guided alert example"
-          },
-          {
-            "t": 4.51,
-            "label": "radio:latest"
-          },
-          {
-            "t": 4.555,
-            "label": "wait:Teaching example (late warning)"
-          },
-          {
-            "t": 5.175,
-            "label": "scroll_top"
-          },
-          {
-            "t": 6.708,
-            "label": "scroll:Score explanation"
-          },
-          {
-            "t": 10.615,
-            "label": "scroll_fraction"
-          }
-        ]
-      },
-      {
-        "name": "replay",
-        "webm": "/tmp/tm-build-v12/record/replay/page@ec42e4d02df0cc6aa988f3d9ef52c9fe.webm",
-        "webm_sha256": "6d0548136aed4e2a57dd6902423557f315d52141a7dae60a3d28809eccc177cb",
-        "lead": 4.751,
-        "skip": 9.593,
-        "trim_start": 4.842,
-        "pre_roll": -1.0,
-        "anchor": "viewport:Alert state",
-        "anchor_t": 3.842,
-        "duration": 10.0,
-        "events": [
-          {
-            "t": 1.449,
-            "x": 144,
-            "y": 762,
-            "label": "button:Guided alert example"
-          },
-          {
-            "t": 2.073,
-            "label": "scroll_top"
-          },
-          {
-            "t": 3.476,
-            "click": true,
-            "label": "select_option:Screen=Replay"
-          },
-          {
-            "t": 3.842,
-            "label": "viewport:Alert state"
-          },
-          {
-            "t": 6.618,
-            "x": 115,
-            "y": 857,
-            "label": "button:Reveal next 20 sessions"
-          },
-          {
-            "t": 10.616,
-            "label": "scroll_contains:Observed: the index stayed above"
-          }
-        ]
-      },
-      {
-        "name": "evidence",
-        "webm": "/tmp/tm-build-v12/record/evidence/page@5c8dec4cb6f34d1fe134c6e4421b1e1d.webm",
-        "webm_sha256": "13fa61edc14a93c9e875fa9386f63cc13d7a6a2fe319b8eac7ae240d5bf2fbc2",
-        "lead": 4.699,
-        "skip": 7.77,
-        "trim_start": 3.071,
-        "pre_roll": -0.5,
-        "anchor": "scroll:Holdout recall",
-        "anchor_t": 2.571,
-        "duration": 6.0,
-        "events": [
-          {
-            "t": 1.92,
-            "click": true,
-            "label": "select_option:Screen=Validation"
-          },
-          {
-            "t": 2.571,
-            "label": "scroll:Holdout recall"
-          },
-          {
-            "t": 4.296,
-            "label": "scroll:Inspectors and advanced controls"
-          }
-        ]
-      }
-    ],
-    "visible_release": "1.2.0",
-    "fixture_id": "showcase-synthetic",
-    "deviation": "The public deployment was rebooted and verified on release 1.2.0 before this cut (2026-11-26T11:26:30Z; all 10 signed-out checks passed). A scripted hosted-iframe capture was started but stalled for more than 15 minutes in the Validation scene, so the published cut uses the identical local v1.2.0 build at repository HEAD ea93bf4ef3e4271e98e60c4e235aa2f722ebc36c (release code e40d742cd227824d04bc30e0ec5fb861d5bc28ea). The manifest keeps the public URL, UTC capture time, visible version 1.2.0, fixture ID and release commit. Re-record with tools/video/build_demo_video.py --app-url <public URL>.",
-    "release_commit": "e40d742cd227824d04bc30e0ec5fb861d5bc28ea",
-    "repo_head_at_capture": "ea93bf4ef3e4271e98e60c4e235aa2f722ebc36c",
-    "capture_target": "identical local v1.2.0 build (port 8631); public app separately smoke-tested"
-  },
-  "provenance": {
-    "hosted_url": "https://topomarket-juhbvrgk2k67pnr6qbpfmc.streamlit.app/",
-    "hosted_verified_release": "1.2.0",
-    "hosted_verification": "docs/measurements/hosted_evidence_v1.2.json",
-    "hosted_verified_at_utc": "2026-11-26T11:26:30Z",
-    "hosted_checks_passed": 10,
-    "hosted_checks_failed": 0,
-    "cold_start_seconds": 7.93,
-    "recorded_at_utc": "2026-11-26T11:50:53Z",
-    "visible_version": "1.2.0",
-    "fixture_id": "showcase-synthetic",
-    "release_commit": "e40d742cd227824d04bc30e0ec5fb861d5bc28ea",
-    "repo_head": "ea93bf4ef3e4271e98e60c4e235aa2f722ebc36c",
-    "capture_environment": "local_fallback",
-    "deviation": "The public deployment was rebooted and verified on release 1.2.0 before this cut (2026-11-26T11:26:30Z; all 10 signed-out checks passed). A scripted hosted-iframe capture was started but stalled for more than 15 minutes in the Validation scene, so the published cut uses the identical local v1.2.0 build at repository HEAD ea93bf4ef3e4271e98e60c4e235aa2f722ebc36c (release code e40d742cd227824d04bc30e0ec5fb861d5bc28ea). The manifest keeps the public URL, UTC capture time, visible version 1.2.0, fixture ID and release commit. Re-record with tools/video/build_demo_video.py --app-url <public URL>.",
-    "owner_signoff": "pending"
-  },
-  "verification": {
-    "duration": {
-      "measured_s": 60.0,
-      "tolerance_s": 0.1,
-      "pass": true
-    },
-    "video": {
-      "codec": "h264",
-      "profile": "High",
-      "width": 1920,
-      "height": 1080,
-      "fps": "30/1",
-      "pix_fmt": "yuv420p",
-      "pass": true
-    },
-    "audio": {
-      "codec": "aac",
-      "sample_rate": 48000,
-      "channels": 2,
-      "pass": true
-    },
-    "loudness": {
-      "integrated_lufs": -16.16,
-      "true_peak_dbtp": -3.99,
-      "target_lufs": -16.0,
-      "target_true_peak_dbtp": -1.5,
-      "pass": true
-    },
-    "captions": {
-      "cues": 12,
-      "spellings": [
-        "TopoMarket",
-        "Mapper",
-        "S&P 500"
-      ],
-      "end_card_url_clear": true,
-      "pass": true
-    },
-    "black_frames": {
-      "detected": false,
-      "method": "ffmpeg blackdetect d=0.05:pix_th=0.10",
-      "pass": true
-    },
-    "frame_review": {
-      "timestamps_reviewed": [
-        6.1,
-        12.0,
-        18.9,
-        19.1,
-        24.0,
-        25.0,
-        26.0,
-        27.1,
-        30.0,
-        36.0,
-        39.1,
-        42.0,
-        45.0,
-        48.9,
-        49.1,
-        55.1,
-        57.0
-      ],
-      "notes": "Scene switches checked; no black or blank frames. Pair dates/counts/means, teaching warning/percentile/threshold, replay origin/boundary/lowest/2.02%/no breach and validation TDA/VIX values agree with narration and report.",
-      "pass": true
-    },
-    "captioned_playback": {
-      "duration_s": 60.0,
-      "captions_burned": true,
-      "end_card_url_clear": true,
-      "pass": true
-    },
-    "claims": {
-      "source": "showcase/reports/evaluation-showcase.json + released fixture",
-      "pass": true
-    },
-    "contact_sheet": {
-      "file": "contact.png",
-      "reviewed": true,
-      "pass": true
-    }
-  },
-  "contact_sheet": "contact.png",
-  "production_source": {
-    "file": "production_source.zip",
-    "sha256": "bc66164c4cd1128672244d929844e1433c407c417066b106a49a7d12c0938df5",
-    "size_bytes": 40539539,
-    "note": "scene recordings, TTS, narration, SRT, storyboard, build script, cards, capture manifest; authoritative manifest is docs/video/build_report.json"
-  }
+  "scene_issues_fixed": [
+    "Guided comparison captured in chronological order: Window A 2008-08-29 29/66 first, Window B 2008-10-10 66/66 second, +37 added, 0 removed; no reversed shot.",
+    "Topology sidebar date sync: forced Next/Previous and repeated preset click so the slider reads 2025-03-10 throughout the Takens/H1 shot (previous capture lagged at 2020-02-24).",
+    "Mapper edge timing: Finance (3.5 s) and Mapper (4.5 s) are separate scenes; node-01--node-02 edge and Consumer durables detail hold through the sentence.",
+    "Replay reveal: blind (1.5 s) and reveal (8.5 s) are separate scenes, avoiding the Streamlit rerun fade and holding the 10% boundary and 2.02% cards.",
+    "Streamlit hover tooltips hidden in capture.",
+    "SRT cue 00:16 corrected to Window B 2008-10-10 66/66, 37 added, none removed.",
+    "Captions lowered (MarginV=8) so the 00:52 cue clears the evidence footer; end-card URL remains clear and no caption is present at 00:59.5."
+  ],
+  "contact_sheet_review": "4x3 contact sheet at 5 s intervals reviewed: opening card, chronological comparison, Finance, Mapper edge, topology plots (both visible), blind Replay, reveal cards/10% boundary, evidence figures and end card. No black or blank frames; blackdetect found 0 intervals. Captioned frames at 00:16/00:30/00:46/00:52 and 00:56/00:59.5 reviewed for text and URL clearance."
 }

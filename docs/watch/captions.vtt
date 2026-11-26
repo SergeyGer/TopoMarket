@@ -1,37 +1,40 @@
 WEBVTT
 
-00:00:00.050 --> 00:00:05.378
+00:00:00.050 --> 00:00:05.400
 TopoMarket maps market structure and tests whether topology can warn of sharp declines.
 
-00:00:06.050 --> 00:00:13.647
-Frozen retrospective: 29 of 66 pairs on 2008-08-29; 66 of 66 on 2008-10-10.
+00:00:06.050 --> 00:00:10.450
+Window A, 29 August 2008: 29 of 66 qualifying pairs.
 
-00:00:13.667 --> 00:00:18.022
-Mean correlation rises from 0.791 to 0.911.
+00:00:10.650 --> 00:00:16.400
+Window B, 10 October 2008: 66 of 66; 37 added, none removed.
 
-00:00:19.050 --> 00:00:21.649
-Finance: eleven qualifying pairs.
+00:00:16.550 --> 00:00:18.250
+Retrospective synthetic example.
 
-00:00:21.669 --> 00:00:25.214
-Mapper groups portfolios by shared structure.
+00:00:19.050 --> 00:00:21.400
+Finance has eleven qualifying pairings.
 
-00:00:27.050 --> 00:00:32.167
-March 10, 2025: a late-warning teaching example at percentile 100.
+00:00:21.700 --> 00:00:26.300
+Mapper places Finance with Manufacturing and Chemicals; Consumer durables is shared across groups.
 
-00:00:32.187 --> 00:00:37.846
-Takens and H1 show the S&amp;P 500 return shape; the frozen threshold is 100.
+00:00:27.050 --> 00:00:32.500
+10 March 2025: a recorded alert at percentile 100, versus a frozen threshold of 100.
+
+00:00:32.600 --> 00:00:38.300
+The 56-point Takens embedding and the highlighted H1 interval show the shape of recent S&amp;P 500 returns.
 
 00:00:39.050 --> 00:00:40.250
 Blind replay.
 
-00:00:40.270 --> 00:00:46.976
-Reveal: the index stayed above the 10% boundary, with a 2.02% maximum decline.
+00:00:40.300 --> 00:00:45.150
+Reveal: the index stayed above the 10% boundary; maximum decline, 2.02%.
 
-00:00:49.050 --> 00:00:52.316
-Experimental: TDA 0 of 3, VIX 1 of 3.
+00:00:45.250 --> 00:00:48.850
+Recorded late alert, included in the evaluation, zero early-warning credit.
 
-00:00:52.336 --> 00:00:54.542
-Average precision is low.
+00:00:49.050 --> 00:00:53.950
+Three episodes: TDA 0 of 3; VIX 1 of 3. Average precision is low.
 
-00:00:55.050 --> 00:00:58.602
+00:00:55.050 --> 00:00:58.600
 Explore the code and the live demo on GitHub.

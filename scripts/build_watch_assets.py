@@ -24,15 +24,16 @@ SCENES = {
     0: "Opening card",
     1: "Two-window comparison",
     2: "Two-window comparison",
-    3: "Direct exploration",
-    4: "Mapper",
-    5: "Alert explanation",
+    3: "Two-window comparison",
+    4: "Finance selection",
+    5: "Mapper",
     6: "Alert explanation",
-    7: "Blind Replay",
-    8: "Reveal",
+    7: "Alert explanation",
+    8: "Blind Replay",
     9: "Reveal",
-    10: "Results",
-    11: "End card",
+    10: "Late alert",
+    11: "Results",
+    12: "End card",
 }
 
 

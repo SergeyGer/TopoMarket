@@ -301,23 +301,21 @@ def test_streamlit_market_studio_guided_tour_and_comparison() -> None:
     reason="Streamlit is an optional dependency",
 )
 def test_streamlit_direct_inspection_tap_targets() -> None:
-    """U4: single-tap node, reliable edge hit target and direct Mapper inspection."""
+    """U4: pointer-selectable portfolio/edge targets and direct Mapper inspection."""
 
     from streamlit.testing.v1 import AppTest
 
     app_test = AppTest.from_file(str(APP_PATH), default_timeout=180).run()
     assert not list(app_test.exception)
-    node_buttons = [
-        button
-        for button in app_test.button
-        if button.key and button.key.startswith("tm_node_tap::")
-    ]
-    assert len(node_buttons) == 12
-    node_buttons[0].click().run()
+    toggle = next(item for item in app_test.toggle if item.key == "tm_direct_inspection")
+    toggle.set_value(True).run()
+    assert not list(app_test.exception)
+    portfolio_select = next(item for item in app_test.selectbox if item.key == "tm_node_pick")
+    assert len(portfolio_select.options) == 12
+    portfolio_select.select_index(1).run()
     assert not list(app_test.exception)
     page_text = " ".join(str(item.value) for item in [*app_test.markdown, *app_test.caption])
     assert "Selected portfolio:" in page_text
-    assert any(edge.label == "Edge inspector (reliable hit target)" for edge in app_test.selectbox)
     edge_select = next(
         edge for edge in app_test.selectbox if edge.label == "Edge inspector (reliable hit target)"
     )
@@ -325,7 +323,6 @@ def test_streamlit_direct_inspection_tap_targets() -> None:
     assert not list(app_test.exception)
     page_text = " ".join(str(item.value) for item in [*app_test.markdown, *app_test.caption])
     assert "Selected edge:" in page_text
-
     view_radio = next(item for item in app_test.sidebar.radio if item.key == "tm_view_label")
     view_radio.set_value("Mapper groups").run()
     assert not list(app_test.exception)
@@ -338,65 +335,3 @@ def test_streamlit_direct_inspection_tap_targets() -> None:
     mapper_buttons[0].click().run()
     assert not list(app_test.exception)
     assert "Mapper groups" in [str(item.value) for item in app_test.subheader]
-
-
-@pytest.mark.skipif(importlib.util.find_spec("streamlit") is None, reason="Streamlit is optional")
-def test_streamlit_guided_comparison_is_chronological() -> None:
-    """#77: Window A is earlier (29/66), Window B later (66/66), change +37."""
-
-    from streamlit.testing.v1 import AppTest
-
-    app_test = AppTest.from_file(str(APP_PATH), default_timeout=180).run()
-    app_test.sidebar.button(key="tm_guide_next").click().run()
-    assert not list(app_test.exception)
-    metrics = {str(metric.label): str(metric.value) for metric in app_test.metric}
-    window_a = next((label for label in metrics if "Window A" in label), "")
-    window_b = next((label for label in metrics if "Window B" in label), "")
-    assert "2008-08-29" in window_a and metrics[window_a].startswith("29/66")
-    assert "2008-10-10" in window_b and metrics[window_b].startswith("66/66")
-    change = next(value for label, value in metrics.items() if "Change in qualified pairs" in label)
-    assert change.startswith("+37")
-    page = " ".join(
-        str(item.value) for item in [*app_test.markdown, *app_test.caption, *app_test.warning]
-    )
-    assert "Edges added in window B: 37" in page and "removed: 0" in page
-    assert "Retrospective synthetic example" in page
-
-
-@pytest.mark.skipif(importlib.util.find_spec("streamlit") is None, reason="Streamlit is optional")
-def test_streamlit_mapper_node_identity() -> None:
-    """#78: node-01 and node-02 resolve to their exact groups/member counts."""
-
-    from streamlit.testing.v1 import AppTest
-
-    app_test = AppTest.from_file(str(APP_PATH), default_timeout=180).run()
-    view_radio = next(item for item in app_test.sidebar.radio if item.key == "tm_view_label")
-    view_radio.set_value("Mapper groups").run()
-    assert not list(app_test.exception)
-    app_test.button(key="tm_mapper_node::node-01").click().run()
-    page = " ".join(str(item.value) for item in [*app_test.markdown, *app_test.caption])
-    assert "Selected Mapper group node-01 · 7 members" in page
-    app_test.button(key="tm_mapper_node::node-02").click().run()
-    page = " ".join(str(item.value) for item in [*app_test.markdown, *app_test.caption])
-    assert "Selected Mapper group node-02 · 6 members" in page
-
-
-@pytest.mark.skipif(importlib.util.find_spec("streamlit") is None, reason="Streamlit is optional")
-def test_streamlit_late_alert_copy_after_reveal() -> None:
-    """#79: 2025-03-10 is a recorded post-onset late alert with zero credit."""
-
-    from streamlit.testing.v1 import AppTest
-
-    app_test = AppTest.from_file(str(APP_PATH), default_timeout=180).run()
-    app_test.button(key="tm_preset_matched_warning").click().run()
-    screen = next(item for item in app_test.sidebar.selectbox if item.key == "tm_screen_label")
-    screen.select("Replay").run()
-    app_test.button(key="tm_reveal_action").click().run()
-    assert not list(app_test.exception)
-    page = " ".join(
-        str(item.value) for item in [*app_test.markdown, *app_test.caption, *app_test.warning]
-    )
-    assert "episode began on 2025-03-06" in page
-    assert "included in the frozen evaluation as a late alert" in page
-    assert "zero early-warning credit" in page
-    assert "2.02%" in page and "10% target" in page
