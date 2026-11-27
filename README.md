@@ -69,6 +69,11 @@ The committed `showcase/` fixture is fully synthetic (snapshot `showcase-synthet
 
 ## Development
 
+**Current release:** v1.3.1 (see [CHANGELOG.md](CHANGELOG.md)). **Next planned work:** a separate
+research cycle on improving TDA early-warning predictive performance (currently 0/3 synthetic and 0/9
+private episodes, AP 0.0154/0.0492); track it in
+[issue #108](https://github.com/SergeyGer/TopoMarket/issues/108).
+
 See [CHANGELOG.md](CHANGELOG.md) for release notes, [docs/](docs/) for technical documentation, and [docs/UPGRADE_v1.3.md](docs/UPGRADE_v1.3.md) for current work. Run `pip install -e ".[dev,ui]"`, then `pytest -q` and `topomarket release-check`. Contribution and security guidance: [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md). Project Wiki: [github.com/SergeyGer/TopoMarket/wiki](https://github.com/SergeyGer/TopoMarket/wiki).
 
 ## Citation and contact
