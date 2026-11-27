@@ -67,7 +67,7 @@ Epic **#88**, milestone **Release v1.3**.
 - Film owner approval recorded (26 November 2026, https://youtu.be/8Xyp-BDM88Q).
 - Streamlit Cloud rebooted and hosted v1.3.0 identity verified (cold start 9.4 s).
 
-## Owner actions pending
+## Owner actions (completed by v1.3.1)
 
 - **Private seed run/receipt** on the chosen release candidate (`TOPOMARKET_SEED_DIR`), sanitised
   aggregate only.
