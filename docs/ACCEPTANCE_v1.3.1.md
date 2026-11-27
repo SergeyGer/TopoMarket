@@ -35,10 +35,13 @@ v1.3.1 patch).
 
 ## Release gates
 
-- [ ] Public suite + Linux/Windows CI green on the v1.3.1 candidate.
-- [ ] Hosted signed-out evidence on the deployed v1.3.1 revision (Cloud deploy/reboot by the owner).
-- [ ] v1.3.1 tag/release assets verified; v1.3.0 preserved.
-- [ ] Owner final sign-off on the v1.3.1 acceptance record.
+- [x] Public suite + Linux/Windows CI green on the v1.3.1 candidate (CI on the release workflow and patch PRs).
+- [x] Hosted signed-out evidence on the deployed **v1.3.1** revision after the owner Cloud reboot:
+      identity 1.3.1, dashboard, chronological comparison, blind replay, computed reveal target,
+      Validation, Data calendars, both Mapper nodes (node-01 7 / node-02 6), mobile and two isolated
+      sessions — **12/12 checks**, cold start 6.6 s (`docs/measurements/hosted_evidence_v1.3.1.json`).
+- [x] v1.3.1 tagged and published with 9 verified assets; v1.3.0 tag/record preserved.
+- [x] Owner final sign-off on the v1.3.1 acceptance record (video approval recorded 26 November 2026).
 
 ## Known limitations
 

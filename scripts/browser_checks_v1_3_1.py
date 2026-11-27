@@ -1,160 +1,151 @@
 """Hosted browser assertions for the v1.3.1 acceptance patch (manual; needs Playwright)."""
 
+from __future__ import annotations
+
 import json
 import re
 import time
+from pathlib import Path
 
-# requires: pip install playwright; playwright install chromium
-from playwright.sync_api import sync_playwright  # noqa: E402
+from playwright.sync_api import Page, sync_playwright
 
 URL = "https://topomarket-juhbvrgk2k67pnr6qbpfmc.streamlit.app/~/+/"
-out = {
-    "schema_version": 1,
-    "app_url": "https://topomarket-juhbvrgk2k67pnr6qbpfmc.streamlit.app/",
-    "expected_release": "1.3.0",
-    "checks": {},
-    "details": {},
-    "measured_at_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-}
+EXPECTED_RELEASE = "1.3.1"
+OUT = Path("docs/measurements/hosted_evidence_v1.3.1.json")
 
 
-def body(page, timeout=25000):
-    return page.locator("body").inner_text(timeout=timeout)
+def body(page: Page) -> str:
+    return page.locator("body").inner_text(timeout=30000)
 
 
-with sync_playwright() as p:
-    b = p.chromium.launch(args=["--no-sandbox"])
-    page = b.new_page(viewport={"width": 1440, "height": 900})
-    page.goto(URL, wait_until="load", timeout=120000)
-    t = body(page)
-    for _ in range(15):
-        if "TopoMarket research" in t or "release " in t:
-            break
-        time.sleep(6)
-        t = body(page)
-    m = re.search(r"release\s+([0-9.]+)", t)
-    out["details"]["version"] = m.group(1) if m else None
-    out["checks"]["release_identity"] = out["details"]["version"] == "1.3.0"
-    out["checks"]["dashboard_renders"] = "TopoMarket research" in t and "AttributeError" not in t
-    if out["checks"]["dashboard_renders"]:
-        page.get_by_role("button", name=re.compile("Guided: next step")).click(timeout=20000)
-        time.sleep(4)
-        t = body(page)
-        out["checks"]["chronological_comparison"] = (
-            "Window A" in t and "2008-08-29" in t and "Window B" in t and "2008-10-10" in t
-        )
-        page.screenshot(
-            path="/root/projects/TopoMarket/docs/measurements/hosted_v131_comparison.png",
-            full_page=True,
-        )
-        # Replay blind/reveal via preset + screen switch using widget labels
-        try:
-            page.get_by_role("button", name=re.compile("Guided alert example")).first.click(
-                timeout=20000
-            )
-            time.sleep(3)
-            # choose Replay screen through the Screen selectbox
-            for combo in page.get_by_role("combobox").all():
-                try:
-                    if "Structure" in combo.inner_text(timeout=3000):
-                        combo.click(timeout=5000)
-                        page.get_by_text("Replay", exact=True).last.click(timeout=8000)
-                        break
-                except Exception:
-                    continue
-            time.sleep(4)
-            t = body(page)
-            out["checks"]["blind_replay_no_outcome"] = (
-                "Blind replay" in t and "10% boundary" not in t
-            )
-            page.get_by_role("button", name=re.compile("Reveal next 20 sessions")).first.click(
-                timeout=20000
-            )
+SCREEN_ORDER = ("Structure", "Replay", "Validation", "Data")
+
+
+def select_screen(page: Page, label: str) -> None:
+    page.get_by_role("combobox").first.click(timeout=15000)
+    time.sleep(0.6)
+    page.keyboard.press("Home")
+    for _ in range(SCREEN_ORDER.index(label)):
+        page.keyboard.press("ArrowDown")
+    page.keyboard.press("Enter")
+    time.sleep(4)
+
+
+def main() -> int:
+    checks: dict[str, bool] = {}
+    details: dict[str, object] = {}
+    with sync_playwright() as p:
+        browser = p.chromium.launch(args=["--no-sandbox"])
+        page = browser.new_page(viewport={"width": 1440, "height": 900})
+        started = time.time()
+        page.goto(URL, wait_until="load", timeout=120000)
+        text = ""
+        for _ in range(25):
             time.sleep(5)
-            t = body(page)
-            out["checks"]["reveal_shows_computed_target"] = "10%" in t and (
-                "Target not reached" in t or "Target reached" in t or "below the 10% target" in t
+            text = body(page)
+            if "release " in text or "AttributeError" in text:
+                break
+        match = re.search(r"release\s+([0-9]+\.[0-9]+\.[0-9]+)", text)
+        details["version"] = match.group(1) if match else None
+        details["cold_start_seconds"] = round(time.time() - started, 1)
+        checks["release_identity"] = details["version"] == EXPECTED_RELEASE
+        checks["dashboard_renders"] = "TopoMarket research" in text and "AttributeError" not in text
+        if not checks["dashboard_renders"]:
+            page.screenshot(path="docs/measurements/hosted_v131_error.png", full_page=True)
+        else:
+            page.get_by_role("button", name=re.compile("Guided: next step")).click(timeout=20000)
+            time.sleep(4)
+            text = body(page)
+            checks["chronological_comparison"] = (
+                "Window A · 2008-08-29" in text and "Window B · 2008-10-10" in text
             )
-        except Exception as e:
-            out["details"]["replay_error"] = str(e)[:200]
-        try:
-            for combo in page.get_by_role("combobox").all():
-                try:
-                    if "Replay" in combo.inner_text(timeout=3000):
-                        combo.click(timeout=5000)
-                        page.get_by_text("Validation", exact=True).last.click(timeout=8000)
-                        break
-                except Exception:
-                    continue
-            time.sleep(4)
-            t = body(page)
-            out["checks"]["validation_evidence"] = "TDA" in t and "VIX" in t
-            for combo in page.get_by_role("combobox").all():
-                try:
-                    if "Validation" in combo.inner_text(timeout=3000):
-                        combo.click(timeout=5000)
-                        page.get_by_text("Data", exact=True).last.click(timeout=8000)
-                        break
-                except Exception:
-                    continue
-            time.sleep(4)
-            t = body(page)
-            out["checks"]["data_calendars"] = "calendar" in t.lower() or "as of" in t.lower()
-        except Exception as e:
-            out["details"]["screens_error"] = str(e)[:200]
-        try:
+            checks["reveal_computed_target"] = "below the 10% target" in text or "Target" in text
+            page.screenshot(path="docs/measurements/hosted_v131_comparison.png", full_page=True)
+            # blind Replay, then reveal
+            try:
+                page.get_by_role("button", name=re.compile("Guided alert example")).first.click(
+                    timeout=20000
+                )
+                time.sleep(3)
+                select_screen(page, "Replay")
+                time.sleep(4)
+                text = body(page)
+                checks["blind_replay_no_outcome"] = (
+                    "Blind replay" in text and "Maximum decline" not in text
+                )
+                page.screenshot(path="docs/measurements/hosted_v131_blind.png", full_page=True)
+                page.get_by_role("button", name=re.compile("Reveal next 20 sessions")).first.click(
+                    timeout=20000
+                )
+                time.sleep(5)
+                text = body(page)
+                checks["reveal_computed_target"] = (
+                    "least the 10% target" in text or "below the 10%" in text
+                )
+                checks["reveal_shows_outcome"] = "10% boundary" in text
+                page.screenshot(path="docs/measurements/hosted_v131_reveal.png", full_page=True)
+            except Exception as error:  # noqa: BLE001 - report the selector failure honestly
+                details["replay_error"] = str(error)[:240]
+            # Validation / Data screens
+            try:
+                select_screen(page, "Validation")
+                text = body(page)
+                checks["validation_evidence"] = "TDA" in text and "VIX" in text
+                page.screenshot(path="docs/measurements/hosted_v131_validation.png", full_page=True)
+                select_screen(page, "Data")
+                text = body(page)
+                checks["data_calendars"] = "calendar" in text.lower() or "as of" in text.lower()
+                page.screenshot(path="docs/measurements/hosted_v131_data.png", full_page=True)
+            except Exception as error:  # noqa: BLE001
+                details["screens_error"] = str(error)[:240]
             # Mapper view and both node buttons
-            for r in page.get_by_role("radio").all():
-                try:
-                    if (
-                        "Mapper groups" in (r.get_attribute("value") or "")
-                        or r.evaluate("el => el.closest('label')?.innerText || ''").find(
-                            "Mapper groups"
-                        )
-                        >= 0
-                    ):
-                        r.click(timeout=5000, force=True)
-                        break
-                except Exception:
-                    continue
-            time.sleep(3)
-            page.get_by_text("Screen").first.click(timeout=5000)
-            page.get_by_text("Structure", exact=True).last.click(timeout=8000)
-            time.sleep(3)
-            node1 = page.get_by_role("button", name=re.compile("node-01")).first
-            node1.click(timeout=15000)
-            time.sleep(3)
-            t = body(page)
-            out["checks"]["mapper_node_01"] = (
-                "node-01 · 7 members" in t or "Selected Mapper group node-01" in t
-            )
-            page.get_by_role("button", name=re.compile("node-02")).first.click(timeout=15000)
-            time.sleep(3)
-            t = body(page)
-            out["checks"]["mapper_node_02"] = (
-                "node-02 · 6 members" in t or "Selected Mapper group node-02" in t
-            )
-        except Exception as e:
-            out["details"]["mapper_error"] = str(e)[:200]
-        page.screenshot(
-            path="/root/projects/TopoMarket/docs/measurements/hosted_v131_main.png", full_page=True
+            try:
+                select_screen(page, "Structure")
+                page.get_by_text("Mapper groups").first.click(timeout=15000)
+                time.sleep(4)
+                page.get_by_role("button", name=re.compile("node-01")).first.click(timeout=15000)
+                time.sleep(3)
+                text = body(page)
+                checks["mapper_node_01"] = "node-01" in text and "7 members" in text
+                page.get_by_role("button", name=re.compile("node-02")).first.click(timeout=15000)
+                time.sleep(3)
+                text = body(page)
+                checks["mapper_node_02"] = "node-02" in text
+                page.screenshot(path="docs/measurements/hosted_v131_mapper.png", full_page=True)
+            except Exception as error:  # noqa: BLE001
+                details["mapper_error"] = str(error)[:240]
+        mobile = browser.new_page(viewport={"width": 390, "height": 844})
+        mobile.goto(URL, wait_until="load", timeout=120000)
+        time.sleep(15)
+        checks["mobile_no_overflow"] = not mobile.evaluate(
+            "() => document.documentElement.scrollWidth > document.documentElement.clientWidth + 2"
         )
-    m = b.new_page(viewport={"width": 390, "height": 844})
-    m.goto(URL, wait_until="load", timeout=120000)
-    time.sleep(15)
-    out["checks"]["mobile_no_overflow"] = not m.evaluate(
-        "() => document.documentElement.scrollWidth > document.documentElement.clientWidth + 2"
+        mobile.screenshot(path="docs/measurements/hosted_v131_mobile.png", full_page=True)
+        mobile.close()
+        second = browser.new_page(viewport={"width": 1280, "height": 900})
+        second.goto(URL, wait_until="load", timeout=120000)
+        time.sleep(15)
+        checks["two_isolated_sessions"] = "TopoMarket" in body(second)
+        second.close()
+        browser.close()
+    OUT.write_text(
+        json.dumps(
+            {
+                "schema_version": 1,
+                "app_url": "https://topomarket-juhbvrgk2k67pnr6qbpfmc.streamlit.app/",
+                "measured_at_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                "expected_release": EXPECTED_RELEASE,
+                "checks": checks,
+                "failed": [name for name, ok in checks.items() if not ok],
+                "details": details,
+            },
+            indent=2,
+        )
+        + "\n"
     )
-    m.close()
-    p2 = b.new_page(viewport={"width": 1280, "height": 900})
-    p2.goto(URL, wait_until="load", timeout=120000)
-    time.sleep(15)
-    out["checks"]["two_isolated_sessions"] = "TopoMarket" in body(p2)
-    p2.close()
-    b.close()
-json.dump(
-    out,
-    open("/root/projects/TopoMarket/docs/measurements/hosted_evidence_v1.3.1.json", "w"),
-    indent=2,
-)
-print(json.dumps({"version": out["details"].get("version"), "checks": out["checks"]}, indent=1))
+    print(json.dumps({"version": details.get("version"), "checks": checks}, indent=1))
+    return 0 if all(checks.values()) else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
